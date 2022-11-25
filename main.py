@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options 
 
 
 def get_highlights(driver):
@@ -32,7 +33,9 @@ def get_recent_releases(driver):
 
 
 if __name__ == '__main__':
-    driver = webdriver.Chrome()
+    options = Options()  
+    options.add_argument("--headless") 
+    driver = webdriver.Chrome(options=options)
 
     driver.get("https://mymangas.net/")
 
