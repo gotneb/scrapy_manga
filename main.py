@@ -1,3 +1,6 @@
+import time
+import requests
+import json
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options 
@@ -24,28 +27,47 @@ def get_populars(driver):
 
 
 def get_recent_releases(driver):
-    elems = driver.find_elements(By.CSS_SELECTOR, 'div#recent_releases div#lancamento-hoje ul li.item_news-manga div.right h3 a')
+    elems = driver.find_elements(By.CSS_SELECTOR, 'div#recent_releases ul li.item_news-manga div.right h3 a')
     releases = []
     for tag in elems:
-        releases.append(tag.text)
-        print(tag.text)
+        link = tag.get_attribute("href")
+        releases.append(link)
     return releases
 
 
-if __name__ == '__main__':
-    options = Options()  
-    options.add_argument("--headless") 
+def update_mangas():
+    options = webdriver.ChromeOptions()
+    options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
     driver = webdriver.Chrome(options=options)
-
     driver.get("https://mymangas.net/")
 
+    #   print("\n[HIGHLIGHTS]")
+    #   get_highlights(driver)
+
+    #   print("\n[POPULARS]")
+    #   get_populars(driver)
+
     print("\n[RECENT RELEASES]")
-    get_recent_releases(driver)
+    releases = get_recent_releases(driver)
 
-    print("\n[HIGHLIGHTS]")
-    get_highlights(driver)
+    print("Ready!")
+    data = {
+        "links": releases,
+    }
+    response = requests.post('https://mangahoot.up.railway.app/add/release-mangas/', json=data)
 
-    print("\n[POPULARS]")
-    get_populars(driver)
+    if (response.status_code == 200):
+        print("OK | response: ", response.content)
+    else:
+        print("Something went wrong... =(")
+        print("response: ", response.content)
 
     driver.quit()
+
+
+ONE_MINUTE = 60
+while True:
+    update_mangas()
+    time.sleep(30 * ONE_MINUTE)
