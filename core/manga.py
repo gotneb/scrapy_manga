@@ -9,15 +9,9 @@ class Manga:
     genres: list[str]
     summary: str
     status: str
-    chapters: list[str]
     total_chapters: int
+    chapters: list[str]
 
-    def __init__(self, title, author, thumbnail, genres, summary, status, chapters, total_chapters):
-        self.title = title
-        self.author = author
-        self.thumbnail = thumbnail
-        self.genres = genres
-        self.summary = summary
-        self.status = status
-        self.chapters = chapters
-        self.total_chapters = total_chapters
+
+    def show(self) -> None:
+        print(f"Title: {self.title}\nAuthor: {self.author}\nStatus: {self.status}\nThumbnail: {self.thumbnail}\ngenres: {self.genres}\nSummary: {self.summary}\nTotal Chapters: {self.total_chapters}\nChapters: {self.chapters}")
