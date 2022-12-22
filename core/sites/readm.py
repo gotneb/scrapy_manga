@@ -14,10 +14,34 @@ def setup_driver() -> webdriver.Chrome:
     return webdriver.Chrome(options=options)
 
 
+def get_populars() -> list[Manga]:
+    driver = setup_driver()
+    url = "https://readm.org/popular-manga"
+    driver.get(url)
+
+    # Links to mangas
+    links = []
+    elems = driver.find_elements(By.CSS_SELECTOR, "ul.filter-results li.mb-lg div.poster-with-subject a")
+    for e in elems:
+        anchor = e.get_attribute("href")
+        if links.__len__() == 0:
+            links.append(anchor)
+        elif (not links.__contains__(anchor)) and (not anchor.__contains__("category")):
+            links.append(anchor)
+    
+    mangas = []
+    for link in links:
+        mangas.append(get_manga(link))
+    return mangas
+
+
 def get_manga(mangaUrl) -> Manga:
     """Function navigates to url and returns the manga being hosted there."""
     driver = setup_driver()
     driver.get(mangaUrl)
+
+    # Just for debug...
+    print(f"Openned {driver.title}")
 
     title = get_title(driver)
     # I dunno if it's right... But in case there isn't an author, I'll fetch artist...
@@ -33,6 +57,8 @@ def get_manga(mangaUrl) -> Manga:
     summary = get_summary(driver)
     chapters = get_chapters(driver)
     total_chapters = len(chapters)
+
+    driver.quit()
 
     return Manga(title, author, thumbnail, genres, summary, stt, chapters, total_chapters)
 
@@ -102,7 +128,8 @@ def get_chapters(driver) -> list[str]:
         e.click()
         allChapters = driver.find_elements(By.CSS_SELECTOR, "section.episodes-box div.ui.tab.active div.ui.list div.item.season_start h6.truncate a")
         for singleChapter in allChapters:
-            # Well... I'm sure READM.ORG will always gimme something like that: "Chapter ABC"
-            # This is why I split without checking its lenght
-            chapters.append(singleChapter.text.split()[1])
+            # Usually ["Chapter", "__number__"]
+            split = singleChapter.text.split()
+            if (split.__len__() == 2):
+                chapters.append(split[1])
     return chapters
