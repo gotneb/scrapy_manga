@@ -44,6 +44,7 @@ def manga_detail(manga_url) -> Manga:
     #print(f"Openned {driver.title}")
 
     title = get_title(driver)
+    alt_title = get_alt_title(driver)
     # I dunno if it's right... But in case there isn't an author, I'll fetch artist...
     # Why? See vagabond -> https://readm.org/manga/7872
     # There isn't  an author, because it was written by someone in the past, but Takehiro-sama has draw for us :)
@@ -61,13 +62,22 @@ def manga_detail(manga_url) -> Manga:
     # Clean resources
     driver.quit()
 
-    return Manga(title, author, thumbnail, genres, summary, stt, chapters, total_chapters)
+    return Manga(title, alt_title, author, thumbnail, genres, summary, stt, chapters, total_chapters)
 
 
 def get_title(driver) -> str:
     """Returns title from manga"""
     title = driver.find_element(By.CSS_SELECTOR, "div.ui.grid h1.page-title")
     return title.text
+
+
+def get_alt_title(driver) -> str:
+    """Returns alternative title from manga"""
+    try:
+        title = driver.find_element(By.CSS_SELECTOR, "div.sub-title.pt-sm")
+        return title.text
+    except NoSuchElementException:
+        return ''
 
 
 def get_author(driver) -> str:
@@ -125,6 +135,9 @@ def get_summary(driver) -> str:
 def get_chapters(driver) -> list[str]:
     """Returns a list of chapters from manga."""
     chapters = []
+    # TODO: it's freaking' lazy that way. It must improve!
+    # Add a more robust wait
+    driver.implicitly_wait(1)
     buttons = driver.find_elements(By.CSS_SELECTOR, "section.episodes-box div#seasons-menu a")
     for e in buttons:
         e.click()
