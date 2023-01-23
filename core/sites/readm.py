@@ -15,7 +15,7 @@ def cli_driver() -> webdriver.Chrome:
 
 
 def get_populars() -> list[Manga]:
-    driver = setup_driver()
+    driver = cli_driver()
     url = "https://readm.org/popular-manga"
     driver.get(url)
 
