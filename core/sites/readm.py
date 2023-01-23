@@ -31,7 +31,7 @@ def get_populars() -> list[Manga]:
     
     mangas = []
     for link in links:
-        mangas.append(get_manga(link))
+        mangas.append(manga_detail(link))
     return mangas
 
 
