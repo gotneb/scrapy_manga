@@ -45,13 +45,8 @@ def manga_detail(manga_url) -> Manga:
 
     title = get_title(driver)
     alt_title = get_alt_title(driver)
-    # I dunno if it's right... But in case there isn't an author, I'll fetch artist...
-    # Why? See vagabond -> https://readm.org/manga/7872
-    # There isn't  an author, because it was written by someone in the past, but Takehiro-sama has draw for us :)
-    if len(get_author(driver)) == 0:
-        author = get_artist(driver)
-    else:
-        author = get_author(driver)
+    author = get_author(driver)
+    artist = get_artist(driver)
     stt = get_status(driver)
     thumbnail = get_thumbnail(driver)
     genres = get_genres(driver)
@@ -62,7 +57,7 @@ def manga_detail(manga_url) -> Manga:
     # Clean resources
     driver.quit()
 
-    return Manga(title, alt_title, author, thumbnail, genres, summary, stt, chapters, total_chapters)
+    return Manga(title, alt_title, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters)
 
 
 def get_title(driver) -> str:

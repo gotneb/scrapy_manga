@@ -6,6 +6,7 @@ class Manga:
     title: str
     alternative_title: str
     author: str
+    artist: str
     thumbnail: str
     genres: list[str]
     summary: str
@@ -15,4 +16,11 @@ class Manga:
 
 
     def show(self) -> None:
-        print(f"Title: {self.title}\nAlternative title: {self.alternative_title}\nAuthor: {self.author}\nStatus: {self.status}\nThumbnail: {self.thumbnail}\ngenres: {self.genres}\nSummary: {self.summary}\nTotal Chapters: {self.total_chapters}\nChapters: {self.chapters}")
+        """Prints manga atributes on standard output"""
+        print(f"""Title: {self.title}
+Alternative title: {self.alternative_title}
+Author: {self.author}\nArtist: {self.artist}
+Status: {self.status}\nThumbnail: {self.thumbnail}
+genres: {self.genres}\nSummary: {self.summary}
+Total Chapters: {self.total_chapters}
+Chapters: {self.chapters}""")
