@@ -1,8 +1,9 @@
 from dataclasses import dataclass
 
+
 @dataclass
 class Manga:
-    """Class represent a manga hosted in readm.org"""
+    """Mangas are objects that represent mangas avaliable either readm.org or mangalivre.net"""
     title: str
     alternative_title: str
     author: str
@@ -14,7 +15,22 @@ class Manga:
     total_chapters: int
     chapters: list[str]
 
+    def to_dict(self):
+        """Returns itself as a dictionary"""
+        return {
+            'title': self.title,
+            'alternative_title': self.alternative_title,
+            'author': self.author,
+            'artist': self.artist,
+            'thumbnail': self.thumbnail,
+            'genres': self.genres,
+            'summary': self.summary,
+            'status': self.status,
+            'total_chapters': self.total_chapters,
+            'chapters': self.chapters
+        }
 
+    # Useful for debug
     def show(self) -> None:
         """Prints manga atributes on standard output"""
         print(f"""Title: {self.title}
