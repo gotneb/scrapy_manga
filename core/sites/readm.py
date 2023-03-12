@@ -1,21 +1,29 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.chrome.options import Options 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.wait import WebDriverWait
 from core.manga import Manga
 
 
-def cli_driver() -> webdriver.Chrome:
-    """Returns a webdriver which works without gui"""
+def get_driver(display_gui=False) -> webdriver.Chrome:
+    """
+        Creates a webdriver. If `display_gui` is true, then display chrome window.  
+    Arguments:  
+        display_gui: bool
+    Returns:
+        A google's webdriver
+    """
+    # TODO: Throw exception if chrome is not installed
     options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--no-sandbox')
-    options.add_argument('--disable-dev-shm-usage')
+    if not display_gui:
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
     return webdriver.Chrome(options=options)
 
 
 def get_populars() -> list[Manga]:
-    driver = cli_driver()
+    driver = get_driver()
     url = "https://readm.org/popular-manga"
     driver.get(url)
 
@@ -35,9 +43,9 @@ def get_populars() -> list[Manga]:
     return mangas
 
 
-def manga_detail(manga_url) -> Manga:
+def manga_detail(manga_url, enable_gui=False) -> Manga:
     """Returns the manga data on the url."""
-    driver = cli_driver()
+    driver = get_driver(display_gui=enable_gui)
     driver.get(manga_url)
 
     # Just for debug...
@@ -130,10 +138,14 @@ def get_summary(driver) -> str:
 def get_chapters(driver) -> list[str]:
     """Returns a list of chapters from manga."""
     chapters = []
-    # TODO: it's freaking' lazy that way. It must improve!
-    # Add a more robust wait
-    driver.implicitly_wait(1)
-    buttons = driver.find_elements(By.CSS_SELECTOR, "section.episodes-box div#seasons-menu a")
+    MAX_TIME = 60 # 1 minute
+
+    buttons = WebDriverWait(driver, MAX_TIME).until(lambda d: d.find_elements(By.CSS_SELECTOR, "section.episodes-box div#seasons-menu a"))
+
+    # Some `ADS` interrupts driver avoiding it to click on button
+    # To fix I'm explicitly scrolling the window to bottom
+    driver.execute_script("window.scrollBy(0, 1000);")
+
     for e in buttons:
         e.click()
         allChapters = driver.find_elements(By.CSS_SELECTOR, "section.episodes-box div.ui.tab.active div.ui.list div.item.season_start h6.truncate a")
