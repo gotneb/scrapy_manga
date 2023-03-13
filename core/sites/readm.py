@@ -5,7 +5,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from core.manga import Manga
 
 
-def get_driver(display_gui=False) -> webdriver.Chrome:
+def get_driver(display_gui) -> webdriver.Chrome:
     """
         Creates a webdriver. If `display_gui` is true, then display chrome window.  
     Arguments:  
@@ -21,8 +21,11 @@ def get_driver(display_gui=False) -> webdriver.Chrome:
         options.add_argument('--disable-dev-shm-usage')
     return webdriver.Chrome(options=options)
 
-
+# TODO: Make it avaliable for "mangalivre.net" as well
 def get_populars() -> list[Manga]:
+    """
+    Visits the `readm.org` and returns top 10 most populars mangas.
+    """
     driver = get_driver()
     url = "https://readm.org/popular-manga"
     driver.get(url)
@@ -43,8 +46,16 @@ def get_populars() -> list[Manga]:
     return mangas
 
 
-def manga_detail(manga_url, enable_gui=False) -> Manga:
-    """Returns the manga data on the url."""
+# FIX: Disabling chrome's window may throw errors
+def manga_detail(manga_url, enable_gui=True) -> Manga:
+    """
+    Visits the `manga_url` and extract all data on it.
+    Arguments:
+        manga_url: the manga content. Must have `readm.org` or `mangalivre.net` domain.
+        enable_gui: show chrome window.
+    Return:
+        Manga content.
+    """
     driver = get_driver(display_gui=enable_gui)
     driver.get(manga_url)
 
