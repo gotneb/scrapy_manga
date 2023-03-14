@@ -1,9 +1,12 @@
-from typing import Callable, NoReturn
-
+# Python
+import math
+from typing import Callable
+# Selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
+# Core
 from core.manga import Manga
 
 
@@ -22,6 +25,39 @@ def get_driver(show_window) -> webdriver.Chrome:
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
     return webdriver.Chrome(options=options)
+
+
+def get_latest_updates(limit:int=40, on_link_received: Callable[[str], None]=None) -> list[str]:
+    """
+    Returns a list of all links from `readm.org` that were updateds.\n
+    Arguments:
+        `limit:` the total quantity of manga links will be extracted.
+    Return:
+        A list of recent mangas updated.
+    """
+    # 400 it's equivalente to 10 page on "readm.org". The max is 10 pages!
+    if limit > 400:
+        raise Exception('limit must be lower or equals than 400!')
+
+    links = []
+    total_pages = math.ceil(limit/40)
+    pages_counter = 0
+
+    driver = get_driver(show_window=True)
+    for page in range(1, total_pages + 1):
+        driver.get(f'https://readm.org/latest-releases/{page}')
+        anchors = driver.find_elements(By.CSS_SELECTOR, 'li.segment-poster-sm h2.truncate a')
+        for a in anchors:
+            link = a.get_attribute('href')
+            links.append(link)
+
+            if on_link_received is not None:
+                on_link_received(link)
+            
+            pages_counter += 1
+            if pages_counter == limit:
+                break
+
 
 # TODO: Make it avaliable for "mangalivre.net" as well
 def get_populars() -> list[Manga]:
@@ -46,13 +82,13 @@ def get_populars() -> list[Manga]:
     return mangas
 
 
-def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str], NoReturn]=None) -> list[str]:
+def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str], None]=None) -> list[str]:
     """
     Visits `readm.org` and extract all links that starts with `letter` on its name.\n
     Arguments:
-        letter: manga initial name.
-        show_window: show google's chrome window.
-        on_link_received: callback that's called when manga's link is received.
+        `letter:` manga initial name.
+        `show_window:` show google's chrome window.
+        `on_link_received:` callback that's called when manga's link is received.
     Return:
         A list containing all links.
     """
