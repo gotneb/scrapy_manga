@@ -1,32 +1,39 @@
 from firebase_admin.firestore import client
 from core.manga import Manga
-from core.sites.readm import manga_detail, get_pages
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
-db = client();
-details_colection = db.collection("mangas").document("readm").collection("details")
+class MangaDatabase:
+    def __init__(self):
+        try:    
+            self.details_colection = client().collection("mangas").document("readm").collection("details")
+        except:
+            Exception("Database connection failed!")
+    
+    def add_details(self, manga: Manga):
+        """
+        Add a new manga details to the database
+        Returns:
+            A reference to the created document
+        """
+        manga_dict = manga.to_dict()
+        if self.exists(manga_dict['title']):
+            return None
+        doc_ref = self.details_colection.add(manga_dict)
+        return doc_ref
 
-def add_manga_details(manga: Manga):
-    """
-    Add a new manga details to the database
-    Returns:
-        A reference to the created document
-    """
-    manga_dict = manga.to_dict()
-    if manga_exists(manga_dict['title']):
+    def get_details(self, title: str):
+        """returns the first document from database with same title"""
+        docs = self.details_colection.where("title", "==", title).stream()
+        for doc in docs:
+            return doc.to_dict()
         return None
-    doc_ref = details_colection.add(manga_dict)
-    return doc_ref
 
-def get_manga_details(title: str):
-    """returns the first document from database with same title"""
-    docs = details_colection.where("title", "==", title).stream()
-    for doc in docs:
-        return doc.to_dict()
-    return None
+    def exists(self, title: str):
+        """returns True if manga exists in database"""
+        doc = self.get_details(title)
+        return doc != None
+    
+    
 
-def manga_exists(title: str):
-    """returns True if manga exists in database"""
-    doc = get_manga_details(title)
-    return doc != None
+db = MangaDatabase()
