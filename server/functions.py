@@ -13,3 +13,7 @@ def get_manga_details(title: str):
     for doc in docs:
         return doc.to_dict()
     return None
+
+def manga_exists(title: str):
+    doc = get_manga_details(title)
+    return doc != None
