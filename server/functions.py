@@ -1,15 +1,15 @@
 from firebase_admin.firestore import client
 from core.manga import Manga
+from core.sites.readm import manga_detail, get_pages
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
+db = client();
+details_colection = db.collection("mangas").document("readm").collection("details")
 
-def add_manga(manga: Manga):
-    """Add manga to online database"""
-    # Reference to mangas collection
-    mangas_ref = client()     \
-    .collection('readm')      \
-    .document('manga_details')\
-    .collection('mangas')
-
-    doc_ref = mangas_ref.add(manga.to_dict())
+def get_manga_details(title: str):
+    """returns the first document from database with same title"""
+    docs = details_colection.where("title", "==", title).stream()
+    for doc in docs:
+        return doc.to_dict()
+    return None
