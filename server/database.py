@@ -67,11 +67,20 @@ class MangaDatabase:
         doc = self.get_details(title)
         return doc != None
     
-    def add_chapter(self, chapter: ChapterEntity):
+    def add_chapter(self, chapter: ChapterEntity) -> str:
         """Add new chapter in database"""
         chapter_dict = chapter.to_dict()
         _, doc_ref = self.chapters_collection.add(chapter_dict)
         return doc_ref.id
     
-
+    def get_chapter(self, manga_id: str, chapter_num: str) -> tuple[str, dict]:
+        docs = self.chapters_collection \
+            .where("manga_id", "==", manga_id) \
+                .where("chapter_num", "==", chapter_num) \
+                    .stream()
+        
+        for doc in docs:
+            return doc.id, doc.to_dict()
+        return None
+        
 db = MangaDatabase()
