@@ -6,7 +6,9 @@ from core.manga import Manga
 class MangaDatabase:
     def __init__(self):
         try:    
-            self.details_collection = client().collection("mangas").document("readm").collection("details")
+            self.db = client().collection("mangas").document("readm")
+            self.details_collection = self.db.collection("details")
+            self.pages_collection = self.db.collection("pages")
         except:
             Exception("Database connection failed!")
     
@@ -19,8 +21,8 @@ class MangaDatabase:
         manga_dict = manga.to_dict()
         if self.exists(manga_dict['title']):
             return None
-        doc_ref = self.details_collection.add(manga_dict)
-        return doc_ref
+        _, doc_ref = self.details_collection.add(manga_dict)
+        return doc_ref.id
 
     def get_details(self, title: str):
         """returns the first document from database with same title"""
