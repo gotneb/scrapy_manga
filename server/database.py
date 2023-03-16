@@ -108,4 +108,12 @@ class MangaDatabase:
         except:
             return False
         
+    def remove_chapter(self, id: str) -> bool:
+        """Remove a chapter by id"""
+        try:
+            self.chapters_collection.document(id).delete()
+            return True
+        except:
+            return False
+        
 db = MangaDatabase()
