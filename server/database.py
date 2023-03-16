@@ -25,7 +25,10 @@ class MangaDatabase:
         return doc_ref.id
     
     def remove_details(self, id: str):
+        """Remove a manga by id"""
         self.details_collection.document("id").delete()
+    
+    
 
     def get_details(self, title: str):
         """returns the first document from database with same title"""
