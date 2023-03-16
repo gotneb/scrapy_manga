@@ -28,7 +28,7 @@ class MangaDatabase:
         """returns the first document from database with same title"""
         docs = self.details_collection.where("title", "==", title).stream()
         for doc in docs:
-            return doc.to_dict()
+            return doc.to_dict(), doc.id
         return None
 
     def exists(self, title: str):
