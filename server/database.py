@@ -3,7 +3,8 @@ from core.manga import Manga
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
-"""Class used for stored manga chapter in database"""
+"""Class used to stored manga chapter in the database"""
+
 class ChapterEntity:
     def __init__(self, manga_id: str, chapter_num: str, image_urls: list[str]) -> None:
         self.manga_id = manga_id
@@ -65,6 +66,12 @@ class MangaDatabase:
         """returns True if manga exists in database"""
         doc = self.get_details(title)
         return doc != None
+    
+    def add_chapter(self, chapter: ChapterEntity):
+        """Add new chapter in database"""
+        chapter_dict = chapter.to_dict()
+        _, doc_ref = self.chapters_collection.add(chapter_dict)
+        return doc_ref.id
     
 
 db = MangaDatabase()
