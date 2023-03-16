@@ -61,6 +61,14 @@ class MangaDatabase:
         for doc in docs:
             return doc.id, doc.to_dict()
         return None
+    
+    def get_details_by_id(self, id: str) -> tuple[str, dict]:
+        """returns the element with same id"""
+        doc = self.details_collection.document(id).get()
+        if doc:
+            return doc.id, doc.to_dict()
+        else:
+            return None
 
     def manga_exists_by_title(self, title: str) -> bool:
         """returns True if manga exists in database"""
