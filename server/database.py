@@ -3,12 +3,26 @@ from core.manga import Manga
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
+"""Class used for stored manga chapter in database"""
+class ChapterEntity:
+    def __init__(self, manga_id: str, chapter_num: str, image_urls: list[str]) -> None:
+        self.manga_id = manga_id
+        self.chapter_num = chapter_num
+        self.image_urls = image_urls
+    
+    def to_dict(self) -> dict:
+        return {
+            'manga_id': self.manga_id,
+            'chapter_num': self.chapter_num,
+            'image_urls': self.image_urls
+        }
+
 class MangaDatabase:
     def __init__(self):
         try:    
             self.db = client()
             self.details_collection = self.db.collection("details")
-            self.pages_collection = self.db.collection("pages")
+            self.chapters_collection = self.db.collection("chapters")
         except:
             Exception("Database connection failed!")
     
@@ -40,18 +54,17 @@ class MangaDatabase:
         except:
             return False
 
-    def get_details(self, title: str) -> tuple[dict, str]:
+    def get_details(self, title: str) -> tuple[str, dict]:
         """returns the first document from database with same title"""
         docs = self.details_collection.where("title", "==", title).stream()
         for doc in docs:
-            return doc.to_dict(), doc.id
+            return doc.id, doc.to_dict()
         return None
 
     def manga_exists(self, title: str) -> bool:
         """returns True if manga exists in database"""
         doc = self.get_details(title)
         return doc != None
-    
     
 
 db = MangaDatabase()
