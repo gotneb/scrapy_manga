@@ -55,7 +55,7 @@ class MangaDatabase:
         except:
             return False
 
-    def get_details(self, title: str) -> tuple[str, dict]:
+    def get_details_by_title(self, title: str) -> tuple[str, dict]:
         """returns the first document from database with same title"""
         docs = self.details_collection.where("title", "==", title).stream()
         for doc in docs:
@@ -64,7 +64,7 @@ class MangaDatabase:
 
     def manga_exists(self, title: str) -> bool:
         """returns True if manga exists in database"""
-        doc = self.get_details(title)
+        doc = self.get_details_by_title(title)
         return doc != None
     
     def add_chapter(self, chapter: ChapterEntity) -> str:
