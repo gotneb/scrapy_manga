@@ -6,13 +6,13 @@ from core.manga import Manga
 class MangaDatabase:
     def __init__(self):
         try:    
-            self.db = client().collection("mangas").document("readm")
+            self.db = client()
             self.details_collection = self.db.collection("details")
             self.pages_collection = self.db.collection("pages")
         except:
             Exception("Database connection failed!")
     
-    def add_details(self, manga: Manga):
+    def add_details(self, manga: Manga) -> str:
         """
         Add a new manga details to the database
         Returns:
@@ -24,7 +24,7 @@ class MangaDatabase:
         _, doc_ref = self.details_collection.add(manga_dict)
         return doc_ref.id
     
-    def remove_details(self, id: str):
+    def remove_details(self, id: str) -> bool:
         """Remove a manga by id"""
         try:
             self.details_collection.document(id).delete()
@@ -32,7 +32,7 @@ class MangaDatabase:
         except:
             return False
     
-    def set_details(self, id: str, manga: Manga):
+    def set_details(self, id: str, manga: Manga) -> bool:
         """Update manga details by id"""
         try:
             self.details_collection.document(id).set(manga.to_dict())
@@ -40,14 +40,14 @@ class MangaDatabase:
         except:
             return False
 
-    def get_details(self, title: str):
+    def get_details(self, title: str) -> tuple[dict, str]:
         """returns the first document from database with same title"""
         docs = self.details_collection.where("title", "==", title).stream()
         for doc in docs:
             return doc.to_dict(), doc.id
         return None
 
-    def manga_exists(self, title: str):
+    def manga_exists(self, title: str) -> bool:
         """returns True if manga exists in database"""
         doc = self.get_details(title)
         return doc != None
