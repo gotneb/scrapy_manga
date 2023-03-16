@@ -98,5 +98,14 @@ class MangaDatabase:
         for doc in docs:
             return doc.id, doc.to_dict()
         return None
+    
+    def set_chapter(self, id: str, chapter: ChapterEntity) -> bool:
+        """Update chapter by id"""
+        try:
+            if self.manga_exists_by_id(id):
+                self.chapters_collection.document(id).set(chapter.to_dict())
+            return True
+        except:
+            return False
         
 db = MangaDatabase()
