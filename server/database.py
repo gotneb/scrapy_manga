@@ -82,9 +82,12 @@ class MangaDatabase:
     
     def add_chapter(self, chapter: ChapterEntity) -> str:
         """Add new chapter in database"""
-        chapter_dict = chapter.to_dict()
-        _, doc_ref = self.chapters_collection.add(chapter_dict)
-        return doc_ref.id
+        if self.manga_exists_by_id(chapter.manga_id):
+            chapter_dict = chapter.to_dict()
+            _, doc_ref = self.chapters_collection.add(chapter_dict)
+            return doc_ref.id
+        else:
+            return None
     
     def get_chapter(self, manga_id: str, chapter_num: str) -> tuple[str, dict]:
         docs = self.chapters_collection \
