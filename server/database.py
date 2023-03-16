@@ -26,7 +26,11 @@ class MangaDatabase:
     
     def remove_details(self, id: str):
         """Remove a manga by id"""
-        self.details_collection.document(id).delete()
+        try:
+            self.details_collection.document(id).delete()
+            return True
+        except:
+            return False
     
     def set_details(self, id: str, manga: Manga):
         self.details_collection.document(id).set(manga.to_dict())
