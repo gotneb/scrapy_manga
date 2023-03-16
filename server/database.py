@@ -33,7 +33,12 @@ class MangaDatabase:
             return False
     
     def set_details(self, id: str, manga: Manga):
-        self.details_collection.document(id).set(manga.to_dict())
+        """Update manga details by id"""
+        try:
+            self.details_collection.document(id).set(manga.to_dict())
+            return True
+        except:
+            return False
 
     def get_details(self, title: str):
         """returns the first document from database with same title"""
