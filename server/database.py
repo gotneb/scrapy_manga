@@ -75,6 +75,11 @@ class MangaDatabase:
         doc = self.get_details_by_title(title)
         return doc != None
     
+    def manga_exists_by_id(self, id: str) -> bool:
+        """returns True if manga exists in database"""
+        doc = self.get_details_by_id(id)
+        return doc != None
+    
     def add_chapter(self, chapter: ChapterEntity) -> str:
         """Add new chapter in database"""
         chapter_dict = chapter.to_dict()
