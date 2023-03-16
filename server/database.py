@@ -19,7 +19,7 @@ class MangaDatabase:
             A reference to the created document
         """
         manga_dict = manga.to_dict()
-        if self.exists(manga_dict['title']):
+        if self.manga_exists(manga_dict['title']):
             return None
         _, doc_ref = self.details_collection.add(manga_dict)
         return doc_ref.id
@@ -47,7 +47,7 @@ class MangaDatabase:
             return doc.to_dict(), doc.id
         return None
 
-    def exists(self, title: str):
+    def manga_exists(self, title: str):
         """returns True if manga exists in database"""
         doc = self.get_details(title)
         return doc != None
