@@ -42,11 +42,13 @@ class MangaDatabase:
         except:
             return False
 
-    def get_details_by_title(self, title: str) -> tuple[str, dict]:
+    def get_details_by_title(self, title: str) -> dict:
         """returns the first document from database with same title"""
         docs = self.details_collection.where("title", "==", title).stream()
         for doc in docs:
-            return doc.id, doc.to_dict()
+            manga_details = doc.to_dict()
+            manga_details['id'] = doc.id
+            return manga_details
         return None
     
     def get_details_by_id(self, id: str) -> tuple[str, dict]:
