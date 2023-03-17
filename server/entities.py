@@ -1,31 +1,20 @@
+from dataclasses import dataclass
+
+@dataclass
 class MangaDetailsEntity:
     """Class used to stored manga manga_details in the database"""
-    def __init__(
-        self, 
-        title: str,
-        alternative_title: str,
-        author: str,
-        artist: str,
-        thumbnail: str,
-        genres: list[str],
-        summary: str,
-        status: str,
-        total_chapters: int,
-        chapters: list[str],
-        origin: str
-    ) -> None: 
-        self.title: str = title
-        self.alternative_title: str = alternative_title
-        self.author: str = author
-        self.artist: str = artist
-        self.thumbnail: str = thumbnail
-        self.genres: list[str] = genres
-        self.summary: str = summary
-        self.status: str = status
-        self.total_chapters: int = total_chapters
-        self.chapters: list[str] = chapters
-        self.origin: str = origin
-
+    title: str
+    alternative_title: str
+    author: str
+    artist: str
+    thumbnail: str
+    genres: list[str]
+    summary: str 
+    status: str
+    total_chapters: int
+    chapters: list[str]
+    origin: str
+    
     def to_dict(self):
         """Returns itself as a dictionary"""
         return {
