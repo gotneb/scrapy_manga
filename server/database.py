@@ -80,7 +80,7 @@ class MangaDatabase:
         else:
             return None
     
-    def get_chapter(self, manga_id: str, chapter_num: str) -> tuple[str, dict]:
+    def get_chapter(self, manga_id: str, chapter_num: str) -> dict:
         """Return the first chapter with same manga_id and chapter_sum"""
         docs = self.chapters_collection \
             .where("manga_id", "==", manga_id) \
@@ -88,7 +88,9 @@ class MangaDatabase:
                     .stream()
         
         for doc in docs:
-            return doc.id, doc.to_dict()
+            chapter_dict = doc.to_dict()
+            chapter_dict['id'] = doc.id
+            return chapter_dict
         return None
     
     def set_chapter(self, id: str, chapter: ChapterEntity) -> bool:
