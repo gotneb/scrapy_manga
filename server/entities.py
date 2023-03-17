@@ -14,6 +14,7 @@ class MangaDetailsEntity:
     total_chapters: int
     chapters: list[str]
     origin: str
+    id: str = None
     
     def to_dict(self):
         """Returns itself as a dictionary"""
