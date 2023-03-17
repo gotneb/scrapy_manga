@@ -1,6 +1,6 @@
 from firebase_admin.firestore import client
 from core.manga import Manga
-from entities import ChapterEntity, MangaDetailsEntity
+from .entities import ChapterEntity, MangaDetailsEntity
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
