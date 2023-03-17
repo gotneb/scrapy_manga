@@ -1,6 +1,7 @@
 from firebase_admin.firestore import client
 from core.manga import Manga
 from .entities import ChapterEntity, MangaDetailsEntity
+from operator import itemgetter
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
@@ -76,6 +77,7 @@ class MangaDatabase:
             return None
     
     def get_chapter(self, manga_id: str, chapter_num: str) -> tuple[str, dict]:
+        """Return the first chapter with same manga_id and chapter_sum"""
         docs = self.chapters_collection \
             .where("manga_id", "==", manga_id) \
                 .where("chapter_num", "==", chapter_num) \
@@ -101,5 +103,18 @@ class MangaDatabase:
             return True
         except:
             return False
+    
+    def search_details(self, queryText: str) -> list[dict]:
+        """Returns a list with documents whose title contains the queryText"""
+        docs = self.details_collection.where("title", ">=", queryText).where("title", "<=", queryText + "\uf8ff").get()
+        results: list[dict] = []
+
+        for doc in docs:
+            manga_details = doc.to_dict()
+            manga_details['id'] = doc.id
+            results.append(manga_details)
+        
+        return results
+            
         
 db = MangaDatabase()
