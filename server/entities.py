@@ -31,12 +31,12 @@ class MangaDetailsEntity:
             'origin': self.origin
         }
 
+@dataclass
 class ChapterEntity:
     """Class used to stored manga chapter in the database"""
-    def __init__(self, manga_id: str, chapter_num: str, image_urls: list[str]) -> None:
-        self.manga_id = manga_id
-        self.chapter_num = chapter_num
-        self.image_urls = image_urls
+    manga_id: str
+    chapter_num: str
+    image_urls: list[str]
     
     def to_dict(self) -> dict:
         return {
