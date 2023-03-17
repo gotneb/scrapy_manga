@@ -51,11 +51,13 @@ class MangaDatabase:
             return manga_details
         return None
     
-    def get_details_by_id(self, id: str) -> tuple[str, dict]:
+    def get_details_by_id(self, id: str) -> dict:
         """returns the element with same id"""
         doc = self.details_collection.document(id).get()
         if doc:
-            return doc.id, doc.to_dict()
+            manga_details = doc.to_dict()
+            manga_details['id'] = doc.id
+            return manga_details
         else:
             return None
 
