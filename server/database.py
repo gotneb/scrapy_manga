@@ -1,6 +1,6 @@
 from firebase_admin.firestore import client
 from core.manga import Manga
-from entities import ChapterEntity
+from entities import ChapterEntity, MangaDetailsEntity
 
 # Firestore Python docs: https://cloud.google.com/python/docs/reference/firestore/latest
 
@@ -13,7 +13,7 @@ class MangaDatabase:
         except:
             Exception("Database connection failed!")
     
-    def add_details(self, manga: Manga) -> str:
+    def add_details(self, manga: MangaDetailsEntity) -> str:
         """
         Add a new manga details to the database
         Returns:
@@ -33,7 +33,7 @@ class MangaDatabase:
         except:
             return False
     
-    def set_details(self, id: str, manga: Manga) -> bool:
+    def set_details(self, id: str, manga: MangaDetailsEntity) -> bool:
         """Update manga details by id"""
         try:
             self.details_collection.document(id).set(manga.to_dict())
