@@ -11,27 +11,11 @@ from bs4 import BeautifulSoup
 # Requests
 from requests import get
 # Core
+from core.driver import init_driver
 from core.manga import Manga
 
 
 domain = 'https://readm.org'
-
-
-def get_driver(show_window) -> webdriver.Chrome:
-    """
-    Creates a webdriver. If `show_window` is true, then display chrome window.\n
-    Arguments:  
-        show_window: shows google chrome's window.
-    Returns:
-        A google's webdriver.
-    """
-    # TODO: Throw exception if chrome is not installed
-    options = webdriver.ChromeOptions()
-    if not show_window:
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-    return webdriver.Chrome(options=options)
 
 
 # I'm not sure if I should have added a callback on this function o_o'
@@ -96,7 +80,7 @@ def get_pages(manga_url) -> list[str]:
 # TODO: Make it avaliable for "mangalivre.net" as well
 def get_populars() -> list[Manga]:
     """Visits the `readm.org` and returns top 10 most populars mangas."""
-    driver = get_driver()
+    driver = init_driver()
     url = "https://readm.org/popular-manga"
     driver.get(url)
 
@@ -131,7 +115,7 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
         raise Exception('letter must be unique character.')
 
     letter = letter.lower()
-    driver = get_driver(show_window)
+    driver = init_driver(show_window)
     driver.get(f'https://readm.org/manga-list/{letter}')
 
     # Get all tags '<a>'
@@ -158,7 +142,7 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     Return:
         Manga content.
     """
-    driver = get_driver(show_window)
+    driver = init_driver(show_window)
     driver.get(manga_url)
 
     # Just for debug...
