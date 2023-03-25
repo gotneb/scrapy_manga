@@ -1,5 +1,4 @@
 # Core
-import time
 from core.driver import init_driver
 # Selenium
 from selenium import webdriver
@@ -21,12 +20,13 @@ def manga_detail(manga_url, show_window=True):
     driver = init_driver(show_window)
     driver.get(manga_url)
 
-    # "Manga Livre" doesn't have a artist
+    # "Manga Livre" mangas doesn't have an artist data at all
     artist = None
+    # "Manga Livre" mixes author and status on the same tag ¯\_(ツ)_/¯
+    author, status = get_author(driver)
 
     title = get_title(driver)
     genres = get_genres(driver)
-    author = get_author(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
     chapters = get_chapters(driver)
@@ -42,7 +42,7 @@ def manga_detail(manga_url, show_window=True):
                  thumbnail=thumbnail, 
                  genres=genres, 
                  summary=summary, 
-                 status='stt', 
+                 status=status, 
                  total_chapters=total_chapters, 
                  chapters=chapters)
 
@@ -61,16 +61,28 @@ def get_summary(driver: webdriver.Chrome):
 
 def get_author(driver: webdriver.Chrome):
     span_tag = driver.find_element(By.CSS_SELECTOR, 'div#series-data.content-wraper div.series-info.touchcarousel span.series-author')
-    a_tag = span_tag.find_element(By.TAG_NAME, 'a')
-    
     span_text = span_tag.text
-    a_text = a_tag.text
 
-    author = span_text.replace(a_text, '').strip()
-    return author
+    # For some unkown reason, the manga page sometimes has a
+    # specific tag containing the author, and sometimes it doesn't happen
+    try:
+        a_tag = span_tag.find_element(By.TAG_NAME, 'a')
+        a_text = a_tag.text
+        author = span_text.replace(a_text, '').strip()
+    except:
+        author = span_text
+
+    # TODO: Make a function for extract status =P
+    status = "COMPLETO"
+    if status in author:
+        author = author.replace(status, '').strip()
+    else:
+        status = "EM ANDAMENTO"
+
+    return author, status
 
 
-def get_title(driver: webdriver.Chrome) -> str:
+def get_title(driver: webdriver.Chrome):
     elem = driver.find_element(By.CSS_SELECTOR, 'div#series-data.content-wraper div.series-info.touchcarousel span.series-title')
     title = elem.text
     return title
@@ -118,7 +130,7 @@ def get_chapters(driver: webdriver.Chrome):
         .scroll_by_amount(0, 1000) \
         .perform()
 
-        # Site notify user chapters are being loaded
+        # Site notifies users that chapters are being loaded
         first = driver.find_element(By.CSS_SELECTOR, 'div.loadmore a.loadmore')
         second = driver.find_element(By.CSS_SELECTOR, 'div.loadmore a.loading.loadmore')
         st1 = first.get_attribute('style')
