@@ -8,7 +8,7 @@ from selenium.webdriver.common.by import By
 from core.manga import Manga
 
 
-def manga_detail(manga_url, show_window=True):
+def manga_detail(manga_url: str, show_window=True):
     """
     Visits the `manga_url` and extract all data on it.\n
     Arguments:
@@ -26,6 +26,7 @@ def manga_detail(manga_url, show_window=True):
     author, status = get_author(driver)
 
     title = get_title(driver)
+    alt_title = get_alt_title(driver)
     genres = get_genres(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
@@ -36,7 +37,7 @@ def manga_detail(manga_url, show_window=True):
     driver.quit()
 
     return Manga(title=title, 
-                 alternative_title='alt_title', 
+                 alternative_title=alt_title, 
                  author=author, 
                  artist=artist, 
                  thumbnail=thumbnail, 
@@ -72,7 +73,7 @@ def get_author(driver: webdriver.Chrome):
     except:
         author = span_text
 
-    # TODO: Make a function for extract status =P
+    # TODO: Make the below code as function for extract status =P
     status = "COMPLETO"
     if status in author:
         author = author.replace(status, '').strip()
@@ -105,6 +106,18 @@ def get_genres(driver: webdriver.Chrome) -> list[str]:
         genres.append(li.text)
     
     return genres
+
+
+def get_alt_title(driver: webdriver.Chrome) -> str:
+    elems = driver.find_elements(By.CSS_SELECTOR, 'div#series-desc span.series-desc ol.series-synom li')
+
+    alt_title = ''
+    for li in elems:
+        if is_oriental(li.text):
+            alt_title = li.text
+            break
+    
+    return alt_title
 
 
 def get_chapters(driver: webdriver.Chrome):
@@ -148,3 +161,7 @@ def get_chapters(driver: webdriver.Chrome):
         chapters.append(chapter_value)
     
     return chapters
+
+
+def is_oriental(word: str) -> bool:
+    return not word.isascii() 
