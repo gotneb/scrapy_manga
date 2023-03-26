@@ -8,6 +8,47 @@ from selenium.webdriver.common.by import By
 from core.manga import Manga
 
 
+def get_pages(manga_url: str) -> list[str]:
+    """Extract all image links from a manga chapter.\n
+    `manga_url:` manga chapter
+    """
+    driver = init_driver(show_window=True)
+    driver.get(manga_url)
+
+    # Toggle to vertical mode
+    try:
+        btn = driver.find_element(By.CSS_SELECTOR, 'div.orientation-container.orientation-toggle a.orientation span.change-to-vertical')
+        btn.click()
+    except:
+        print('ALREADY IN VERTICAL MODE!')
+
+    # For adult content, agree I'm older than 18 years
+    try:
+        btn = driver.find_element(By.CSS_SELECTOR, 'div.adult-warning-wrapper a.eighteen-but')
+        btn.click()
+    except:
+        print('NOT AN ADULT CONTENT')
+
+    while True:
+        elem = driver.find_element(By.CSS_SELECTOR, 'div.loading')
+
+        # When all pages were loaded, the 'style' is triggered
+        # Before thatm it doesn't have any value
+        if len(elem.get_attribute('style')) > 1:
+            break
+
+        ActionChains(driver)       \
+        .scroll_by_amount(0, 200)  \
+        .perform()
+
+    pages = []
+    elems = driver.find_elements(By.CSS_SELECTOR, 'div.manga-image picture img')
+    for img in elems:
+        src = img.get_attribute('src')
+        pages.append(src)
+    
+    return pages
+
 def manga_detail(manga_url: str, show_window=True):
     """
     Visits the `manga_url` and extract all data on it.\n
