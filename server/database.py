@@ -46,6 +46,16 @@ class MangaDatabase:
             print(error)
             return None
 
+    def set(self, id: str, manga: Manga) -> bool:
+        try:
+            results = self.collection.update_one(
+                {"_id": ObjectId(id)}, {"$set": manga.to_dict()}
+            )
+            return results.matched_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
         return (
