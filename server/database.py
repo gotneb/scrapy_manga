@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from os import getenv
 from .entities import Manga
@@ -25,8 +26,8 @@ class MangaDatabase:
             print(error)
             return None
 
-    def exists_by_manga(self, manga: Manga):
-        """Checks if manga already exists"""
+    def exists_by_manga(self, manga: Manga) -> bool:
+        """Checks if manga already exists by manga object"""
         return (
             self.collection.find_one(
                 {
@@ -37,6 +38,10 @@ class MangaDatabase:
             )
             != None
         )
+
+    def exists_by_id(self, id: str) -> bool:
+        """Checks if manga already exists by id"""
+        return self.collection.find_one({"_id": ObjectId(id)}) != None
 
     def connect(self) -> bool:
         """Connect to database and returns True if sucessful"""
