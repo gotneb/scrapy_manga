@@ -27,6 +27,7 @@ class MangaDatabase:
             return None
 
     def remove(self, id: str) -> bool:
+        """Delete document with same id in database"""
         try:
             if not self.exists_by_id(id):
                 raise Exception("Document not exists in database")
@@ -35,6 +36,15 @@ class MangaDatabase:
         except Exception as error:
             print(error)
             return False
+
+    def get(self, id: str) -> Manga:
+        """Returns document with same id"""
+        try:
+            results = self.collection.find_one({"_id": ObjectId(id)})
+            return results
+        except Exception as error:
+            print(error)
+            return None
 
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
