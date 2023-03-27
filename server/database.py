@@ -18,7 +18,9 @@ class MangaDatabase:
         """Insert a new manga in database and returns an id"""
         try:
             if self.exists_by_manga(manga):
-                raise Exception(f"Document with title {manga.title} already exists.")
+                raise Exception(
+                    f'Document with title "{manga.title} (origin: {manga.origin})" already exists.'
+                )
 
             results = self.collection.insert_one(manga.to_dict())
             return results.inserted_id
@@ -29,8 +31,6 @@ class MangaDatabase:
     def remove(self, id: str) -> bool:
         """Delete document with same id in database"""
         try:
-            if not self.exists_by_id(id):
-                raise Exception("Document not exists in database")
             results = self.collection.delete_one({"_id": ObjectId(id)})
             return results.deleted_count == 1
         except Exception as error:
