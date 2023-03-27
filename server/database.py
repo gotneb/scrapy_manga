@@ -16,7 +16,7 @@ class MangaDatabase:
     def add(self, manga: Manga) -> str:
         """Insert a new manga in database and returns an id"""
         try:
-            if self.exists(manga):
+            if self.exists_by_manga(manga):
                 raise Exception(f"Document with title {manga.title} already exists.")
 
             results = self.collection.insert_one(manga.to_dict())
@@ -25,7 +25,7 @@ class MangaDatabase:
             print(error)
             return None
 
-    def exists(self, manga: Manga):
+    def exists_by_manga(self, manga: Manga):
         """Checks if manga already exists"""
         return (
             self.collection.find_one(
