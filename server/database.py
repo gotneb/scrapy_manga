@@ -26,6 +26,16 @@ class MangaDatabase:
             print(error)
             return None
 
+    def remove(self, id: str) -> bool:
+        try:
+            if not self.exists_by_id(id):
+                raise Exception("Document not exists in database")
+            results = self.collection.delete_one({"_id": ObjectId(id)})
+            return results.deleted_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
         return (
