@@ -41,7 +41,7 @@ class MangaDatabase:
         """Returns document with same id"""
         try:
             results = self.collection.find_one({"_id": ObjectId(id)})
-            return results
+            return Manga.dict_to_manga(results)
         except Exception as error:
             print(error)
             return None
