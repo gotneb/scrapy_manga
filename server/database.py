@@ -13,6 +13,18 @@ class MangaDatabase:
         self.database = None
         self.collection = None
 
+    def exists(self, manga: Manga):
+        return (
+            self.collection.find_one(
+                {
+                    "title": manga.title,
+                    "origin": manga.origin,
+                    "language": manga.language,
+                }
+            )
+            != None
+        )
+
     def connect(self) -> bool:
         try:
             self.client: MongoClient = MongoClient(self.uri)
