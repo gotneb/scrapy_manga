@@ -13,7 +13,20 @@ class MangaDatabase:
         self.database = None
         self.collection = None
 
+    def add(self, manga: Manga) -> str:
+        """Insert a new manga in database and returns an id"""
+        try:
+            if self.exists(manga):
+                raise Exception(f"Document with title {manga.title} already exists.")
+
+            results = self.collection.insert_one(manga.to_dict())
+            return results.inserted_id
+        except Exception as error:
+            print(error)
+            return None
+
     def exists(self, manga: Manga):
+        """Checks if manga already exists"""
         return (
             self.collection.find_one(
                 {
@@ -26,6 +39,7 @@ class MangaDatabase:
         )
 
     def connect(self) -> bool:
+        """Connect to database and returns True if sucessful"""
         try:
             self.client: MongoClient = MongoClient(self.uri)
             self.database = self.client["manga_db"]
@@ -37,5 +51,6 @@ class MangaDatabase:
             return False
 
     def close(self) -> None:
+        """Close database conncetion"""
         if self.client:
             self.client.close()
