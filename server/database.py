@@ -73,6 +73,10 @@ class MangaDatabase:
         """Checks if manga already exists by id"""
         return self.collection.find_one({"_id": ObjectId(id)}) != None
 
+    def exists_by_url(self, url: str) -> bool:
+        """Checks if manga already exists by id"""
+        return self.collection.find_one({"url": url}) != None
+
     def connect(self) -> bool:
         """Connect to database and returns True if sucessful"""
         try:
