@@ -4,6 +4,8 @@ from core.driver import init_driver
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
+# BeautifulSoup4
+from bs4 import BeautifulSoup
 
 from core.manga import Manga
 
@@ -53,8 +55,8 @@ def manga_detail(manga_url: str, show_window=True):
     """
     Visits the `manga_url` and extract all data on it.\n
     Arguments:
-        manga_url: the manga content. Must be `mangalivre.net` domain.
-        enable_gui: show chrome window.
+        `manga_url:` the manga content.
+        `enable_gui:` show chrome window.
     Return:
         Manga content.
     """
@@ -68,11 +70,11 @@ def manga_detail(manga_url: str, show_window=True):
 
     title = get_title(driver)
     alt_title = get_alt_title(driver)
-    genres = get_genres(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
     chapters = get_chapters(driver)
     total_chapters = len(chapters)
+    genres = get_genres(driver)
 
     # Clean resources
     driver.quit()
@@ -137,16 +139,20 @@ def get_summary(driver: webdriver.Chrome) -> str:
 
 
 def get_genres(driver: webdriver.Chrome) -> list[str]:
-    # Is that way wrong? I mean... I don't think this kinda syntax looks like weird :P
-    elems = driver.find_elements(
-    By.CSS_SELECTOR,
-    'div#series-data.content-wraper div.series-info.touchcarousel div.touchcarousel-wrapper ul.tags.touchcarousel-container li')
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
 
     genres = []
+    elems = soup.find_all('li', class_="touchcarousel-item")
     for li in elems:
-        genres.append(li.text)
-    
+        a_tag = li.find('a')
+        # DEBUG: Find out why `a_tag` sometimes is `None`
+        # It's crucial to know in advance why is this happening
+        if a_tag is not None:
+            span_tag = a_tag.find('span', class_='button')
+            genres.append(span_tag.text) 
     return genres
+
 
 
 def get_alt_title(driver: webdriver.Chrome) -> str:
@@ -161,7 +167,7 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
     return alt_title
 
 
-def get_chapters(driver: webdriver.Chrome):
+def get_chapters(driver: webdriver.Chrome) -> list[str]:
     # PROBLEM:
     # Chapters are loaded lazily by AJAX.
     # There isn't a specific time where I can know in advance when the page has fully loaded.
@@ -169,7 +175,7 @@ def get_chapters(driver: webdriver.Chrome):
     # HOW IT WORKS:
     # There's a specific div notifying user when content is being loaded
     # Every time we scroll this div, it updates its children "style"
-    # When it's done, all chidren have block style "none", it loads about 250 chapters...
+    # When it's done, all chidren have block style "none", I think it loads about 250 chapters...
     # So I've putted a "limiter". I think 50 it's a great amount.
     #
     # DON'T WORRY: 
@@ -193,7 +199,7 @@ def get_chapters(driver: webdriver.Chrome):
         if st1 == 'display: none;' and st1 == st2:
             counter += 1
 
-    # When fyllu loaded, we can extract data
+    # When fully loaded, we can extract data
     elems = driver.find_elements(By.CSS_SELECTOR, 'div.container-box.default.color-brown ul.full-chapters-list.list-of-chapters li a.link-dark')
     chapters = []
     for a in elems:
