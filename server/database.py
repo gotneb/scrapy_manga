@@ -56,6 +56,26 @@ class MangaDatabase:
             print(error)
             return False
 
+    def get_by_url(self, url: str) -> Manga:
+        """Returns document with same url"""
+        try:
+            results = self.collection.find_one({"url": url})
+            manga = Manga.dict_to_manga(results)
+            return manga
+        except Exception as error:
+            print(error)
+            return None
+
+    def set_by_url(self, url: str, manga: Manga) -> bool:
+        try:
+            results = self.collection.update_one(
+                {"url": url}, {"$set": manga.to_dict()}
+            )
+            return results.matched_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
         return (
