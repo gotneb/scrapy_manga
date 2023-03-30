@@ -76,6 +76,17 @@ class MangaDatabase:
             print(error)
             return False
 
+    def search_by_title(self, title: str) -> list[Manga]:
+        try:
+            results = []
+            cursor = self.collection.find({"$text": {"$search": title}})
+            for doc in cursor:
+                results.append(Manga.dict_to_manga(doc))
+            return results
+        except Exception as error:
+            print(error)
+            return None
+
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
         return (
