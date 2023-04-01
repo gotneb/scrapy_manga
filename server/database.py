@@ -56,37 +56,6 @@ class MangaDatabase:
             print(error)
             return False
 
-    def get_by_url(self, url: str) -> Manga:
-        """Returns document with same url"""
-        try:
-            results = self.collection.find_one({"url": url})
-            manga = Manga.dict_to_manga(results)
-            return manga
-        except Exception as error:
-            print(error)
-            return None
-
-    def set_by_url(self, url: str, manga: Manga) -> bool:
-        try:
-            results = self.collection.update_one(
-                {"url": url}, {"$set": manga.to_dict()}
-            )
-            return results.matched_count == 1
-        except Exception as error:
-            print(error)
-            return False
-
-    def search_by_title(self, title: str) -> list[Manga]:
-        try:
-            results = []
-            cursor = self.collection.find({"$text": {"$search": title}})
-            for doc in cursor:
-                results.append(Manga.dict_to_manga(doc))
-            return results
-        except Exception as error:
-            print(error)
-            return None
-
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
         return (
@@ -103,10 +72,6 @@ class MangaDatabase:
     def exists_by_id(self, id: str) -> bool:
         """Checks if manga already exists by id"""
         return self.collection.find_one({"_id": ObjectId(id)}) != None
-
-    def exists_by_url(self, url: str) -> bool:
-        """Checks if manga already exists by id"""
-        return self.collection.find_one({"url": url}) != None
 
     def connect(self) -> bool:
         """Connect to database and returns True if sucessful"""

@@ -1,10 +1,5 @@
-from server.database import MangaDatabase
-from server.readm_handler import ReadmHandler as Handler
+from core.sites.readm import manga_detail, get_latest_updates
+from server.database import db
 
 if __name__ == "__main__":
-    db = MangaDatabase()
-    db.connect()
-    handler = Handler(db)
-    handler.start()
-
-    db.close()
+    print(db.get_details("Shishunki na Adam"))
