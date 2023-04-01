@@ -11,29 +11,14 @@ from bs4 import BeautifulSoup
 # Requests
 from requests import get
 # Core
+from core.driver import init_driver
 from core.manga import Manga
 
 
 domain = 'https://readm.org'
 
 
-def get_driver(show_window) -> webdriver.Chrome:
-    """
-    Creates a webdriver. If `show_window` is true, then display chrome window.\n
-    Arguments:  
-        show_window: shows google chrome's window.
-    Returns:
-        A google's webdriver.
-    """
-    # TODO: Throw exception if chrome is not installed
-    options = webdriver.ChromeOptions()
-    if not show_window:
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-    return webdriver.Chrome(options=options)
-
-
+# I'm not sure if I should have added a callback on this function o_o'
 def get_latest_updates(limit: int = 40, on_link_received: Callable[[str], None] = None) -> list[str]:
     """
     Returns a list of all links from `readm.org` that were updateds.\n
@@ -50,13 +35,15 @@ def get_latest_updates(limit: int = 40, on_link_received: Callable[[str], None] 
     total_pages = math.ceil(limit/40)
     pages_counter = 0
 
-    driver = get_driver(show_window=True)
     for page in range(1, total_pages + 1):
-        driver.get(f'https://readm.org/latest-releases/{page}')
-        anchors = driver.find_elements(
-            By.CSS_SELECTOR, 'li.segment-poster-sm h2.truncate a')
-        for a in anchors:
-            link = a.get_attribute('href')
+        html = get(f'https://readm.org/latest-releases/{page}')
+        soup = BeautifulSoup(html.text, 'html.parser')
+
+        all_h2 = soup.find_all('h2', class_='truncate')
+        for h2 in all_h2:
+            a = h2.find('a')
+            # ERROR PRONE: adding two url's path may cause errors!
+            link = domain + a['href']
             links.append(link)
 
             if on_link_received is not None:
@@ -65,6 +52,8 @@ def get_latest_updates(limit: int = 40, on_link_received: Callable[[str], None] 
             pages_counter += 1
             if pages_counter == limit:
                 break
+    
+    return links
 
 
 def get_pages(manga_url) -> list[str]:
@@ -91,7 +80,7 @@ def get_pages(manga_url) -> list[str]:
 # TODO: Make it avaliable for "mangalivre.net" as well
 def get_populars() -> list[Manga]:
     """Visits the `readm.org` and returns top 10 most populars mangas."""
-    driver = get_driver()
+    driver = init_driver()
     url = "https://readm.org/popular-manga"
     driver.get(url)
 
@@ -126,7 +115,7 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
         raise Exception('letter must be unique character.')
 
     letter = letter.lower()
-    driver = get_driver(show_window)
+    driver = init_driver(show_window)
     driver.get(f'https://readm.org/manga-list/{letter}')
 
     # Get all tags '<a>'
@@ -153,7 +142,7 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     Return:
         Manga content.
     """
-    driver = get_driver(show_window)
+    driver = init_driver(show_window)
     driver.get(manga_url)
 
     # Just for debug...
@@ -268,6 +257,6 @@ def get_chapters(driver) -> list[str]:
         for singleChapter in allChapters:
             # Usually ["Chapter", "__number__"]
             split = singleChapter.text.split()
-            if (split.__len__() == 2):
+            if (len(split) == 2):
                 chapters.append(split[1])
     return chapters
