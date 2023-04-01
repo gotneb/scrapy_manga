@@ -4,8 +4,6 @@ from typing import Callable
 # Selenium
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-from selenium.webdriver.support.wait import WebDriverWait
 # BS4
 from bs4 import BeautifulSoup
 # Requests
@@ -105,11 +103,11 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
     """
     Visits `readm.org` and extract all links that starts with `letter` on its name.\n
     Arguments:
-        `letter:` manga initial name.
-        `show_window:` show google's chrome window.
-        `on_link_received:` callback that's called when manga's link is received.
+    `letter:` manga initial name.
+    `show_window:` show google's chrome window.
+    `on_link_received:` callback that's called when manga's link is received.\n
     Return:
-        A list containing all links.
+    list of links.
     """
     if len(letter) > 2:
         raise Exception('letter must be unique character.')
@@ -142,15 +140,8 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     Return:
         Manga content.
     """
-    # Loads the full html content. After, gets the data and hold on `html` :D
-    driver = init_driver(show_window)
-    # Sometimes the content takes a lot of time to fully loads
-    driver.get(manga_url)
-    html = driver.page_source
-    # Clean resources
-    driver.quit()
-
-    soup = BeautifulSoup(html, 'html.parser')
+    html = get(manga_url)
+    soup = BeautifulSoup(html.text, 'html.parser')
 
     title = get_title(soup)
     alt_title = get_alt_title(soup)
