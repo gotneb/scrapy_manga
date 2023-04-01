@@ -142,95 +142,96 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     Return:
         Manga content.
     """
+    # Loads the full html content. After, gets the data and hold on `html` :D
     driver = init_driver(show_window)
+    # Sometimes the content takes a lot of time to fully loads
     driver.get(manga_url)
-
-    # Just for debug...
-    # print(f"Openned {driver.title}")
-
-    title = get_title(driver)
-    alt_title = get_alt_title(driver)
-    author = get_author(driver)
-    artist = get_artist(driver)
-    stt = get_status(driver)
-    thumbnail = get_thumbnail(driver)
-    genres = get_genres(driver)
-    summary = get_summary(driver)
-    chapters = get_chapters(driver)
-    total_chapters = len(chapters)
-
+    html = driver.page_source
     # Clean resources
     driver.quit()
+
+    soup = BeautifulSoup(html, 'html.parser')
+
+    title = get_title(soup)
+    alt_title = get_alt_title(soup)
+    author = get_author(soup)
+    artist = get_artist(soup)
+    stt = get_status(soup)
+    thumbnail = get_thumbnail(soup)
+    genres = get_genres(soup)
+    summary = get_summary(soup)
+    chapters = get_chapters(soup)
+    total_chapters = len(chapters)
 
     return Manga(title, alt_title, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters)
 
 
-def get_title(driver) -> str:
+def get_title(soup: BeautifulSoup) -> str:
     """Returns title from manga"""
-    title = driver.find_element(By.CSS_SELECTOR, "div.ui.grid h1.page-title")
-    return title.text
+    h1 = soup.css.select('div.ui.grid h1.page-title')
+    return h1[0].string
 
 
-def get_alt_title(driver) -> str:
+def get_alt_title(soup: BeautifulSoup) -> str:
     """Returns alternative title from manga"""
     try:
-        title = driver.find_element(By.CSS_SELECTOR, "div.sub-title.pt-sm")
-        return title.text
-    except NoSuchElementException:
+        title = soup.css.select('div.sub-title.pt-sm')
+        return title[0].text
+    except:
         return ''
 
 
-def get_author(driver) -> str:
+def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga. If does not exist, hence it returns an empty str."""
     try:
-        elem = driver.find_element(
-            By.CSS_SELECTOR, "div.first_and_last span#first_episode small")
-        return elem.text
-    except NoSuchElementException:
+        author = soup.css.select('div.first_and_last span#first_episode small')
+        author = author[0].text
+        return author
+    except:
         return ""
 
 
-def get_artist(driver) -> str:
+def get_artist(soup: BeautifulSoup) -> str:
     """Returns author from manga. If does not exist, hence it returns an empty str."""
     try:
-        e = driver.find_element(
-            By.CSS_SELECTOR, "div.first_and_last span#last_episode small")
-        return e.text
-    except NoSuchElementException:
+        art = soup.css.select('div.first_and_last span#last_episode small')
+        art = art[0].text
+        return art
+    except:
         return ""
 
 
-def get_thumbnail(driver) -> str:
+def get_thumbnail(soup: BeautifulSoup) -> str:
     """Returns thumbnail (image) from manga."""
-    elem = driver.find_element(
-        By.CSS_SELECTOR, "a#series-profile-image-wrapper img.series-profile-thumb")
-    return elem.get_attribute("src")
+    cover = soup.css.select('a#series-profile-image-wrapper img.series-profile-thumb')
+
+    # TODO: Make a better way to join url's paths... The below is error prone.
+    cover = f'{domain}{cover[0]["src"]}'
+    return cover
 
 
-def get_status(driver) -> str:
+def get_status(soup: BeautifulSoup) -> str:
     """Returns status from manga. If does not exist, hence it returns an empty str."""
     try:
-        elem = driver.find_element(
-            By.CSS_SELECTOR, "div.series-genres span.series-status.aqua")
-        return elem.text
-    except NoSuchElementException:
+        stt = soup.css.select('div.series-genres span.series-status.aqua')
+        stt = stt[0].text
+        return stt
+    except:
         return ""
 
 
-def get_genres(driver) -> list[str]:
+def get_genres(soup: BeautifulSoup) -> list[str]:
     """Returns a list of genres from manga."""
     genres = []
-    elements = driver.find_elements(
-        By.CSS_SELECTOR, "div.series-summary-wrapper div.ui.list div.item a")
-    for e in elements:
+    elems = soup.css.select('div.series-summary-wrapper div.ui.list div.item a')
+    for e in elems:
         genres.append(e.text)
     return genres
 
 
-def get_summary(driver) -> str:
+def get_summary(soup: BeautifulSoup) -> str:
     """Returns summary from manga."""
-    elems = driver.find_elements(
-        By.CSS_SELECTOR, "article.series-summary div.series-summary-wrapper p")
+    elems = soup.css.select('article.series-summary div.series-summary-wrapper p')
     summary = ""
     for e in elems:
         if (e.text != ""):
@@ -238,25 +239,13 @@ def get_summary(driver) -> str:
     return summary
 
 
-def get_chapters(driver) -> list[str]:
+def get_chapters(soup: BeautifulSoup) -> list[str]:
     """Returns a list of chapters from manga."""
+    a_tags = soup.css.select('section.episodes-box div.ui.tab div.ui.list div.item.season_start h6.truncate a')
     chapters = []
-    MAX_TIME = 60  # 1 minute
 
-    buttons = WebDriverWait(driver, MAX_TIME).until(lambda d: d.find_elements(
-        By.CSS_SELECTOR, "section.episodes-box div#seasons-menu a"))
+    for a in a_tags:
+        c = a.text.split()[1]
+        chapters.append(c)
 
-    # Some `ADS` interrupts driver avoiding it to click on button
-    # To fix I'm explicitly scrolling the window to bottom
-    driver.execute_script("window.scrollBy(0, 1000);")
-
-    for e in buttons:
-        e.click()
-        allChapters = driver.find_elements(
-            By.CSS_SELECTOR, "section.episodes-box div.ui.tab.active div.ui.list div.item.season_start h6.truncate a")
-        for singleChapter in allChapters:
-            # Usually ["Chapter", "__number__"]
-            split = singleChapter.text.split()
-            if (len(split) == 2):
-                chapters.append(split[1])
     return chapters

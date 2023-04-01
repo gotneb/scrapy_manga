@@ -9,9 +9,11 @@ def init_driver(show_window) -> webdriver.Chrome:
         A google's webdriver.
     """
     # TODO: Throw exception if chrome is not installed
-    options = webdriver.ChromeOptions()
     if not show_window:
+        options = webdriver.ChromeOptions()
         options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-    return webdriver.Chrome(options=options)
+        #options.add_argument('--no-sandbox')
+        #options.add_argument('--disable-dev-shm-usage')
+        return webdriver.Chrome(options=options)
+    else:
+        return webdriver.Chrome()

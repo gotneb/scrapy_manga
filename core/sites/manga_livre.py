@@ -35,7 +35,7 @@ def get_pages(manga_url: str) -> list[str]:
         elem = driver.find_element(By.CSS_SELECTOR, 'div.loading')
 
         # When all pages were loaded, the 'style' is triggered
-        # Before thatm it doesn't have any value
+        # Before that, it doesn't have any value
         if len(elem.get_attribute('style')) > 1:
             break
 
