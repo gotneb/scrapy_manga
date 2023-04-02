@@ -69,6 +69,7 @@ def manga_detail(manga_url: str, show_window=True):
     author, status = get_author(driver)
 
     title = get_title(driver)
+    score = get_score(driver)
     alt_title = get_alt_title(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
@@ -81,6 +82,7 @@ def manga_detail(manga_url: str, show_window=True):
 
     return Manga(title=title, 
                  alternative_title=alt_title, 
+                 rating=score,
                  author=author, 
                  artist=artist, 
                  thumbnail=thumbnail, 
@@ -89,6 +91,12 @@ def manga_detail(manga_url: str, show_window=True):
                  status=status, 
                  total_chapters=total_chapters, 
                  chapters=chapters)
+
+
+def get_score(driver: webdriver.Chrome) -> float:
+    elem = driver.find_element(By.CSS_SELECTOR, 'div.series-img div.score div.score-number')
+    score = elem.text
+    return float(score)
 
 
 def get_thumbnail(driver: webdriver.Chrome):

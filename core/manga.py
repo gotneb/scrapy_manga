@@ -6,6 +6,7 @@ class Manga:
     """Mangas are objects that represent mangas avaliable either readm.org or mangalivre.net"""
     title: str
     alternative_title: str
+    rating: float
     author: str
     artist: str
     thumbnail: str
@@ -35,6 +36,7 @@ class Manga:
         """Prints manga atributes on standard output"""
         print(f"""Title: {self.title}
 Alternative title: {self.alternative_title}
+Rating: {self.rating}
 Author: {self.author}\nArtist: {self.artist}
 Status: {self.status}\nThumbnail: {self.thumbnail}
 genres: {self.genres}\nSummary: {self.summary}

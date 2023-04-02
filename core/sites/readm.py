@@ -75,7 +75,6 @@ def get_pages(manga_url) -> list[str]:
     return url_imgs
 
 
-# TODO: Make it avaliable for "mangalivre.net" as well
 def get_populars() -> list[Manga]:
     """Visits the `readm.org` and returns top 10 most populars mangas."""
     driver = init_driver()
@@ -110,7 +109,7 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
     list of links.
     """
     if len(letter) > 2:
-        raise Exception('letter must be unique character.')
+        raise Exception('letter must be an unique character.')
 
     letter = letter.lower()
     driver = init_driver(show_window)
@@ -123,6 +122,7 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
     for a in anchors:
         link = a.get_attribute('href')
         all_links.append(link)
+
         # Callback
         if on_link_received is not None:
             on_link_received(link)
@@ -146,6 +146,7 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     title = get_title(soup)
     alt_title = get_alt_title(soup)
     author = get_author(soup)
+    score = get_score(soup)
     artist = get_artist(soup)
     stt = get_status(soup)
     thumbnail = get_thumbnail(soup)
@@ -154,7 +155,7 @@ def manga_detail(manga_url, show_window=True) -> Manga:
     chapters = get_chapters(soup)
     total_chapters = len(chapters)
 
-    return Manga(title, alt_title, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters)
+    return Manga(title, alt_title, score, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters)
 
 
 def get_title(soup: BeautifulSoup) -> str:
@@ -171,6 +172,12 @@ def get_alt_title(soup: BeautifulSoup) -> str:
     except:
         return ''
 
+
+def get_score(soup: BeautifulSoup) -> float:
+    """Returns the score given by the users."""
+    score = soup.css.select('div.media-meta div.color-imdb')
+    score = float(score[0].text)
+    return score
 
 def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga. If does not exist, hence it returns an empty str."""
