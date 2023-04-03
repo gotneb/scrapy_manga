@@ -47,6 +47,7 @@ class MangaDatabase:
             return None
 
     def set(self, id: str, manga: Manga) -> bool:
+        """Change manga with same id"""
         try:
             results = self.collection.update_one(
                 {"_id": ObjectId(id)}, {"$set": manga.to_dict()}
@@ -55,6 +56,39 @@ class MangaDatabase:
         except Exception as error:
             print(error)
             return False
+
+    def get_by_url(self, url: str) -> Manga:
+        """Returns document with same url"""
+        try:
+            results = self.collection.find_one({"url": url})
+            manga = Manga.dict_to_manga(results)
+            return manga
+        except Exception as error:
+            print(error)
+            return None
+
+    def set_by_url(self, url: str, manga: Manga) -> bool:
+        """Change manga with same url"""
+        try:
+            results = self.collection.update_one(
+                {"url": url}, {"$set": manga.to_dict()}
+            )
+            return results.matched_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
+    def search_by_title(self, title: str) -> list[Manga]:
+        """Return mangas with similar titles or alternative titles"""
+        try:
+            results = []
+            cursor = self.collection.find({"$text": {"$search": title}})
+            for doc in cursor:
+                results.append(Manga.dict_to_manga(doc))
+            return results
+        except Exception as error:
+            print(error)
+            return None
 
     def exists_by_manga(self, manga: Manga) -> bool:
         """Checks if manga already exists by manga object"""
@@ -73,6 +107,10 @@ class MangaDatabase:
         """Checks if manga already exists by id"""
         return self.collection.find_one({"_id": ObjectId(id)}) != None
 
+    def exists_by_url(self, url: str) -> bool:
+        """Checks if manga already exists by id"""
+        return self.collection.find_one({"url": url}) != None
+
     def connect(self) -> bool:
         """Connect to database and returns True if sucessful"""
         try:
@@ -84,6 +122,10 @@ class MangaDatabase:
         except Exception as error:
             print(error)
             return False
+
+    def is_empty(self) -> bool:
+        """Return true if collection 'mangas' is empty"""
+        return self.collection.count_documents({}) == 0
 
     def close(self) -> None:
         """Close database conncetion"""
