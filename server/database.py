@@ -123,8 +123,13 @@ class MangaDatabase:
             print(error)
             return False
 
-    def is_empty(self) -> bool:
-        """Return true if collection 'mangas' is empty"""
+    def is_empty(self, origin: str = None) -> bool:
+        """Return true if docs with same origin exists. If origin is None, return True if collection 'mangas' is empty"""
+        if origin == "readm":
+            return self.collection.count_documents({"origin": "readm"}) == 0
+        elif origin == "manga_livre":
+            return self.collection.count_documents({"origin": "manga_livre"}) == 0
+
         return self.collection.count_documents({}) == 0
 
     def close(self) -> None:
