@@ -7,66 +7,69 @@ from core.sites.readm import (
     get_latest_updates,
 )
 from .database import MangaDatabase
-from time import time
-from threading import Thread, Lock, Semaphore
+from time import time, sleep
+from concurrent.futures import ThreadPoolExecutor, wait
+from threading import Thread
 
 
-class ReadmHandler:
+class ReadmHandler(Thread):
+    """Class that updates database with readm mangas"""
+
     def __init__(self, database: MangaDatabase) -> None:
+        Thread.__init__(self)
         self.database = database
-        self.db_access = Lock()  # mutex for database write control
-        self.exec_permissions = Semaphore(3)  # only 3 concurrent threads
+        self.executor = ThreadPoolExecutor(max_workers=10)
+        self.features = []
 
-    def start(self):
-        print("Readm handler started")
-        last_update_time = time()
-
-        if self.database.is_empty():
-            self._save_all_mangas()
+    def run(self):
+        """Executes when calling method start ( of the superclass Thread)"""
+        print("::----- Readm Handler Started -----::")
 
         while True:
-            # update mangas every 24 hours
-            if time() - last_update_time >= 24 * 60 * 60:
-                self._update_latest_mangas()
-                last_update_time = time()
+            last_update_time = time()
 
-    def _update_latest_mangas(self):
-        """Updates the latest mangas from readm.org"""
-        print("Updating mangas.")
-        get_latest_updates(400, self._init_perform_thread)
-
-    def _save_all_mangas(self):
-        """Save all mangas from readm in database"""
-        print("Downloading mangas for the first time.")
-        letters = [chr(i) for i in range(97, 123)]
-
-        for letter in letters:
-            get_all_start_with(letter, False, self._init_perform_thread)
-
-    def _init_perform_thread(self, manga_url: str):
-        """Start the threads"""
-        self.exec_permissions.acquire()  # request permission to run a new thread
-        Thread(target=self._perform, args=(manga_url,)).start()
-
-    def _perform(self, manga_url: str):
-        """Checks if exists. If true, update it. Otherwise, save for the first time"""
-        try:
-            initial_time = time()
-
-            if not self.database.exists_by_url(manga_url):
-                self._save_manga(manga_url)
-                print(f"Stored manga with url '{manga_url}'.")
+            if self.database.is_empty(origin="readm"):
+                self.populate_database()
             else:
-                self._update_manga(manga_url)
-                print(
-                    f"Updated manga with url '{manga_url}'. (duration: {time() - initial_time})"
-                )
-        except Exception as error:
-            print(error)
-        finally:
-            self.exec_permissions.release()
+                self.update_database()
 
-    def _update_manga(self, manga_url: str):
+            wait(self.features)
+
+            update_duration = time() - last_update_time
+
+            print("::----- Readm Handler Completed -----::")
+            sleep(24 * 60 * 60 - update_duration)
+
+    def populate_database(self):
+        """Iterates over all links and stores manga in database"""
+        for letter in [chr(i) for i in range(97, 123)]:
+            get_all_start_with(
+                letter=letter,
+                show_window=False,
+                on_link_received=self.create_perform_thread,
+            )
+
+    def update_database(self):
+        """Iterates over all latest updates links and updates manga in the database"""
+        get_latest_updates(
+            limit=40,
+            on_link_received=self.create_perform_thread,
+        )
+
+    def create_perform_thread(self, manga_url: str):
+        """Creates thread that executes method perform()"""
+        future = self.executor.submit(self.perform, manga_url)
+        self.features.append(future)
+
+    def perform(self, manga_url: str):
+        """Checks if exists. If true, update it. Otherwise, save for the first time"""
+        print(f"Processing: {manga_url}.")
+        if not self.database.exists_by_url(manga_url):
+            self.save_manga(manga_url)
+        else:
+            self.update_manga(manga_url)
+
+    def update_manga(self, manga_url: str):
         """Updates manga to latest version"""
         try:
             current_manga = self.database.get_by_url(manga_url)
@@ -74,35 +77,30 @@ class ReadmHandler:
 
             for chapter_name in details.chapters:
                 if not chapter_name in current_manga.chapters_names:
-                    new_chapter = self._get_chapter(manga_url, chapter_name)
+                    new_chapter = self.get_chapter(manga_url, chapter_name)
                     current_manga.chapters.update(new_chapter)
                     current_manga.total_chapters += 1
                     current_manga.chapters_names.append(chapter_name)
 
-            self.db_access.acquire()
             self.database.set_by_url(manga_url, current_manga)
-            self.db_access.release()
         except Exception as error:
             print(error)
 
-    def _save_manga(self, manga_url):
+    def save_manga(self, manga_url):
         """Save manga in database"""
         try:
-            manga = self._get_manga(manga_url)
-
-            self.db_access.acquire()
+            manga = self.get_manga(manga_url)
             self.database.add(manga)
-            self.db_access.release()
         except Exception as error:
             print(error)
 
-    def _get_manga(self, manga_url: str) -> Manga:
+    def get_manga(self, manga_url: str) -> Manga:
         """Downloads manga and all pages from readm.org"""
         details: MangaDetails = get_manga_details(manga_url, False)
 
         chapters = {}
         for chapter_name in details.chapters:
-            chapter = self._get_chapter(manga_url, chapter_name)
+            chapter = self.get_chapter(manga_url, chapter_name)
             chapters.update(chapter)
 
         manga = Manga(
@@ -124,7 +122,7 @@ class ReadmHandler:
 
         return manga
 
-    def _get_chapter(self, manga_url: str, chapter_name: str) -> dict:
+    def get_chapter(self, manga_url: str, chapter_name: str) -> dict:
         """Download manga chapter"""
         cp_url = f"{manga_url}/{chapter_name}/all-pages"
         pages = get_pages(cp_url)

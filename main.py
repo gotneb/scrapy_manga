@@ -8,5 +8,6 @@ if __name__ == "__main__":
 
     handler = ReadmHandler(db)
     handler.start()
+    handler.join()
 
     db.close()
