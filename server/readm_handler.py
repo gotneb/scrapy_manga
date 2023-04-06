@@ -19,7 +19,7 @@ class ReadmHandler(Thread):
         Thread.__init__(self)
         self.database = database
         self.executor = ThreadPoolExecutor(max_workers=10)
-        self.features = []
+        self.futures = []
 
     def run(self):
         """Executes when calling method start ( of the superclass Thread)"""
@@ -33,7 +33,8 @@ class ReadmHandler(Thread):
             else:
                 self.update_database()
 
-            wait(self.features)
+            wait(self.futures)
+            self.futures.clear()
 
             update_duration = time() - last_update_time
 
@@ -59,7 +60,7 @@ class ReadmHandler(Thread):
     def create_perform_thread(self, manga_url: str):
         """Creates thread that executes method perform()"""
         future = self.executor.submit(self.perform, manga_url)
-        self.features.append(future)
+        self.futures.append(future)
 
     def perform(self, manga_url: str):
         """Checks if exists. If true, update it. Otherwise, save for the first time"""
