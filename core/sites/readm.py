@@ -176,8 +176,11 @@ def get_alt_title(soup: BeautifulSoup) -> str:
 def get_score(soup: BeautifulSoup) -> float:
     """Returns the score given by the users."""
     score = soup.css.select('div.media-meta div.color-imdb')
-    score = float(score[0].text)
-    return score
+    try:
+       score = float(score[0].text)
+    except:
+        score = None
+        return score
 
 def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga. If does not exist, hence it returns an empty str."""
