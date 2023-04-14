@@ -1,4 +1,6 @@
 # Core
+from typing import Callable
+from requests import get
 from core.driver import init_driver
 # Selenium
 from selenium import webdriver
@@ -91,6 +93,60 @@ def manga_detail(manga_url: str, show_window=True):
                  status=status, 
                  total_chapters=total_chapters, 
                  chapters=chapters)
+
+
+# Helper function to `get_all_start_with`
+def _check_page_exists(driver: webdriver.Chrome) -> bool:
+    try:
+        h1_tag = driver.find_element(By.CSS_SELECTOR, 'div.content-wrapper h1')
+        err = h1_tag.text
+        if err == 'ERRO DE SERVIDOR':
+            return False
+        else:
+            # I'm almost sure the program won't never reach here...
+            return True
+    except:
+        return True
+
+
+def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str], None] = None) -> list[str]:
+    if len(letter) > 2:
+        raise Exception('letter must be an unique character.')
+
+    # Setup
+    letter = letter.lower()
+    path = 'https://mangalivre.net/lista-de-mangas/ordenar-por-nome'
+    url = f'{path}/{letter}'
+    driver = init_driver(show_window=show_window)
+    driver.get(url)
+
+    # Mangá Livre has many mangas, but they are spllited in in a group of 30
+    # We don't know in advance haw many times they splitted. 
+    # So we just keep going until the end
+    mangas_links = []
+    index = 1
+    while True:
+        if not _check_page_exists(driver):
+            print(f"Page on index {index} there isn't.")
+            break
+
+        # Get a list of all mangas
+        anchor_tags = driver.find_elements(By.CSS_SELECTOR, "div.content-wraper ul.seriesList li a[href]")
+        for a in anchor_tags:
+            link = a.get_attribute('href')
+            mangas_links.append(link)
+
+            # Callback
+            if on_link_received is not None:
+                on_link_received(link)
+
+        # Update
+        index += 1
+        url = f'{path}/{letter}?page={index}'
+        driver.get(url)
+    
+    driver.close()
+    return mangas_links
 
 
 def get_score(driver: webdriver.Chrome) -> float:
