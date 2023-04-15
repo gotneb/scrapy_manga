@@ -1,15 +1,55 @@
-# Core
+# Python
+import math
 from typing import Callable
-from requests import get
-from core.driver import init_driver
 # Selenium
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 # BeautifulSoup4
 from bs4 import BeautifulSoup
-
+# Core
 from core.manga import Manga
+from core.driver import init_driver
+
+
+def get_latest_updates(limit: int = 30, on_link_received: Callable[[str], None] = None) -> list[str]:
+    """
+    Returns a list of all links from `mangalivre.net` that were updated.\n
+    Arguments:
+    `limit:` the total quantity of manga links will be extracted.\n
+    Return:
+    A list of recent mangas links that were updated.
+    """
+    # Mangá Livre gives 30 mangas by page...
+    counter = 0
+    total_pages = math.ceil(limit/30)
+    path = 'https://mangalivre.net/lista-de-mangas/ordenar-por-atualizacoes'
+
+    # Setup
+    mangas_urls = []
+    driver = init_driver(show_window=False)
+    for index in range(1, total_pages + 1):
+        if counter == limit:
+            break
+
+        driver.get(f'{path}?page={index}')
+        # Get a list of all mangas links
+        anchor_tags = driver.find_elements(By.CSS_SELECTOR, "div.content-wraper ul.seriesList li a[href]")
+        for a in anchor_tags:
+            link = a.get_attribute('href')
+            mangas_urls.append(link)
+
+            # Callback
+            if on_link_received is not None:
+                on_link_received(link)
+            
+            counter += 1
+            if counter == limit:
+                break
+    
+    driver.close()
+    return mangas_urls
+
 
 
 def get_pages(manga_url: str) -> list[str]:
@@ -52,6 +92,7 @@ def get_pages(manga_url: str) -> list[str]:
         pages.append(src)
     
     return pages
+
 
 def manga_detail(manga_url: str, show_window=True):
     """
@@ -216,7 +257,6 @@ def get_genres(driver: webdriver.Chrome) -> list[str]:
             span_tag = a_tag.find('span', class_='button')
             genres.append(span_tag.text) 
     return genres
-
 
 
 def get_alt_title(driver: webdriver.Chrome) -> str:
