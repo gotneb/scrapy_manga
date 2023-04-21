@@ -1,4 +1,4 @@
-from ..database import Manga
+from server import Manga
 
 
 def get_fake_manga(origin: str = "readm") -> Manga:
