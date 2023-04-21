@@ -1,5 +1,4 @@
-from server.readm_handler import ReadmHandler
-from server.database import MangaDatabase
+from server import ReadmHandler, MangaDatabase
 
 if __name__ == "__main__":
     db = MangaDatabase()

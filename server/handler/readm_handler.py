@@ -1,12 +1,12 @@
 from core.manga import Manga as MangaDetails
-from .entities import Manga
+from ..database.entities import Manga
 from core.sites.readm import (
     manga_detail as get_manga_details,
     get_pages,
     get_all_start_with,
     get_latest_updates,
 )
-from .database import MangaDatabase
+from ..database.database import MangaDatabase
 from time import time, sleep
 from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Thread
