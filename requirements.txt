@@ -3,3 +3,4 @@ requests
 selenium
 pymongo
 python-dotenv
+pytest
