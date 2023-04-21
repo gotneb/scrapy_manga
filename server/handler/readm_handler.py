@@ -1,13 +1,13 @@
 from core.manga import Manga as MangaDetails
 from core.sites.readm import *
-from ..database import *
-from .handler import WebsiteHandler
+from ..database import Database
+from .website_handler import WebsiteHandler
 
 
 class ReadmHandler(WebsiteHandler):
     """Class that updates database with readm mangas"""
 
-    def __init__(self, database: MangaDatabase):
+    def __init__(self, database: Database):
         super().__init__(
             database=database,
             get_manga_detail=manga_detail,

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from ..database import Manga, MangaDatabase
+from ..database import Manga, Database
 from threading import Thread
 from core.manga import Manga as MangaDetail
 from time import time, sleep
@@ -10,7 +10,7 @@ class WebsiteHandler(ABC, Thread):
 
     def __init__(
         self,
-        database: MangaDatabase,
+        database: Database,
         get_manga_detail,
         get_all_start_with,
         get_latest_updates,
