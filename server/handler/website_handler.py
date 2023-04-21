@@ -23,20 +23,14 @@ class WebsiteHandler(ABC, Thread):
 
     def run(self):
         """Executes when calling method start ( of the superclass Thread)"""
-        print("::----- Readm Handler Started -----::")
+        print("Readm handler: started.")
 
-        while True:
-            last_update_time = time()
+        if self.database.is_empty(origin="readm"):
+            self.populate_database()
+        else:
+            self.update_database()
 
-            if self.database.is_empty(origin="readm"):
-                self.populate_database()
-            else:
-                self.update_database()
-
-            update_duration = time() - last_update_time
-
-            print("::----- Readm Handler Completed -----::")
-            sleep(24 * 60 * 60 - update_duration)
+        print("Readm handler: done.")
 
     def populate_database(self):
         """Iterates over all links and stores manga in database"""
@@ -56,7 +50,7 @@ class WebsiteHandler(ABC, Thread):
 
     def perform(self, manga_url: str):
         """Checks if exists. If true, update it. Otherwise, save for the first time"""
-        print(f"Processing: {manga_url}.")
+        print(f"Readm handler: processing {manga_url}.")
         if not self.database.exists(manga_url):
             self.save_manga(manga_url)
         else:
