@@ -1,2 +1,2 @@
-from .database import *
+from .manga_database import *
 from .entities import *

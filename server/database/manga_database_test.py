@@ -1,5 +1,5 @@
-from .database import MangaDatabase
-from .fake_functions import *
+from .manga_database import MangaDatabase
+from ..test_resources import *
 
 
 def test_connection():

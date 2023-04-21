@@ -1,5 +1,5 @@
 from .entities import *
-from .fake_functions import *
+from ..test_resources import *
 
 
 def test_manga_entitie():

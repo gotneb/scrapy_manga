@@ -1,4 +1,4 @@
-from .entities import Manga
+from ..database import Manga
 
 
 def get_fake_manga(origin: str = "readm") -> Manga:
