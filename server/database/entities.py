@@ -13,11 +13,9 @@ class Manga:
     url: str
     origin: str
     language: str
-    total_chapters: int
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters_names: list[str]
     chapters: dict
 
     def to_dict(self):
@@ -36,11 +34,9 @@ class Manga:
                 url=manga_dict["url"],
                 origin=manga_dict["origin"],
                 language=manga_dict["language"],
-                total_chapters=manga_dict["total_chapters"],
                 thumbnail=manga_dict["thumbnail"],
                 genres=manga_dict["genres"],
                 summary=manga_dict["summary"],
-                chapters_names=manga_dict["chapters_names"],
                 chapters=manga_dict["chapters"],
             )
         return None

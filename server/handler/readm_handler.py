@@ -1,12 +1,6 @@
 from core.manga import Manga as MangaDetails
-from ..database.entities import Manga
-from core.sites.readm import (
-    manga_detail as get_manga_details,
-    get_pages,
-    get_all_start_with,
-    get_latest_updates,
-)
-from ..database.database import MangaDatabase
+from core.sites.readm import *
+from ..database import *
 from time import time, sleep
 from concurrent.futures import ThreadPoolExecutor, wait
 from threading import Thread
@@ -18,7 +12,7 @@ class ReadmHandler(Thread):
     def __init__(self, database: MangaDatabase) -> None:
         Thread.__init__(self)
         self.database = database
-        self.executor = ThreadPoolExecutor(max_workers=10)
+        self.executor = ThreadPoolExecutor(max_workers=4)
         self.futures = []
 
     def run(self):
@@ -65,7 +59,7 @@ class ReadmHandler(Thread):
     def perform(self, manga_url: str):
         """Checks if exists. If true, update it. Otherwise, save for the first time"""
         print(f"Processing: {manga_url}.")
-        if not self.database.exists_by_url(manga_url):
+        if not self.database.exists(manga_url):
             self.save_manga(manga_url)
         else:
             self.update_manga(manga_url)
@@ -73,17 +67,16 @@ class ReadmHandler(Thread):
     def update_manga(self, manga_url: str):
         """Updates manga to latest version"""
         try:
-            current_manga = self.database.get_by_url(manga_url)
-            details = get_manga_details(manga_url, False)
+            current_manga = self.database.get(manga_url)
+            details = manga_detail(manga_url, False)
+            chapter_names = list(current_manga.chapters.keys())
 
             for chapter_name in details.chapters:
-                if not chapter_name in current_manga.chapters_names:
+                if not chapter_name in chapter_names:
                     new_chapter = self.get_chapter(manga_url, chapter_name)
                     current_manga.chapters.update(new_chapter)
-                    current_manga.total_chapters += 1
-                    current_manga.chapters_names.append(chapter_name)
 
-            self.database.set_by_url(manga_url, current_manga)
+            self.database.set(manga_url, current_manga)
         except Exception as error:
             print(error)
 
@@ -97,7 +90,7 @@ class ReadmHandler(Thread):
 
     def get_manga(self, manga_url: str) -> Manga:
         """Downloads manga and all pages from readm.org"""
-        details: MangaDetails = get_manga_details(manga_url, False)
+        details: MangaDetails = manga_detail(manga_url, False)
 
         chapters = {}
         for chapter_name in details.chapters:
@@ -113,11 +106,9 @@ class ReadmHandler(Thread):
             url=manga_url,
             origin="readm",
             language="english",
-            total_chapters=details.total_chapters,
             thumbnail=details.thumbnail,
             genres=details.genres,
             summary=details.summary,
-            chapters_names=details.chapters,
             chapters=chapters,
         )
 

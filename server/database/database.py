@@ -9,7 +9,6 @@ load_dotenv()
 
 class MangaDatabase:
     def __init__(self) -> None:
-        self.uri = getenv("MONGO_URI")
         self.client = None
         self.database = None
         self.collection = None
@@ -17,47 +16,22 @@ class MangaDatabase:
     def add(self, manga: Manga) -> str:
         """Insert a new manga in database and returns an id"""
         try:
-            if self.exists_by_manga(manga):
-                raise Exception(
-                    f'Document with title "{manga.title} (origin: {manga.origin})" already exists.'
-                )
-
             results = self.collection.insert_one(manga.to_dict())
             return results.inserted_id
         except Exception as error:
             print(error)
             return None
 
-    def remove(self, id: str) -> bool:
+    def remove(self, url: str) -> bool:
         """Delete document with same id in database"""
         try:
-            results = self.collection.delete_one({"_id": ObjectId(id)})
+            results = self.collection.delete_one({"url": url})
             return results.deleted_count == 1
         except Exception as error:
             print(error)
             return False
 
-    def get(self, id: str) -> Manga:
-        """Returns document with same id"""
-        try:
-            results = self.collection.find_one({"_id": ObjectId(id)})
-            return Manga.dict_to_manga(results)
-        except Exception as error:
-            print(error)
-            return None
-
-    def set(self, id: str, manga: Manga) -> bool:
-        """Change manga with same id"""
-        try:
-            results = self.collection.update_one(
-                {"_id": ObjectId(id)}, {"$set": manga.to_dict()}
-            )
-            return results.matched_count == 1
-        except Exception as error:
-            print(error)
-            return False
-
-    def get_by_url(self, url: str) -> Manga:
+    def get(self, url: str) -> Manga:
         """Returns document with same url"""
         try:
             results = self.collection.find_one({"url": url})
@@ -67,7 +41,7 @@ class MangaDatabase:
             print(error)
             return None
 
-    def set_by_url(self, url: str, manga: Manga) -> bool:
+    def set(self, url: str, manga: Manga) -> bool:
         """Change manga with same url"""
         try:
             results = self.collection.update_one(
@@ -78,7 +52,7 @@ class MangaDatabase:
             print(error)
             return False
 
-    def search_by_title(self, title: str) -> list[Manga]:
+    def search(self, title: str) -> list[Manga]:
         """Return mangas with similar titles or alternative titles"""
         try:
             results = []
@@ -90,38 +64,9 @@ class MangaDatabase:
             print(error)
             return None
 
-    def exists_by_manga(self, manga: Manga) -> bool:
-        """Checks if manga already exists by manga object"""
-        return (
-            self.collection.find_one(
-                {
-                    "title": manga.title,
-                    "origin": manga.origin,
-                    "language": manga.language,
-                }
-            )
-            != None
-        )
-
-    def exists_by_id(self, id: str) -> bool:
-        """Checks if manga already exists by id"""
-        return self.collection.find_one({"_id": ObjectId(id)}) != None
-
-    def exists_by_url(self, url: str) -> bool:
+    def exists(self, url: str) -> bool:
         """Checks if manga already exists by id"""
         return self.collection.find_one({"url": url}) != None
-
-    def connect(self) -> bool:
-        """Connect to database and returns True if sucessful"""
-        try:
-            self.client: MongoClient = MongoClient(self.uri)
-            self.database = self.client["manga_db"]
-            self.collection = self.database["mangas"]
-
-            return True
-        except Exception as error:
-            print(error)
-            return False
 
     def is_empty(self, origin: str = None) -> bool:
         """Return true if docs with same origin exists. If origin is None, return True if collection 'mangas' is empty"""
@@ -131,6 +76,18 @@ class MangaDatabase:
             return self.collection.count_documents({"origin": "manga_livre"}) == 0
 
         return self.collection.count_documents({}) == 0
+
+    def connect(self) -> bool:
+        """Connect to database and returns True if sucessful"""
+        try:
+            self.client: MongoClient = MongoClient(getenv("MONGO_URI"))
+            self.database = self.client["manga_db"]
+            self.collection = self.database["mangas"]
+
+            return True
+        except Exception as error:
+            print(error)
+            return False
 
     def close(self) -> None:
         """Close database conncetion"""
