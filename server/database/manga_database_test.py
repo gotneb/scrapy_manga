@@ -1,5 +1,5 @@
 from .manga_database import MangaDatabase
-from ..test_resources import *
+from ..test_resources import get_fake_manga
 
 
 def test_connection():
