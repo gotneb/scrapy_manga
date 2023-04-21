@@ -1,5 +1,4 @@
 from pymongo import MongoClient
-from bson.objectid import ObjectId
 from dotenv import load_dotenv
 from os import getenv
 from .entities import Manga
@@ -11,12 +10,12 @@ class MangaDatabase:
     def __init__(self) -> None:
         self.client = None
         self.database = None
-        self.collection = None
+        self.mangas = None
 
     def add(self, manga: Manga) -> str:
         """Insert a new manga in database and returns an id"""
         try:
-            results = self.collection.insert_one(manga.to_dict())
+            results = self.mangas.insert_one(manga.to_dict())
             return results.inserted_id
         except Exception as error:
             print(error)
@@ -25,7 +24,7 @@ class MangaDatabase:
     def remove(self, url: str) -> bool:
         """Delete document with same id in database"""
         try:
-            results = self.collection.delete_one({"url": url})
+            results = self.mangas.delete_one({"url": url})
             return results.deleted_count == 1
         except Exception as error:
             print(error)
@@ -34,7 +33,7 @@ class MangaDatabase:
     def get(self, url: str) -> Manga:
         """Returns document with same url"""
         try:
-            results = self.collection.find_one({"url": url})
+            results = self.mangas.find_one({"url": url})
             manga = Manga.dict_to_manga(results)
             return manga
         except Exception as error:
@@ -44,9 +43,7 @@ class MangaDatabase:
     def set(self, url: str, manga: Manga) -> bool:
         """Change manga with same url"""
         try:
-            results = self.collection.update_one(
-                {"url": url}, {"$set": manga.to_dict()}
-            )
+            results = self.mangas.update_one({"url": url}, {"$set": manga.to_dict()})
             return results.matched_count == 1
         except Exception as error:
             print(error)
@@ -56,7 +53,7 @@ class MangaDatabase:
         """Return mangas with similar titles or alternative titles"""
         try:
             results = []
-            cursor = self.collection.find({"$text": {"$search": title}})
+            cursor = self.mangas.find({"$text": {"$search": title}})
             for doc in cursor:
                 results.append(Manga.dict_to_manga(doc))
             return results
@@ -66,23 +63,23 @@ class MangaDatabase:
 
     def exists(self, url: str) -> bool:
         """Checks if manga already exists by id"""
-        return self.collection.find_one({"url": url}) != None
+        return self.mangas.find_one({"url": url}) != None
 
     def is_empty(self, origin: str = None) -> bool:
-        """Return true if docs with same origin exists. If origin is None, return True if collection 'mangas' is empty"""
+        """Return true if docs with same origin exists. If origin is None, return True if mangas 'mangas' is empty"""
         if origin == "readm":
-            return self.collection.count_documents({"origin": "readm"}) == 0
+            return self.mangas.count_documents({"origin": "readm"}) == 0
         elif origin == "manga_livre":
-            return self.collection.count_documents({"origin": "manga_livre"}) == 0
+            return self.mangas.count_documents({"origin": "manga_livre"}) == 0
 
-        return self.collection.count_documents({}) == 0
+        return self.mangas.count_documents({}) == 0
 
     def connect(self) -> bool:
         """Connect to database and returns True if sucessful"""
         try:
             self.client: MongoClient = MongoClient(getenv("MONGO_URI"))
-            self.database = self.client["manga_db"]
-            self.collection = self.database["mangas"]
+            self.database = self.client.get_database("manga_db")
+            self.mangas = self.database.get_collection("mangas")
 
             return True
         except Exception as error:
