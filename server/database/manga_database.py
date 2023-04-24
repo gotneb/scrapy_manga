@@ -50,7 +50,7 @@ class MangaDatabase(Database):
     def get(self, url: str) -> Manga:
         try:
             results = self.mangas.find_one({"url": url})
-            manga = Manga.dict_to_manga(results)
+            manga = Manga.to_manga(results)
             return manga
         except Exception as error:
             print(error)
@@ -69,7 +69,7 @@ class MangaDatabase(Database):
             results = []
             cursor = self.mangas.find({"$text": {"$search": search_term}})
             for doc in cursor:
-                results.append(Manga.dict_to_manga(doc))
+                results.append(Manga.to_manga(doc))
             return results
         except Exception as error:
             print(error)
@@ -89,7 +89,7 @@ class MangaDatabase(Database):
             cursor = self.mangas.find({"genres": genre})
             results = []
             for doc in cursor:
-                results.append(Manga.dict_to_manga(doc))
+                results.append(Manga.to_manga(doc))
             return results
         except Exception as error:
             print(error)

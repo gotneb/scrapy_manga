@@ -25,7 +25,7 @@ class Manga(Entity):
     chapters: dict
 
     @classmethod
-    def dict_to_manga(cls, manga_dict: dict):
+    def to_manga(cls, manga_dict: dict):
         if manga_dict is not None:
             return Manga(
                 title=manga_dict["title"],
@@ -51,7 +51,7 @@ class WebsiteUpdate(Entity):
     latest_updates: list[str]
 
     @classmethod
-    def dict_to_manga(cls, update_dict: dict):
+    def to_website_update(cls, update_dict: dict):
         if update_dict is not None:
             return WebsiteUpdate(
                 origin=update_dict["origin"],
