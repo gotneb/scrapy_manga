@@ -1,8 +1,14 @@
 from dataclasses import dataclass
 
 
+class Entity:
+    def to_dict(self):
+        """Returns itself as a dictionary"""
+        return self.__dict__
+
+
 @dataclass
-class Manga:
+class Manga(Entity):
     """Class used to stored manga in the database"""
 
     title: str
@@ -17,10 +23,6 @@ class Manga:
     genres: list[str]
     summary: str
     chapters: dict
-
-    def to_dict(self):
-        """Returns itself as a dictionary"""
-        return self.__dict__
 
     @classmethod
     def dict_to_manga(cls, manga_dict: dict):
@@ -38,5 +40,22 @@ class Manga:
                 genres=manga_dict["genres"],
                 summary=manga_dict["summary"],
                 chapters=manga_dict["chapters"],
+            )
+        return None
+
+
+@dataclass
+class WebsiteUpdate(Entity):
+    origin: str
+    populars: list[str]
+    latest_updates: list[str]
+
+    @classmethod
+    def dict_to_manga(cls, update_dict: dict):
+        if update_dict is not None:
+            return WebsiteUpdate(
+                origin=update_dict["origin"],
+                populars=update_dict["populars"],
+                latest_updates=update_dict["latest_updates"],
             )
         return None
