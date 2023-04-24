@@ -3,6 +3,8 @@ from .fake_entities import *
 
 
 class TestMangaDatabase:
+    """Testing class MangaDatabase"""
+
     db = MangaDatabase()
 
     def test_connection(self):
@@ -118,3 +120,21 @@ class TestMangaDatabase:
 
         self.db.remove(manga1.url)
         self.db.remove(manga2.url)
+
+    def test_get_mangas_by_genre(self):
+        """Testing method get_mangas_by_genre"""
+        manga = get_fake_manga()
+        manga.genres = ["action", "advanture"]
+        self.db.add(manga)
+
+        results = self.db.get_mangas_by_genre("action")
+        assert results is not None
+        assert results != []
+        assert manga in results
+
+        results = self.db.get_mangas_by_genre("advanture")
+        assert results is not None
+        assert results != []
+        assert manga in results
+
+        self.db.remove(manga.url)
