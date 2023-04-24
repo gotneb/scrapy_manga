@@ -1,5 +1,5 @@
 from server import MangaDatabase
-from .fake_entities import get_fake_manga
+from .fake_entities import *
 
 
 def test_connection():
@@ -8,6 +8,21 @@ def test_connection():
     connection_results = db.connect()
 
     assert connection_results == True
+
+    db.close()
+
+
+def test_add_all_and_remove_all():
+    db = MangaDatabase()
+    db.connect()
+    mangas = get_fake_manga_list()
+
+    add_res = db.add_all(mangas)
+    assert add_res is not None
+
+    urls = [manga.url for manga in mangas]
+    remove_res = db.remove_all(urls)
+    assert remove_res == True
 
     db.close()
 
