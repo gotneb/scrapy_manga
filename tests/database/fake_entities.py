@@ -1,4 +1,4 @@
-from server import Manga
+from server import *
 
 
 def get_fake_manga(origin: str = "readm") -> Manga:
@@ -41,3 +41,11 @@ def get_fake_manga_list(total: int = 3, origin: str = "readm") -> list[Manga]:
 
         mangas.append(manga)
     return mangas
+
+
+def get_fake_website_update():
+    return WebsiteUpdate(
+        origin="origin",
+        populars=["url1", "url2", "url3"],
+        latest_updates=["url3", "url1"],
+    )
