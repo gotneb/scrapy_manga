@@ -26,7 +26,7 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
-    def search(self, title: str) -> list[Manga]:
+    def search(self, search_text: str) -> list[Manga]:
         """Return mangas with similar titles or alternative titles"""
         pass
 

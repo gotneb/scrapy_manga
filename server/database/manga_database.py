@@ -46,10 +46,10 @@ class MangaDatabase(Database):
             print(error)
             return False
 
-    def search(self, title: str) -> list[Manga]:
+    def search(self, search_term: str) -> list[Manga]:
         try:
             results = []
-            cursor = self.mangas.find({"$text": {"$search": title}})
+            cursor = self.mangas.find({"$text": {"$search": search_term}})
             for doc in cursor:
                 results.append(Manga.dict_to_manga(doc))
             return results
