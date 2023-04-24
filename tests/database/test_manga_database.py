@@ -2,114 +2,93 @@ from server import MangaDatabase
 from .fake_entities import *
 
 
-def test_connection():
-    """Testing database connection"""
+class TestMangaDatabase:
     db = MangaDatabase()
-    connection_results = db.connect()
 
-    assert connection_results == True
+    def test_connection(self):
+        """Testing database connection"""
+        connection_results = self.db.connect()
+        assert connection_results == True
 
-    db.close()
+    def test_integrated_insertion_and_deletion(self):
+        """Testing methods add, remove and exists"""
 
+        # insertion test
+        manga = get_fake_manga()
+        inserted_id = self.db.add(manga)
+        assert inserted_id is not None
 
-def test_add_all_and_remove_all():
-    db = MangaDatabase()
-    db.connect()
-    mangas = get_fake_manga_list()
+        inserted_id = self.db.add(manga)
+        assert inserted_id is None
 
-    add_res = db.add_all(mangas)
-    assert add_res is not None
+        # test of method exist
+        exists = self.db.exists(manga.url)
+        assert exists == True
 
-    urls = [manga.url for manga in mangas]
-    remove_res = db.remove_all(urls)
-    assert remove_res == True
+        # deletion test
+        remove_results = self.db.remove(manga.url)
+        assert remove_results == True
 
-    db.close()
+        remove_results = self.db.remove(manga.url)
+        assert remove_results == False
 
+    def test_add_all_and_remove_all(self):
+        """Testing methods add_all and remove_all"""
+        mangas = get_fake_manga_list()
 
-def test_integrated_insertion_and_deletion():
-    """Testing methods add, remove and exists"""
-    db = MangaDatabase()
-    db.connect()
+        add_res = self.db.add_all(mangas)
+        assert add_res is not None
 
-    # insertion test
-    manga = get_fake_manga()
-    inserted_id = db.add(manga)
-    assert inserted_id is not None
+        urls = [manga.url for manga in mangas]
+        remove_res = self.db.remove_all(urls)
+        assert remove_res == True
 
-    inserted_id = db.add(manga)
-    assert inserted_id is None
+    def test_get_and_set(self):
+        """Testing methods get and set"""
 
-    # test of method exist
-    exists = db.exists(manga.url)
-    assert exists == True
+        manga = get_fake_manga()
+        self.db.add(manga)
 
-    # deletion test
-    remove_results = db.remove(manga.url)
-    assert remove_results == True
+        # testing method test
+        recoved_manga = self.db.get(manga.url)
+        assert recoved_manga.title == manga.title
 
-    remove_results = db.remove(manga.url)
-    assert remove_results == False
+        # testing method set
+        new_title = "other_title"
+        recoved_manga.title = new_title
+        set_results = self.db.set(manga.url, recoved_manga)
+        assert set_results == True
 
-    db.close()
+        recoved_manga = self.db.get(manga.url)
+        assert recoved_manga.title == new_title
 
+        self.db.remove(manga.url)
 
-def test_get_and_set():
-    """Testing methods get and set"""
+    def test_search(self):
+        """Testing method search"""
+        manga = get_fake_manga()
+        manga.title = "word1 word2 word3"
+        manga.author = "nome_author sobrenome_author"
+        manga.artist = "nome_artist sobrenome_artist"
 
-    db = MangaDatabase()
-    db.connect()
+        self.db.add(manga)
 
-    manga = get_fake_manga()
-    db.add(manga)
+        # testing method search
+        search_results = self.db.search("word2")
+        assert search_results is not None
+        assert search_results != []
+        assert manga in search_results
 
-    # testing method test
-    recoved_manga = db.get(manga.url)
-    assert recoved_manga.title == manga.title
+        # testing method search
+        search_results = self.db.search("nome_author")
+        assert search_results is not None
+        assert search_results != []
+        assert manga in search_results
 
-    # testing method set
-    new_title = "other_title"
-    recoved_manga.title = new_title
-    set_results = db.set(manga.url, recoved_manga)
-    assert set_results == True
+        # testing method search
+        search_results = self.db.search("sobrenome_artist")
+        assert search_results is not None
+        assert search_results != []
+        assert manga in search_results
 
-    recoved_manga = db.get(manga.url)
-    assert recoved_manga.title == new_title
-
-    db.remove(manga.url)
-
-    db.close()
-
-
-def test_search():
-    """Testing method search"""
-    manga = get_fake_manga()
-    manga.title = "word1 word2 word3"
-    manga.author = "nome_author sobrenome_author"
-    manga.artist = "nome_artist sobrenome_artist"
-
-    db = MangaDatabase()
-    db.connect()
-
-    db.add(manga)
-
-    # testing method search
-    search_results = db.search("word2")
-    assert search_results is not None
-    assert search_results != []
-    assert manga in search_results
-
-    # testing method search
-    search_results = db.search("nome_author")
-    assert search_results is not None
-    assert search_results != []
-    assert manga in search_results
-
-    # testing method search
-    search_results = db.search("sobrenome_artist")
-    assert search_results is not None
-    assert search_results != []
-    assert manga in search_results
-
-    db.remove(manga.url)
-    db.close()
+        self.db.remove(manga.url)
