@@ -1,5 +1,5 @@
 from abc import ABC, abstractclassmethod
-from .entities import Manga
+from .entities import Manga, WebsiteUpdate
 from bson import ObjectId
 
 
@@ -54,6 +54,36 @@ class Database(ABC):
     @abstractclassmethod
     def get_mangas_by_genre(self, genre: str) -> list[Manga]:
         """Returns a list with mangas"""
+        pass
+
+    @abstractclassmethod
+    def get_populars(self, origin: str) -> list[Manga]:
+        """Return a list od the most popular mangas"""
+        pass
+
+    @abstractclassmethod
+    def get_latest_updates(self, origin: str) -> list[Manga]:
+        """Return a list of recently updated mangas"""
+        pass
+
+    @abstractclassmethod
+    def add_update_info(self, update: WebsiteUpdate) -> ObjectId:
+        """Add website info"""
+        pass
+
+    @abstractclassmethod
+    def remove_update_info(self, origin: str) -> bool:
+        """Remove website info"""
+        pass
+
+    @abstractclassmethod
+    def get_update_info(self, origin: str) -> WebsiteUpdate:
+        """Get website update info"""
+        pass
+
+    @abstractclassmethod
+    def set_update_info(self, update: WebsiteUpdate) -> bool:
+        """Updates website info"""
         pass
 
     @abstractclassmethod

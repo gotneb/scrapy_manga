@@ -2,7 +2,7 @@ from bson import ObjectId
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
-from .entities import Manga
+from .entities import Manga, WebsiteUpdate
 from .database import Database
 
 load_dotenv()
@@ -13,6 +13,7 @@ class MangaDatabase(Database):
         self.client = None
         self.database = None
         self.mangas = None
+        self.updates = None
 
     def add(self, manga: Manga) -> ObjectId:
         try:
@@ -83,6 +84,7 @@ class MangaDatabase(Database):
             return self.mangas.find({"language": language}).distinct("genres")
         except Exception as error:
             print(error)
+            return None
 
     def get_mangas_by_genre(self, genre: str) -> list[Manga]:
         try:
@@ -93,6 +95,70 @@ class MangaDatabase(Database):
             return results
         except Exception as error:
             print(error)
+            return None
+
+    def add_update_info(self, update: WebsiteUpdate) -> ObjectId:
+        try:
+            results = self.updates.insert_one(update.to_dict())
+            return results.inserted_id
+        except Exception as error:
+            print(error)
+            return None
+
+    def remove_update_info(self, origin: str) -> bool:
+        try:
+            results = self.updates.delete_one({"origin": origin})
+            return results.deleted_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
+    def get_update_info(self, origin: str) -> WebsiteUpdate:
+        try:
+            results = self.updates.find_one({"origin": origin})
+            update = WebsiteUpdate.to_website_update(results)
+            return update
+        except Exception as error:
+            print(error)
+            return None
+
+    def set_update_info(self, update: WebsiteUpdate) -> bool:
+        try:
+            results = self.updates.update_one(
+                {"origin": update.origin}, {"$set": update.to_dict()}
+            )
+            return results.matched_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
+    def get_populars(self, origin: str) -> list[Manga]:
+        try:
+            results = self.updates.find_one({"origin": origin})
+            urls = results["populars"]
+            cursor = self.mangas.find({"origin": origin, "url": {"$in": urls}})
+
+            mangas = []
+            for doc in cursor:
+                mangas.append(Manga.to_manga(doc))
+            return mangas
+        except Exception as error:
+            print(error)
+            return None
+
+    def get_latest_updates(self, origin: str) -> list[Manga]:
+        try:
+            results = self.updates.find_one({"origin": origin})
+            urls = results["latest_updates"]
+            cursor = self.mangas.find({"origin": origin, "url": {"$in": urls}})
+
+            mangas = []
+            for doc in cursor:
+                mangas.append(Manga.to_manga(doc))
+            return mangas
+        except Exception as error:
+            print(error)
+            return None
 
     def is_empty(self, origin: str = None) -> bool:
         if origin == "readm":
@@ -107,6 +173,7 @@ class MangaDatabase(Database):
             self.client: MongoClient = MongoClient(getenv("MONGO_URI"))
             self.database = self.client.get_database("manga_db")
             self.mangas = self.database.get_collection("mangas")
+            self.updates = self.database.get_collection("updates")
 
             return True
         except Exception as error:
