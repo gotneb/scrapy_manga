@@ -78,6 +78,12 @@ class MangaDatabase(Database):
     def exists(self, url: str) -> bool:
         return self.mangas.find_one({"url": url}) != None
 
+    def list_genres(self, language: str = "english") -> list[str]:
+        try:
+            return self.mangas.find({"language": language}).distinct("genres")
+        except Exception as error:
+            print(error)
+
     def is_empty(self, origin: str = None) -> bool:
         if origin == "readm":
             return self.mangas.count_documents({"origin": "readm"}) == 0

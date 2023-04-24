@@ -47,6 +47,10 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
+    def list_genres(language: str) -> list[str]:
+        pass
+
+    @abstractclassmethod
     def is_empty(self, origin: str = None) -> bool:
         """Return true if docs with same origin exists. If origin is None, return True if mangas 'mangas' is empty"""
         pass
