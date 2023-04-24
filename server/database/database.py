@@ -48,6 +48,11 @@ class Database(ABC):
 
     @abstractclassmethod
     def list_genres(language: str) -> list[str]:
+        """Returns a list with genres (by language: english or portuguese)"""
+        pass
+
+    def get_mangas_by_genre(genre: str) -> list[Manga]:
+        """Returns a list with mangas"""
         pass
 
     @abstractclassmethod

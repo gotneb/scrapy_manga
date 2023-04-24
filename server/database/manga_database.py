@@ -84,6 +84,16 @@ class MangaDatabase(Database):
         except Exception as error:
             print(error)
 
+    def get_mangas_by_genre(self, genre: str) -> list[Manga]:
+        try:
+            cursor = self.mangas.find({"genres": genre})
+            results = []
+            for doc in cursor:
+                results.append(Manga.dict_to_manga(doc))
+            return results
+        except Exception as error:
+            print(error)
+
     def is_empty(self, origin: str = None) -> bool:
         if origin == "readm":
             return self.mangas.count_documents({"origin": "readm"}) == 0
