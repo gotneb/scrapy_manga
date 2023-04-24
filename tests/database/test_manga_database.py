@@ -64,29 +64,34 @@ class TestMangaDatabase:
 
         self.db.remove(manga.url)
 
-    def test_search(self):
-        """Testing method search"""
+    def test_search_by_title(self):
+        """Testing method search (by title and alternative_title)"""
         manga = get_fake_manga()
         manga.title = "word1 word2 word3"
-        manga.author = "nome_author sobrenome_author"
-        manga.artist = "nome_artist sobrenome_artist"
 
         self.db.add(manga)
 
-        # testing method search
         search_results = self.db.search("word2")
         assert search_results is not None
         assert search_results != []
         assert manga in search_results
 
-        # testing method search
-        search_results = self.db.search("nome_author")
+        self.db.remove(manga.url)
+
+    def test_search_by_author(self):
+        """Testing method search (by author and artist)"""
+        manga = get_fake_manga()
+        manga.author = "name_author last_name_author"
+        manga.artist = "name_artist last_name_artist"
+
+        self.db.add(manga)
+
+        search_results = self.db.search("name_author")
         assert search_results is not None
         assert search_results != []
         assert manga in search_results
 
-        # testing method search
-        search_results = self.db.search("sobrenome_artist")
+        search_results = self.db.search("last_name_artist")
         assert search_results is not None
         assert search_results != []
         assert manga in search_results
