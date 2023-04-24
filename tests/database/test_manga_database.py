@@ -97,3 +97,24 @@ class TestMangaDatabase:
         assert manga in search_results
 
         self.db.remove(manga.url)
+
+    def test_list_genres(self):
+        """Testing method search (by author and artist)"""
+        manga1 = get_fake_manga()
+        manga1.genres = ["action", "advanture"]
+        self.db.add(manga1)
+
+        manga2 = get_fake_manga()
+        manga2.language = "portuguese"
+        manga2.url = "outra_url"
+        manga2.genres = ["ação", "aventura"]
+        self.db.add(manga2)
+
+        search_results = self.db.list_genres("english")
+        assert set(search_results) == set(manga1.genres)
+
+        search_results = self.db.list_genres("portuguese")
+        assert set(search_results) == set(manga2.genres)
+
+        self.db.remove(manga1.url)
+        self.db.remove(manga2.url)
