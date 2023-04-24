@@ -70,6 +70,8 @@ def test_search():
     """Testing method search"""
     manga = get_fake_manga()
     manga.title = "word1 word2 word3"
+    manga.author = "nome_author sobrenome_author"
+    manga.artist = "nome_artist sobrenome_artist"
 
     db = MangaDatabase()
     db.connect()
@@ -78,6 +80,18 @@ def test_search():
 
     # testing method search
     search_results = db.search("word2")
+    assert search_results is not None
+    assert search_results != []
+    assert manga in search_results
+
+    # testing method search
+    search_results = db.search("nome_author")
+    assert search_results is not None
+    assert search_results != []
+    assert manga in search_results
+
+    # testing method search
+    search_results = db.search("sobrenome_artist")
     assert search_results is not None
     assert search_results != []
     assert manga in search_results
