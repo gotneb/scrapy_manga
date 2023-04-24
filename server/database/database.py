@@ -1,18 +1,29 @@
 from abc import ABC, abstractclassmethod
 from .entities import Manga
+from bson import ObjectId
 
 
 class Database(ABC):
     """A base (abstract) class for building the database."""
 
     @abstractclassmethod
-    def add(self, manga: Manga) -> str:
+    def add(self, manga: Manga) -> ObjectId:
         """Insert a new manga in database and returns an id"""
         pass
 
     @abstractclassmethod
+    def add_all(self, mangas: list[Manga]) -> list[ObjectId]:
+        """Insert a manga list  in database and returns an list with inserted ids"""
+        pass
+
+    @abstractclassmethod
     def remove(self, url: str) -> bool:
-        """Delete document with same id in database"""
+        """Delete document with same url in database"""
+        pass
+
+    @abstractclassmethod
+    def remove_all(self, urls: list[str]) -> bool:
+        """Delete all documents with same urls"""
         pass
 
     @abstractclassmethod

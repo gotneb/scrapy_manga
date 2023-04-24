@@ -1,3 +1,4 @@
+from bson import ObjectId
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
@@ -13,10 +14,19 @@ class MangaDatabase(Database):
         self.database = None
         self.mangas = None
 
-    def add(self, manga: Manga) -> str:
+    def add(self, manga: Manga) -> ObjectId:
         try:
             results = self.mangas.insert_one(manga.to_dict())
             return results.inserted_id
+        except Exception as error:
+            print(error)
+            return None
+
+    def add_all(self, mangas: list[Manga]) -> list[ObjectId]:
+        try:
+            mangas_doc = [manga.to_dict() for manga in mangas]
+            results = self.mangas.insert_many(mangas_doc)
+            return results.inserted_ids
         except Exception as error:
             print(error)
             return None
@@ -25,6 +35,14 @@ class MangaDatabase(Database):
         try:
             results = self.mangas.delete_one({"url": url})
             return results.deleted_count == 1
+        except Exception as error:
+            print(error)
+            return False
+
+    def remove_all(self, urls: list[str]) -> bool:
+        try:
+            results = self.mangas.delete_many({"url": {"$in": urls}})
+            return results.deleted_count == len(urls)
         except Exception as error:
             print(error)
             return False
