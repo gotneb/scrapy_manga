@@ -20,7 +20,7 @@ def get_fake_manga(origin: str = "readm") -> Manga:
     return manga
 
 
-def get_fake_manga_list(total: int = 3, origin: str = "readm") -> list[Manga]:
+def get_fake_manga_list(total: int = 3, origin: str = "origin") -> list[Manga]:
     mangas = []
 
     for i in range(total):

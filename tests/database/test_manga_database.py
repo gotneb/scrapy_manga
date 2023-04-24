@@ -138,3 +138,60 @@ class TestMangaDatabase:
         assert manga in results
 
         self.db.remove(manga.url)
+
+    def test_add_and_remove_update_info(self):
+        """Testing the methods add_update_info and remove_update_info"""
+
+        update = get_fake_website_update()
+
+        inserted_id = self.db.add_update_info(update)
+        assert inserted_id is not None
+
+        remove_res = self.db.remove_update_info(update.origin)
+        assert remove_res == True
+
+    def test_get_and_set_update_info(self):
+        update = get_fake_website_update()
+        self.db.add_update_info(update)
+
+        data = self.db.get_update_info(update.origin)
+        assert data is not None
+
+        data.populars = ["outra_url"]
+        res = self.db.set_update_info(data)
+        assert res == True
+
+        data = self.db.get_update_info(update.origin)
+        assert data is not None
+        assert data.populars == ["outra_url"]
+
+        self.db.remove_update_info(update.origin)
+
+    def test_info_exists(self):
+        """Checks if readm and manga livre update info exists"""
+
+        update = self.db.get_update_info("readm")
+        assert update is not None
+        assert update.origin == "readm"
+
+        update = self.db.get_update_info("manga_livre")
+        assert update is not None
+        assert update.origin == "manga_livre"
+
+    def test_get_populars(self):
+        mangas = get_fake_manga_list(5)
+        urls = [manga.url for manga in mangas]
+
+        self.db.add_all(mangas)
+
+        update = get_fake_website_update()
+        update.populars = urls
+
+        self.db.add_update_info(update)
+
+        popular_mangas = self.db.get_populars(update.origin)
+        assert popular_mangas is not None
+        assert len(popular_mangas) == len(urls)
+
+        self.db.remove_update_info(update.origin)
+        self.db.remove_all(urls)
