@@ -39,7 +39,7 @@ class ReadmHandler(WebsiteHandler):
         urls = []
 
         try:
-            urls = urls + get_latest_updates()
+            urls = urls + get_latest_updates(limit=400)
         except Exception:
             print(traceback.format_exc())
 
