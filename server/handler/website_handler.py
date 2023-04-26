@@ -13,7 +13,7 @@ class WebsiteHandler(ABC, Thread):
         Thread.__init__(self)
         self.db = database
         self.origin = origin
-        self.number_of_works = 50  # Set this value according to your preference (affects the computer's performance)
+        self.number_of_works = 10  # Set this value according to your preference (affects the computer's performance)
 
     def run(self):
         """Get the manga urls and update the database."""
