@@ -1,91 +1,106 @@
 from abc import ABC, abstractmethod
-from ..database import Manga, Database
+from ..database import Manga, Database, WebsiteUpdate
 from threading import Thread
-from core.manga import Manga as MangaDetail
-from time import time, sleep
+import core.manga
+import traceback
 
 
 class WebsiteHandler(ABC, Thread):
-    """Base class for websites handlers"""
+    """Base class for websites handlers."""
 
-    def __init__(
-        self,
-        database: Database,
-        get_manga_detail,
-        get_all_start_with,
-        get_latest_updates,
-    ) -> None:
+    def __init__(self, database: Database, origin: str) -> None:
         Thread.__init__(self)
-        self.database = database
-        self.get_manga_detail = get_manga_detail
-        self.get_all_start_with = get_all_start_with
-        self.get_latest_updates = get_latest_updates
+        self.db = database
+        self.origin = origin
 
     def run(self):
-        """Executes when calling method start ( of the superclass Thread)"""
-        print("Readm handler: started.")
+        """Get the manga urls and update the database."""
 
-        if self.database.is_empty(origin="readm"):
-            self.populate_database()
-        else:
-            self.update_database()
+        print(f"Handler ({self.origin}): started.")
 
-        print("Readm handler: done.")
+        latest_updated_urls = self.get_latest_updated_urls()
+        popular_urls = self.get_popular_urls()
 
-    def populate_database(self):
-        """Iterates over all links and stores manga in database"""
-        for letter in [chr(i) for i in range(97, 123)]:
-            self.get_all_start_with(
-                letter=letter,
-                show_window=False,
-                on_link_received=self.perform,
-            )
-
-    def update_database(self):
-        """Iterates over all latest updates links and updates manga in the database"""
-        self.get_latest_updates(
-            limit=40,
-            on_link_received=self.perform,
+        update_info = WebsiteUpdate(
+            origin=self.origin,
+            populars=popular_urls,
+            latest_updates=latest_updated_urls,
         )
 
-    def perform(self, manga_url: str):
-        """Checks if exists. If true, update it. Otherwise, save for the first time"""
-        print(f"Readm handler: processing {manga_url}.")
-        if not self.database.exists(manga_url):
-            self.save_manga(manga_url)
+        self.db.set_update_info(update_info)  # update website info in database
+
+        if self.db.is_empty(self.origin):
+            urls = self.get_all_urls()
         else:
-            self.update_manga(manga_url)
+            urls = latest_updated_urls
 
-    def update_manga(self, manga_url: str):
-        """Updates manga to latest version"""
+        for manga_url in urls:
+            self.feat(manga_url)
+
+        print(f"Handler ({self.origin}): finished.")
+
+    def feat(self, manga_url: str):
+        """Check if manga is in the database, saving the manga or updating chapters."""
         try:
-            current_manga = self.database.get(manga_url)
-            details = self.get_manga_detail(manga_url, False)
-            chapter_names = list(current_manga.chapters.keys())
+            print(f"Handler ({self.origin}): processing {manga_url}")
+            manga_exists = self.db.exists(manga_url)
 
-            for chapter_name in details.chapters:
-                if not chapter_name in chapter_names:
-                    new_chapter = self.get_chapter(manga_url, chapter_name)
-                    current_manga.chapters.update(new_chapter)
+            if manga_exists:
+                self.update(manga_url)
+            else:
+                self.save(manga_url)
+        except Exception:
+            print(f"Handler ({self.origin}) failure: {manga_url}")
+            print(traceback.format_exc())
 
-            self.database.set(manga_url, current_manga)
-        except Exception as error:
-            print(error)
+    def update(self, manga_url: str):
+        """Checks for missing chapters and updates them."""
+        manga_details = self.get_details(manga_url)
+        manga = self.db.get(manga_url)
 
-    def save_manga(self, manga_url):
-        """Save manga in database"""
-        try:
-            manga = self.get_manga(manga_url)
-            self.database.add(manga)
-        except Exception as error:
-            print(error)
+        chapter_names = [
+            item
+            for item in manga_details.chapters
+            if item not in manga.get_chapter_names()
+        ]
+
+        for name in chapter_names:
+            chapter = self.get_chapter(manga_url, name)
+            manga.chapters.update(chapter)
+
+        self.db.set(manga.url, manga)
+
+    def save(self, manga_url: str):
+        """Save a new manga in the database."""
+        manga = self.get_manga(manga_url)
+        self.db.add(manga)
 
     @abstractmethod
-    def get_manga(self, manga_url: str) -> Manga:
-        """Downloads manga and all pages from readm.org"""
+    def get_details(self, manga_url: str) -> core.manga.Manga:
+        """Get the manga details (core.manga.Manga)."""
         pass
 
     @abstractmethod
-    def get_chapter(self, manga_url: str, chapter_name: str) -> dict:
-        """Downloads manga chapter pages"""
+    def get_manga(self, manga_url: str) -> Manga:
+        """Get the manga entity (server.entities.Manga)."""
+        pass
+
+    @abstractmethod
+    def get_chapter(self, manga_url: str, chapter_name: str) -> dict[str, list[str]]:
+        """get a chapter in dictionary format: {<chapter_name>: <url_array>}."""
+        pass
+
+    @abstractmethod
+    def get_all_urls(self) -> list[str]:
+        """Return a list of all URLs."""
+        pass
+
+    @abstractmethod
+    def get_latest_updated_urls(self) -> list[str]:
+        """Return a list of latest updated urls."""
+        pass
+
+    @abstractmethod
+    def get_popular_urls(self) -> list[str]:
+        """Return a list of popular manga urls."""
         pass

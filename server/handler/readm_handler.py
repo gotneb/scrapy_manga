@@ -1,23 +1,55 @@
-from core.manga import Manga as MangaDetails
-from core.sites.readm import *
-from ..database import Database
+import core.manga
+from core.sites.readm import (
+    manga_detail,
+    get_all_start_with,
+    get_latest_updates,
+    get_populars,
+    get_pages,
+)
+from ..database import Database, Manga
 from .website_handler import WebsiteHandler
+
+import traceback
 
 
 class ReadmHandler(WebsiteHandler):
     """Class that updates database with readm mangas"""
 
     def __init__(self, database: Database):
-        super().__init__(
-            database=database,
-            get_manga_detail=manga_detail,
-            get_all_start_with=get_all_start_with,
-            get_latest_updates=get_latest_updates,
-        )
-        self.database = database
+        super().__init__(database=database, origin="readm")
+        self.origin = "readm"
+        self.language = "english"
+
+    def get_details(self, manga_url: str) -> core.manga.Manga:
+        return manga_detail(manga_url=manga_url, show_window=False)
+
+    def get_all_urls(self):
+        urls = []
+
+        for letter in [chr(i) for i in range(97, 123)]:
+            try:
+                letter_urls = get_all_start_with(letter=letter, show_window=False)
+                urls = urls + letter_urls
+            except Exception:
+                print(traceback.format_exc())
+
+        return urls
+
+    def get_latest_updated_urls(self):
+        urls = []
+
+        try:
+            urls = urls + get_latest_updates()
+        except Exception:
+            print(traceback.format_exc())
+
+        return urls
+
+    def get_popular_urls(self):
+        return []
 
     def get_manga(self, manga_url: str) -> Manga:
-        details: MangaDetails = manga_detail(manga_url, False)
+        details = manga_detail(manga_url, False)
 
         chapters = {}
         for chapter_name in details.chapters:
@@ -31,8 +63,8 @@ class ReadmHandler(WebsiteHandler):
             artist=details.artist,
             status=details.status,
             url=manga_url,
-            origin="readm",
-            language="english",
+            origin=self.origin,
+            language=self.language,
             thumbnail=details.thumbnail,
             genres=details.genres,
             summary=details.summary,
@@ -41,7 +73,7 @@ class ReadmHandler(WebsiteHandler):
 
         return manga
 
-    def get_chapter(self, manga_url: str, chapter_name: str) -> dict:
+    def get_chapter(self, manga_url: str, chapter_name: str) -> dict[str, list[str]]:
         cp_url = f"{manga_url}/{chapter_name}/all-pages"
         pages = get_pages(cp_url)
         return {chapter_name: pages}
