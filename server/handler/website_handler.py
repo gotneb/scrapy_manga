@@ -3,6 +3,7 @@ from ..database import Manga, Database, WebsiteUpdate
 from threading import Thread
 import core.manga
 import traceback
+from concurrent.futures import ThreadPoolExecutor, Future, wait
 
 
 class WebsiteHandler(ABC, Thread):
@@ -12,6 +13,7 @@ class WebsiteHandler(ABC, Thread):
         Thread.__init__(self)
         self.db = database
         self.origin = origin
+        self.number_of_works = 3  # Set this value according to your preference (affects the computer's performance)
 
     def run(self):
         """Get the manga urls and update the database."""
@@ -34,8 +36,13 @@ class WebsiteHandler(ABC, Thread):
         else:
             urls = latest_updated_urls
 
-        for manga_url in urls:
-            self.feat(manga_url)
+        with ThreadPoolExecutor(max_workers=self.number_of_works) as executor:
+            futures: list[Future] = []
+
+            for url in urls:
+                futures.append(executor.submit(self.feat, url))
+
+            wait(futures)
 
         print(f"Handler ({self.origin}): finished.")
 
@@ -50,8 +57,9 @@ class WebsiteHandler(ABC, Thread):
             else:
                 self.save(manga_url)
         except Exception:
-            print(f"Handler ({self.origin}) failure: {manga_url}")
-            print(traceback.format_exc())
+            print(
+                f"Handler ({self.origin}) failure: {manga_url}\n      {traceback.format_exc()}"
+            )
 
     def update(self, manga_url: str):
         """Checks for missing chapters and updates them."""
