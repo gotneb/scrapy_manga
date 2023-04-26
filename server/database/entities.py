@@ -22,7 +22,10 @@ class Manga(Entity):
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters: dict
+    chapters: dict[str, list[str]]
+
+    def get_chapter_names(self):
+        return list(self.chapters.keys())
 
     @classmethod
     def to_manga(cls, manga_dict: dict):
