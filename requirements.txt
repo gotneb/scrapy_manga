@@ -4,3 +4,4 @@ selenium
 pymongo
 python-dotenv
 pytest
+schedule
