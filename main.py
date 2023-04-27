@@ -1,7 +1,7 @@
-from server import ReadmHandler, MangaDatabase, Database
+from server import ReadmHandler, MangaDatabase
 import schedule
 from time import sleep
-from random import randomint
+from random import randint
 
 
 def update_sites():
@@ -18,7 +18,7 @@ def update_sites():
 
 if __name__ == "__main__":
     hour = 23
-    minutes = randomint(0, 60)
+    minutes = randint(0, 60)
     schedule.every().day.at("{:02d}:{:02d}".format(hour, minutes)).do(update_sites)
 
     while True:
