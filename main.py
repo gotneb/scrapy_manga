@@ -23,4 +23,4 @@ if __name__ == "__main__":
 
     while True:
         schedule.run_pending()
-        sleep(60 * 60)
+        sleep(60)
