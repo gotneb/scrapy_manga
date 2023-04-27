@@ -20,7 +20,10 @@ class WebsiteHandler(ABC, Thread):
 
         print(f"Handler ({self.origin}): started.")
 
+        print(f"Handler ({self.origin}): downloading latest updated urls.")
         latest_updated_urls = self.get_latest_updated_urls()
+
+        print(f"Handler ({self.origin}): downloading the most popular urls.")
         popular_urls = self.get_popular_urls()
 
         update_info = WebsiteUpdate(
@@ -32,6 +35,7 @@ class WebsiteHandler(ABC, Thread):
         self.db.set_update_info(update_info)  # update website info in database
 
         if self.db.is_empty(self.origin):
+            print(f"Handler ({self.origin}): downloading all urls.")
             urls = self.get_all_urls()
         else:
             urls = latest_updated_urls
