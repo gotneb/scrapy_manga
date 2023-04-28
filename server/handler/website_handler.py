@@ -13,7 +13,7 @@ class WebsiteHandler(ABC, Thread):
         Thread.__init__(self)
         self.db = database
         self.origin = origin
-        self.number_of_works = 10  # Set this value according to your preference (affects the computer's performance)
+        self.number_of_works = 3  # Set this value according to your preference (affects the computer's performance)
 
     def run(self):
         """Get the manga urls and update the database."""
@@ -46,7 +46,7 @@ class WebsiteHandler(ABC, Thread):
             for url in urls:
                 futures.append(executor.submit(self.feat, url))
 
-            wait(futures)
+            executor.shutdown(wait=True)
 
         print(f"Handler ({self.origin}): finished.")
 

@@ -1,2 +1,2 @@
-from .readm_handler import *
-from .website_handler import *
+from .readm_handler import ReadmHandler
+from .website_handler import WebsiteHandler
