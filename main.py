@@ -4,7 +4,7 @@ from time import sleep
 from random import randint
 
 
-def update_sites():
+def update_database():
     db = MangaDatabase()
 
     db.connect()
@@ -17,10 +17,12 @@ def update_sites():
 
 
 if __name__ == "__main__":
-    hour = 23
+    """hour = 23
     minutes = randint(0, 60)
     schedule.every().day.at("{:02d}:{:02d}".format(hour, minutes)).do(update_sites)
 
     while True:
         schedule.run_pending()
-        sleep(60)
+        sleep(60)"""
+
+    update_database()
