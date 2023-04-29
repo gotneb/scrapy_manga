@@ -132,7 +132,6 @@ def get_all_start_with(letter, show_window=False, on_link_received: Callable[[st
     return all_links
 
 
-# FIX: Disabling chrome's window may throw errors
 def manga_detail(manga_url, show_window=False) -> Manga:
     """
     Visits the `manga_url` and extract all data on it.\n
@@ -180,10 +179,9 @@ def get_score(soup: BeautifulSoup) -> float:
     """Returns the score given by the users."""
     score = soup.css.select('div.media-meta div.color-imdb')
     try:
-       score = float(score[0].text)
+       return float(score[0].text)
     except:
-        score = None
-        return score
+        return None
 
 def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga. If does not exist, hence it returns an empty str."""
