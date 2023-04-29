@@ -56,7 +56,7 @@ def get_pages(manga_url: str) -> list[str]:
     """Extract all image links from a manga chapter.\n
     `manga_url:` manga chapter
     """
-    driver = init_driver(show_window=True)
+    driver = init_driver(show_window=False)
     driver.get(manga_url)
 
     # Toggle to vertical mode
@@ -94,7 +94,7 @@ def get_pages(manga_url: str) -> list[str]:
     return pages
 
 
-def manga_detail(manga_url: str, show_window=True):
+def manga_detail(manga_url: str, show_window=False):
     """
     Visits the `manga_url` and extract all data on it.\n
     Arguments:
@@ -150,7 +150,7 @@ def _check_page_exists(driver: webdriver.Chrome) -> bool:
         return True
 
 
-def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str], None] = None) -> list[str]:
+def get_all_start_with(letter: str, show_window=False, on_link_received: Callable[[str], None] = None) -> list[str]:
     if len(letter) > 2:
         raise Exception('letter must be an unique character.')
 

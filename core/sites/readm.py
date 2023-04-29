@@ -1,8 +1,6 @@
 # Python
 import math
 from typing import Callable
-# Selenium
-from selenium import webdriver
 from selenium.webdriver.common.by import By
 # BS4
 from bs4 import BeautifulSoup
@@ -98,7 +96,7 @@ def get_populars() -> list[Manga]:
     return mangas
 
 
-def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str], None] = None) -> list[str]:
+def get_all_start_with(letter, show_window=False, on_link_received: Callable[[str], None] = None) -> list[str]:
     """
     Visits `readm.org` and extract all links that starts with `letter` on its name.\n
     Arguments:
@@ -131,15 +129,16 @@ def get_all_start_with(letter, show_window=True, on_link_received: Callable[[str
 
 
 # FIX: Disabling chrome's window may throw errors
-def manga_detail(manga_url, show_window=True) -> Manga:
+def manga_detail(manga_url, show_window=False) -> Manga:
     """
-    Visits the `manga_url` and extract all data on it.
-    Arguments:
-        manga_url: the manga content. Must have `readm.org` or `mangalivre.net` domain.
-        enable_gui: show chrome window.
-    Return:
-        Manga content.
+    Visits the `manga_url` and extract all data on it.\n
+    Arguments:\n
+    `manga_url:` the manga content. Must have `readm.org` or `mangalivre.net` domain.
+    `enable_gui:` show chrome window.
     """
+    if show_window:
+        print('WARNING: \"show_window\" is disable...')
+
     html = get(manga_url)
     soup = BeautifulSoup(html.text, 'html.parser')
 
