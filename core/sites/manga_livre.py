@@ -7,6 +7,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 # BeautifulSoup4
 from bs4 import BeautifulSoup
+from core.chapter import Chapter
 # Core
 from core.manga import Manga
 from core.driver import init_driver
@@ -116,8 +117,9 @@ def manga_detail(manga_url: str, show_window=False):
     alt_title = get_alt_title(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
-    chapters = get_chapters(driver)
-    total_chapters = len(chapters)
+    chapters_info = get_chapters_info(driver)
+    chapters = get_chapters(chapters_info)
+    total_chapters = len(chapters_info)
     genres = get_genres(driver)
 
     # Clean resources
@@ -133,6 +135,7 @@ def manga_detail(manga_url: str, show_window=False):
                  summary=summary, 
                  status=status, 
                  total_chapters=total_chapters, 
+                 chapters_info=chapters_info,
                  chapters=chapters)
 
 
@@ -271,7 +274,7 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
     return alt_title
 
 
-def get_chapters(driver: webdriver.Chrome) -> list[str]:
+def get_chapters_info(driver: webdriver.Chrome) -> list[Chapter]:
     # PROBLEM:
     # Chapters are loaded lazily by AJAX.
     # There isn't a specific time where I can know in advance when the page has fully loaded.
@@ -308,10 +311,30 @@ def get_chapters(driver: webdriver.Chrome) -> list[str]:
     chapters = []
     for a in elems:
         # title's attribute returns: 'Ler Capitulo `N`', where N is a number =P
-        chapter_value = a.get_attribute('title').split(' ')[2] 
-        chapters.append(chapter_value)
+        value = a.get_attribute('title').split(' ')[2] 
+        id = _get_chapter_id(a.get_attribute('href'))
+        chapters.append(Chapter(number=value, id=id))
     
     return chapters
+
+
+def get_chapters(list: list[Chapter]) -> list[str]:
+    chapters = []
+    for c in list:
+        chapters.append(c.number)
+    
+    return chapters
+
+
+def _get_chapter_id(a_tag: str) -> str:
+    """Get an internal id from a chapter.
+    Arguments:\n
+    `a_tag`: the chapter link to read
+    """
+    splitted = a_tag.split('/') 
+    # Python indexes are weird as hell
+    # Last but one
+    return splitted[-2]
 
 
 def is_oriental(word: str) -> bool:

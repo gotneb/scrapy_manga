@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 # Requests
 from requests import get
+from core.chapter import Chapter
 # Core
 from core.driver import init_driver
 from core.manga import Manga
@@ -155,9 +156,10 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     genres = get_genres(soup)
     summary = get_summary(soup)
     chapters = get_chapters(soup)
+    chapters_info = get_chapters_info(chapters)
     total_chapters = len(chapters)
 
-    return Manga(title, alt_title, score, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters)
+    return Manga(title, alt_title, score, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters, chapters_info)
 
 
 def get_title(soup: BeautifulSoup) -> str:
@@ -254,3 +256,10 @@ def get_chapters(soup: BeautifulSoup) -> list[str]:
             chapters.append(c)
 
     return chapters
+
+def get_chapters_info(chapters: list[str]) -> list[Chapter]:
+    info = []
+    for c in chapters:
+        info.append(Chapter(c))
+    
+    return info

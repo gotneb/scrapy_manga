@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from core.chapter import Chapter
+
 
 @dataclass
 class Manga:
@@ -14,7 +16,9 @@ class Manga:
     summary: str
     status: str
     total_chapters: int
+    # Deprecated: Use `chapters_info` instead
     chapters: list[str]
+    chapters_info: list[Chapter]
 
     def to_dict(self):
         """Returns itself as a dictionary"""
