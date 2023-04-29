@@ -73,26 +73,30 @@ def get_pages(manga_url) -> list[str]:
     return url_imgs
 
 
-def get_populars() -> list[Manga]:
+def get_populars(on_manga_received: Callable[[Manga], None] = None) -> list[Manga]:
     """Visits the `readm.org` and returns top 10 most populars mangas."""
-    driver = init_driver()
+    driver = init_driver(show_window=False)
     url = "https://readm.org/popular-manga"
     driver.get(url)
 
     # Links to mangas
     links = []
+    mangas = []
     elems = driver.find_elements(
         By.CSS_SELECTOR, "ul.filter-results li.mb-lg div.poster-with-subject a")
     for e in elems:
         anchor = e.get_attribute("href")
-        if links.__len__() == 0:
+        if len(links) == 0 or                 \
+        ((not links.__contains__(anchor)) and \
+        (not anchor.__contains__("category"))):
             links.append(anchor)
-        elif (not links.__contains__(anchor)) and (not anchor.__contains__("category")):
-            links.append(anchor)
+            manga = manga_detail(anchor)
+            
+            mangas.append(manga)
+            # Callback
+            if on_manga_received != None:
+                on_manga_received(manga)
 
-    mangas = []
-    for link in links:
-        mangas.append(manga_detail(link))
     return mangas
 
 
@@ -245,7 +249,10 @@ def get_chapters(soup: BeautifulSoup) -> list[str]:
     chapters = []
 
     for a in a_tags:
-        c = a.text.split()[1]
-        chapters.append(c)
+        # There are some chapters wihtout a number, only 'Chapter  '
+        # This a bug from the site itself
+        if len(a.text.split()) == 2:
+            c = a.text.split()[1]
+            chapters.append(c)
 
     return chapters
