@@ -9,3 +9,4 @@ class Chapter:
     # mangalivre.net has a internal business logic for its chapters
     # readm.org doesn't need one, so it's `None` by default
     id: str = None
+    pages: list[str] = None

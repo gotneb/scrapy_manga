@@ -6,13 +6,14 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 # Requests
 from requests import get
-from core.chapter import Chapter
 # Core
 from core.driver import init_driver
-from core.manga import Manga
+from entities.chapter import Chapter
+from entities.manga import Manga
 
-
-domain = 'https://readm.org'
+_origin = 'readm'
+_language = 'english'
+_domain = 'https://readm.org'
 
 
 # I'm not sure if I should have added a callback on this function o_o'
@@ -40,7 +41,7 @@ def get_latest_updates(limit: int = 40, on_link_received: Callable[[str], None] 
         for h2 in all_h2:
             a = h2.find('a')
             # ERROR PRONE: adding two url's path may cause errors!
-            link = domain + a['href']
+            link = _domain + a['href']
             links.append(link)
 
             if on_link_received is not None:
@@ -58,7 +59,7 @@ def get_pages(manga_url) -> list[str]:
 
     `manga_url:` a chapter of a manga
     """
-    if domain not in manga_url:
+    if _domain not in manga_url:
         raise Exception("get pages doesn't support this site!")
 
     html = get(manga_url)
@@ -68,7 +69,7 @@ def get_pages(manga_url) -> list[str]:
     links = soup.find_all('img', class_='img-responsive')
     for link in links:
         href = link['src']
-        url = f'{domain}{href}'
+        url = f'{_domain}{href}'
         url_imgs.append(url)
 
     return url_imgs
@@ -155,11 +156,23 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters = get_chapters(soup)
-    chapters_info = get_chapters_info(chapters)
-    total_chapters = len(chapters)
+    chapters_info = get_chapters(soup)
 
-    return Manga(title, alt_title, score, author, artist, thumbnail, genres, summary, stt, total_chapters, chapters, chapters_info)
+    return Manga(
+                title= title,
+                alternative_title= alt_title,
+                author= author,
+                artist= artist,
+                status= stt,
+                url= manga_url,
+                origin= _origin,
+                language= _language,
+                thumbnail= thumbnail,
+                genres= genres,
+                summary= summary,
+                chapters_info=chapters_info,
+                rating= score,
+            )
 
 
 def get_title(soup: BeautifulSoup) -> str:
@@ -210,7 +223,7 @@ def get_thumbnail(soup: BeautifulSoup) -> str:
     cover = soup.css.select('a#series-profile-image-wrapper img.series-profile-thumb')
 
     # TODO: Make a better way to join url's paths... The below is error prone.
-    cover = f'{domain}{cover[0]["src"]}'
+    cover = f'{_domain}{cover[0]["src"]}'
     return cover
 
 
@@ -249,17 +262,10 @@ def get_chapters(soup: BeautifulSoup) -> list[str]:
     chapters = []
 
     for a in a_tags:
-        # There are some chapters wihtout a number, only 'Chapter  '
+        # There are some chapters without a number, only 'Chapter  '
         # This a bug from the site itself
         if len(a.text.split()) == 2:
             c = a.text.split()[1]
-            chapters.append(c)
+            chapters.append(Chapter(number=c))
 
     return chapters
-
-def get_chapters_info(chapters: list[str]) -> list[Chapter]:
-    info = []
-    for c in chapters:
-        info.append(Chapter(c))
-    
-    return info
