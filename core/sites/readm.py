@@ -187,7 +187,7 @@ def get_alt_title(soup: BeautifulSoup) -> str:
         title = soup.css.select('div.sub-title.pt-sm')
         return title[0].text
     except:
-        return ''
+        return None
 
 
 def get_score(soup: BeautifulSoup) -> float:
@@ -205,7 +205,7 @@ def get_author(soup: BeautifulSoup) -> str:
         author = author[0].text
         return author
     except:
-        return ""
+        return None
 
 
 def get_artist(soup: BeautifulSoup) -> str:
@@ -215,7 +215,7 @@ def get_artist(soup: BeautifulSoup) -> str:
         art = art[0].text
         return art
     except:
-        return ""
+        return None
 
 
 def get_thumbnail(soup: BeautifulSoup) -> str:
@@ -234,7 +234,7 @@ def get_status(soup: BeautifulSoup) -> str:
         stt = stt[0].text
         return stt
     except:
-        return ""
+        return None
 
 
 def get_genres(soup: BeautifulSoup) -> list[str]:
