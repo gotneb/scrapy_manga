@@ -156,9 +156,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters = get_chapters(soup)
-    chapters_info = get_chapters_info(chapters)
-    total_chapters = len(chapters)
+    chapters_info = get_chapters(soup)
 
     return Manga(
                 title= title,
@@ -172,7 +170,6 @@ def manga_detail(manga_url, show_window=False) -> Manga:
                 thumbnail= thumbnail,
                 genres= genres,
                 summary= summary,
-                chapters= chapters,
                 chapters_info=chapters_info,
                 rating= score,
             )
@@ -265,17 +262,10 @@ def get_chapters(soup: BeautifulSoup) -> list[str]:
     chapters = []
 
     for a in a_tags:
-        # There are some chapters wihtout a number, only 'Chapter  '
+        # There are some chapters without a number, only 'Chapter  '
         # This a bug from the site itself
         if len(a.text.split()) == 2:
             c = a.text.split()[1]
-            chapters.append(c)
+            chapters.append(Chapter(number=c))
 
     return chapters
-
-def get_chapters_info(chapters: list[str]) -> list[Chapter]:
-    info = []
-    for c in chapters:
-        info.append(Chapter(c))
-    
-    return info

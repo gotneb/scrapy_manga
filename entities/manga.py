@@ -1,16 +1,11 @@
+# Python
 from dataclasses import dataclass
-
+# Entities
 from entities.chapter import Chapter
 
 
-class Entity:
-    def to_dict(self):
-        """Returns itself as a dictionary"""
-        return self.__dict__
-
-
 @dataclass
-class Manga(Entity):
+class Manga():
     """Class used to stored manga in the database"""
 
     title: str
@@ -25,12 +20,29 @@ class Manga(Entity):
     thumbnail: str
     genres: list[str]
     summary: str
-    # Deprecated: Use `chapters_info` instead
-    chapters: list[str]
     chapters_info: list[Chapter]
 
-    def get_chapter_names(self):
-        return self.chapters
+    def get_chapter_names(self) -> list[str]:
+        values = []
+        # Not sure if it's the best way to return chapter's value
+        for c in self.chapters_info:
+            values.append(c.number)
+        return values
+
+    def to_dict(self):
+        return {
+            'title': self.title,
+            'alternative': self.alternative_title,
+            'author': self.author,
+            'artist': self.artist,
+            'url': self.url,
+            'origin': self.origin,
+            'language': self.language,
+            'thumbnail': self.thumbnail,
+            'genres': self.genres,
+            'summary': self.summary,
+            'chapters': self.chapters_info
+        }
 
     @classmethod
     def to_manga(cls, manga_dict: dict):
@@ -50,12 +62,12 @@ class Manga(Entity):
                 chapters=manga_dict["chapters"],
             )
         return None
-    
+
     # Useful for debug
     def show(self) -> None:
         """Prints manga atributes on standard output"""
         print(
-f"""Origin: {self.origin}
+            f"""Origin: {self.origin}
 Url: {self.url}
 Title: {self.title}
 Alternative title: {self.alternative_title}
@@ -67,4 +79,4 @@ Language: {self.language}
 Thumbnail: {self.thumbnail}
 genres: {self.genres}
 Summary: {self.summary}
-Chapters: {self.chapters}""")
+Chapters: {self.get_chapter_names()}""")

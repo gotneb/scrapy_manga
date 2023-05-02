@@ -9,11 +9,12 @@ from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
 # Core
 from core.driver import init_driver
+# Entities
 from entities.chapter import Chapter
 from entities.manga import Manga
 
-_origin = 'Mangá Livre'
-_language = 'português'
+_origin = 'manga_livre'
+_language = 'portuguese'
 
 
 def get_latest_updates(limit: int = 30, on_link_received: Callable[[str], None] = None) -> list[str]:
@@ -101,17 +102,18 @@ def get_pages(manga_url: str) -> list[str]:
     return pages
 
 
-def manga_detail(manga_url: str, show_window=False):
+def manga_detail(url: str, show_window=False):
     """
-    Visits the `manga_url` and extract all data on it.\n
+    Visits the `manga_url` and extract all data on it.
+
     Arguments:
-        `manga_url:` the manga content.
-        `enable_gui:` show chrome window.
-    Return:
-        Manga content.
+
+    `manga_url:` the url of manga site.
+
+    `enable_gui:` optional, show chrome window.
     """
     driver = init_driver(show_window)
-    driver.get(manga_url)
+    driver.get(url)
 
     # "Manga Livre" mangas doesn't have an artist data at all
     artist = None
@@ -124,7 +126,6 @@ def manga_detail(manga_url: str, show_window=False):
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
     chapters_info = get_chapters_info(driver)
-    chapters = get_chapters(chapters_info)
     genres = get_genres(driver)
 
     # Clean resources
@@ -136,13 +137,12 @@ def manga_detail(manga_url: str, show_window=False):
         author=author,
         artist=artist,
         status=status,
-        url=manga_url,
+        url=url,
         origin=_origin,
         language=_language,
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters=chapters,
         chapters_info=chapters_info,
         rating=score
     )
@@ -332,14 +332,6 @@ def get_chapters_info(driver: webdriver.Chrome) -> list[Chapter]:
         value = a.get_attribute('title').split(' ')[2]
         id = _get_chapter_id(a.get_attribute('href'))
         chapters.append(Chapter(number=value, id=id))
-
-    return chapters
-
-
-def get_chapters(list: list[Chapter]) -> list[str]:
-    chapters = []
-    for c in list:
-        chapters.append(c.number)
 
     return chapters
 
