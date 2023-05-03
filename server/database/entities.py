@@ -45,7 +45,10 @@ class Manga(Entity):
     chapters_info: list[ChapterInfo] | None
 
     def chapters_to_dict_list(self):
-        return list(map(lambda chapter: chapter.to_dict(), self.chapters))
+        if self.chapters:
+            return list(map(lambda chapter: chapter.to_dict(), self.chapters))
+        else:
+            return []
 
     def to_dict(self) -> dict:
         return {
