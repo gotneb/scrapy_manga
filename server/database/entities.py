@@ -1,10 +1,20 @@
 from dataclasses import dataclass
+from abc import abstractclassmethod, ABC
 
 
-class Entity:
-    def to_dict(self):
-        """Returns itself as a dictionary"""
-        return self.__dict__
+class Entity(ABC):
+    @abstractclassmethod
+    def to_dict(self) -> dict:
+        pass
+
+
+@dataclass
+class Chapter(Entity):
+    name: str
+    pages: list[str]
+
+    def to_dict(self) -> dict:
+        return {"name": self.name, "pages": self.pages}
 
 
 @dataclass
@@ -22,29 +32,26 @@ class Manga(Entity):
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters: dict[str, list[str]]
+    chapters: list[Chapter]
 
-    def get_chapter_names(self):
-        return list(self.chapters.keys())
+    def to_dict(self) -> dict:
+        return {
+            "title": self.title,
+            "alternative_title": self.alternative_title,
+            "author": self.author,
+            "artist": self.artist,
+            "status": self.status,
+            "url": self.url,
+            "origin": self.origin,
+            "language": self.language,
+            "thumbnail": self.thumbnail,
+            "genres": self.genres,
+            "summary": self.summary,
+            "chapters": self.chapters,
+        }
 
-    @classmethod
-    def to_manga(cls, manga_dict: dict):
-        if manga_dict is not None:
-            return Manga(
-                title=manga_dict["title"],
-                alternative_title=manga_dict["alternative_title"],
-                author=manga_dict["author"],
-                artist=manga_dict["artist"],
-                status=manga_dict["status"],
-                url=manga_dict["url"],
-                origin=manga_dict["origin"],
-                language=manga_dict["language"],
-                thumbnail=manga_dict["thumbnail"],
-                genres=manga_dict["genres"],
-                summary=manga_dict["summary"],
-                chapters=manga_dict["chapters"],
-            )
-        return None
+    def get_chapter_names(self) -> list[str]:
+        return list(map(lambda chapter: chapter.name, self.chapters))
 
 
 @dataclass
@@ -53,12 +60,9 @@ class WebsiteUpdate(Entity):
     populars: list[str]
     latest_updates: list[str]
 
-    @classmethod
-    def to_website_update(cls, update_dict: dict):
-        if update_dict is not None:
-            return WebsiteUpdate(
-                origin=update_dict["origin"],
-                populars=update_dict["populars"],
-                latest_updates=update_dict["latest_updates"],
-            )
-        return None
+    def to_string(self):
+        return {
+            "origin": self.origin,
+            "populars": self.populars,
+            "latest_updates": self.latest_updates,
+        }
