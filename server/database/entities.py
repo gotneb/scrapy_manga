@@ -18,6 +18,15 @@ class Chapter(Entity):
 
 
 @dataclass
+class ChapterInfo(Entity):
+    id: str
+    name: str
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "name": self.name}
+
+
+@dataclass
 class Manga(Entity):
     """Class used to stored manga in the database"""
 
@@ -32,7 +41,8 @@ class Manga(Entity):
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters: list[Chapter]
+    chapters: list[Chapter] | None
+    chapters_info: list[ChapterInfo] | None
 
     def chapters_to_dict_list(self):
         return list(map(lambda chapter: chapter.to_dict(), self.chapters))
