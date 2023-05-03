@@ -12,22 +12,7 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
-    def add_all(self, mangas: list[Manga]) -> list[ObjectId]:
-        """Insert a manga list  in database and returns an list with inserted ids"""
-        pass
-
-    @abstractclassmethod
-    def remove(self, url: str) -> bool:
-        """Delete document with same url in database"""
-        pass
-
-    @abstractclassmethod
-    def remove_all(self, urls: list[str]) -> bool:
-        """Delete all documents with same urls"""
-        pass
-
-    @abstractclassmethod
-    def get(self, url: str) -> Manga:
+    def get(self, url: str) -> dict:
         """Returns document with same url"""
         pass
 
@@ -37,33 +22,8 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
-    def search(self, search_text: str) -> list[Manga]:
-        """Return mangas with similar titles or alternative titles"""
-        pass
-
-    @abstractclassmethod
     def exists(self, url: str) -> bool:
         """Checks if manga already exists by id"""
-        pass
-
-    @abstractclassmethod
-    def list_genres(self, language: str) -> list[str]:
-        """Returns a list with genres (by language: english or portuguese)"""
-        pass
-
-    @abstractclassmethod
-    def get_mangas_by_genre(self, genre: str) -> list[Manga]:
-        """Returns a list with mangas"""
-        pass
-
-    @abstractclassmethod
-    def get_populars(self, origin: str) -> list[Manga]:
-        """Return a list od the most popular mangas"""
-        pass
-
-    @abstractclassmethod
-    def get_latest_updates(self, origin: str) -> list[Manga]:
-        """Return a list of recently updated mangas"""
         pass
 
     @abstractclassmethod
@@ -72,12 +32,7 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
-    def remove_update_info(self, origin: str) -> bool:
-        """Remove website info"""
-        pass
-
-    @abstractclassmethod
-    def get_update_info(self, origin: str) -> WebsiteUpdate:
+    def get_update_info(self, origin: str) -> dict:
         """Get website update info"""
         pass
 
