@@ -78,7 +78,7 @@ class WebsiteHandler(ABC, Thread):
 
         for name in chapter_names:
             chapter = self.get_chapter(manga_url, name)
-            manga.chapters.update(chapter)
+            manga.chapters.append(chapter)
 
         self.db.set(manga.url, manga)
 
