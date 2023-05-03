@@ -34,6 +34,9 @@ class Manga(Entity):
     summary: str
     chapters: list[Chapter]
 
+    def chapters_to_dict_list(self):
+        return list(map(lambda chapter: chapter.to_dict(), self.chapters))
+
     def to_dict(self) -> dict:
         return {
             "title": self.title,
@@ -47,7 +50,7 @@ class Manga(Entity):
             "thumbnail": self.thumbnail,
             "genres": self.genres,
             "summary": self.summary,
-            "chapters": self.chapters,
+            "chapters": self.chapters_to_dict_list(),
         }
 
     def get_chapter_names(self) -> list[str]:
