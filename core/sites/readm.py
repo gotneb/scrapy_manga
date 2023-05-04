@@ -276,6 +276,6 @@ def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
         # This a bug from the site itself
         if len(a.text.split()) == 2:
             c = a.text.split()[1]
-            chapters.append(ChapterInfo(id=None, name=c))
+            chapters.append(ChapterInfo(name=c))
 
     return chapters
