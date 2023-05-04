@@ -13,6 +13,7 @@ class Manga(Entity):
     author: str
     artist: str
     status: str
+    rating: float
     url: str
     origin: str
     language: str
@@ -21,6 +22,13 @@ class Manga(Entity):
     summary: str
     chapters_info: list[ChapterInfo] | None
     chapters: list[Chapter] | None = None
+
+    def get_chapter_names(self) -> list[str]:
+        values = []
+        # Not sure if it's the best way to return chapter's value
+        for c in self.chapters_info:
+            values.append(c.name)
+        return values
 
     def chapters_to_dict_list(self):
         if self.chapters:
@@ -35,6 +43,7 @@ class Manga(Entity):
             "author": self.author,
             "artist": self.artist,
             "status": self.status,
+            "rating": self.rating,
             "url": self.url,
             "origin": self.origin,
             "language": self.language,
@@ -46,3 +55,22 @@ class Manga(Entity):
 
     def get_chapter_names(self) -> list[str]:
         return list(map(lambda chapter: chapter.name, self.chapters))
+
+    # Useful for debug
+    def show(self) -> None:
+        """Prints manga atributes on standard output"""
+        print(
+            f"""Origin: {self.origin}
+                Url: {self.url}
+                Title: {self.title}
+                Alternative title: {self.alternative_title}
+                Author: {self.author}
+                Artist: {self.artist}
+                Status: {self.status}
+                Rating: {self.rating}
+                Language: {self.language}
+                Thumbnail: {self.thumbnail}
+                genres: {self.genres}
+                Summary: {self.summary}
+                Chapters: {self.get_chapter_names()}"""
+        )
