@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from ..database import Database, WebsiteUpdate
-from entities import Manga
+from entities import Manga, ChapterInfo, Chapter
 from threading import Thread
-import core.manga
 import traceback
 from concurrent.futures import ThreadPoolExecutor, Future, wait
 
@@ -68,20 +67,25 @@ class WebsiteHandler(ABC, Thread):
 
     def update(self, manga_url: str):
         """Checks for missing chapters and updates them."""
-        manga_details = self.get_details(manga_url)
-        manga = self.db.get(manga_url)
+        manga = self.get_manga(manga_url)
+        doc = self.db.get(manga_url)
 
-        chapter_names = [
-            item
-            for item in manga_details.chapters
-            if item not in list(map(lambda chapter: chapter["name"], manga["chapters"]))
-        ]
-
-        for name in chapter_names:
-            chapter = self.get_chapter(manga_url, name)
+        for info in self.chapters_not_registered(manga.chapters_info, doc["chapters"]):
+            chapter = self.get_chapter(manga_url, info)
             manga.chapters.append(chapter)
 
         self.db.set(manga.url, manga)
+
+    def chapters_not_registered(
+        self, chapters_info: list[ChapterInfo], chapters_registered: list[dict]
+    ) -> list[ChapterInfo]:
+        informations = []
+        names_registered = [chapter["name"] for chapter in chapters_registered]
+
+        for info in chapters_info:
+            if not info.name in names_registered:
+                informations.append(info)
+        return informations
 
     def save(self, manga_url: str):
         """Save a new manga in the database."""
@@ -89,17 +93,12 @@ class WebsiteHandler(ABC, Thread):
         self.db.add(manga)
 
     @abstractmethod
-    def get_details(self, manga_url: str) -> core.manga.Manga:
-        """Get the manga details (core.manga.Manga)."""
-        pass
-
-    @abstractmethod
     def get_manga(self, manga_url: str) -> Manga:
         """Get the manga entity (server.entities.Manga)."""
         pass
 
     @abstractmethod
-    def get_chapter(self, manga_url: str, chapter_name: str) -> dict[str, list[str]]:
+    def get_chapter(self, manga_url: str, info: ChapterInfo) -> Chapter:
         """get a chapter in dictionary format: {<chapter_name>: <url_array>}."""
         pass
 
