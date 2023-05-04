@@ -1,4 +1,7 @@
 beautifulsoup4
-firebase-admin
 requests
 selenium
+pymongo
+python-dotenv
+pytest
+schedule
