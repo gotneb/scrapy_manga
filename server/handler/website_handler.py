@@ -74,7 +74,7 @@ class WebsiteHandler(ABC, Thread):
         chapter_names = [
             item
             for item in manga_details.chapters
-            if item not in manga.get_chapter_names()
+            if item not in list(map(lambda chapter: chapter["name"], manga["chapters"]))
         ]
 
         for name in chapter_names:
