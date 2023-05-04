@@ -1,4 +1,4 @@
-from server import ReadmHandler, MangaDatabase
+from server import ReadmHandler, MangaDatabase, MangaLivreHandler
 import schedule
 from time import sleep
 from random import randint
@@ -11,13 +11,16 @@ load_dotenv()
 def update_database():
     db = MangaDatabase()
 
-    db.connect(getenv("MONGO_URI"))
+    if db.connect(getenv("MONGO_URI")):
+        readmHandler = ReadmHandler(db)
+        readmHandler.start()
+        readmHandler.join()
 
-    handler = ReadmHandler(db)
-    handler.start()
-    handler.join()
+        mangaLivreHandler = MangaLivreHandler(db)
+        mangaLivreHandler.start()
+        mangaLivreHandler.join()
 
-    db.close()
+        db.close()
 
 
 if __name__ == "__main__":
