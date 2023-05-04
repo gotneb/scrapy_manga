@@ -19,8 +19,8 @@ class Manga(Entity):
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters: list[Chapter] | None
     chapters_info: list[ChapterInfo] | None
+    chapters: list[Chapter] | None = None
 
     def chapters_to_dict_list(self):
         if self.chapters:
