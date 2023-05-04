@@ -22,6 +22,7 @@ _language = "portuguese"
 
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `mangalivre.net` and returns top 10 most populars in the day mangas."""
     url = 'https://mangalivre.net/lista-de-mangas/ordenar-por-numero-de-leituras/todos/dia'
     links = []
     counter = 0
