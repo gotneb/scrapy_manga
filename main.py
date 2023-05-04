@@ -2,12 +2,16 @@ from server import ReadmHandler, MangaDatabase
 import schedule
 from time import sleep
 from random import randint
+from dotenv import load_dotenv
+from os import getenv
+
+load_dotenv()
 
 
 def update_database():
     db = MangaDatabase()
 
-    db.connect()
+    db.connect(getenv("MONGO_URI"))
 
     handler = ReadmHandler(db)
     handler.start()

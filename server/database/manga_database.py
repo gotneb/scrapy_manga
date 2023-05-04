@@ -1,11 +1,7 @@
 from bson import ObjectId
 from pymongo import MongoClient
-from dotenv import load_dotenv
-from os import getenv
 from .website_update import WebsiteUpdate
 from entities import Manga
-
-load_dotenv()
 
 
 class MangaDatabase:
@@ -77,9 +73,9 @@ class MangaDatabase:
 
         return self.mangas.count_documents({}) == 0
 
-    def connect(self) -> bool:
+    def connect(self, mongo_uri: str) -> bool:
         try:
-            self.client: MongoClient = MongoClient(getenv("MONGO_URI"))
+            self.client: MongoClient = MongoClient(mongo_uri)
             self.database = self.client.get_database("manga_db")
             self.mangas = self.database.get_collection("mangas")
             self.updates = self.database.get_collection("updates")

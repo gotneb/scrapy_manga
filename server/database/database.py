@@ -48,7 +48,7 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
-    def connect(self) -> bool:
+    def connect(self, mongo_uri: str) -> bool:
         """Connect to database and returns True if sucessful"""
         pass
 
