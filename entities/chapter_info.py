@@ -3,9 +3,9 @@ from .entity import Entity
 
 
 @dataclass
-class Chapter(Entity):
+class ChapterInfo(Entity):
     name: str
-    pages: list[str]
+    id: str = None
 
     def to_dict(self) -> dict:
-        return {"name": self.name, "pages": self.pages}
+        return {"id": self.id, "name": self.name}

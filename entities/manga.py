@@ -1,11 +1,11 @@
-# Python
 from dataclasses import dataclass
-# Entities
-from entities.chapter import Chapter
+from .entity import Entity
+from .chapter import Chapter
+from .chapter_info import ChapterInfo
 
 
 @dataclass
-class Manga():
+class Manga(Entity):
     """Class used to stored manga in the database"""
 
     title: str
@@ -20,63 +20,57 @@ class Manga():
     thumbnail: str
     genres: list[str]
     summary: str
-    chapters_info: list[Chapter]
+    chapters_info: list[ChapterInfo] | None
+    chapters: list[Chapter] | None = None
 
     def get_chapter_names(self) -> list[str]:
         values = []
         # Not sure if it's the best way to return chapter's value
         for c in self.chapters_info:
-            values.append(c.number)
+            values.append(c.name)
         return values
 
-    def to_dict(self):
+    def chapters_to_dict_list(self):
+        if self.chapters:
+            return list(map(lambda chapter: chapter.to_dict(), self.chapters))
+        else:
+            return []
+
+    def to_dict(self) -> dict:
         return {
-            'title': self.title,
-            'alternative': self.alternative_title,
-            'author': self.author,
-            'artist': self.artist,
-            'url': self.url,
-            'origin': self.origin,
-            'language': self.language,
-            'thumbnail': self.thumbnail,
-            'genres': self.genres,
-            'summary': self.summary,
-            'chapters': self.chapters_info
+            "title": self.title,
+            "alternative_title": self.alternative_title,
+            "author": self.author,
+            "artist": self.artist,
+            "status": self.status,
+            "rating": self.rating,
+            "url": self.url,
+            "origin": self.origin,
+            "language": self.language,
+            "thumbnail": self.thumbnail,
+            "genres": self.genres,
+            "summary": self.summary,
+            "chapters": self.chapters_to_dict_list(),
         }
 
-    @classmethod
-    def to_manga(cls, manga_dict: dict):
-        if manga_dict is not None:
-            return Manga(
-                title=manga_dict["title"],
-                alternative_title=manga_dict["alternative_title"],
-                author=manga_dict["author"],
-                artist=manga_dict["artist"],
-                status=manga_dict["status"],
-                url=manga_dict["url"],
-                origin=manga_dict["origin"],
-                language=manga_dict["language"],
-                thumbnail=manga_dict["thumbnail"],
-                genres=manga_dict["genres"],
-                summary=manga_dict["summary"],
-                chapters=manga_dict["chapters"],
-            )
-        return None
+    def get_chapter_names(self) -> list[str]:
+        return list(map(lambda info: info.name, self.chapters_info))
 
     # Useful for debug
     def show(self) -> None:
         """Prints manga atributes on standard output"""
         print(
             f"""Origin: {self.origin}
-Url: {self.url}
-Title: {self.title}
-Alternative title: {self.alternative_title}
-Author: {self.author}
-Artist: {self.artist}
-Status: {self.status}
-Rating: {self.rating}
-Language: {self.language}
-Thumbnail: {self.thumbnail}
-genres: {self.genres}
-Summary: {self.summary}
-Chapters: {self.get_chapter_names()}""")
+                Url: {self.url}
+                Title: {self.title}
+                Alternative title: {self.alternative_title}
+                Author: {self.author}
+                Artist: {self.artist}
+                Status: {self.status}
+                Rating: {self.rating}
+                Language: {self.language}
+                Thumbnail: {self.thumbnail}
+                genres: {self.genres}
+                Summary: {self.summary}
+                Chapters: {self.get_chapter_names()}"""
+        )
