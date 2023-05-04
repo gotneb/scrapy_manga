@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
-from ..database import Manga, Database, WebsiteUpdate
+from ..database import Database, WebsiteUpdate
+from entities import Manga
 from threading import Thread
 import core.manga
 import traceback

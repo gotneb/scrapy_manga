@@ -1,29 +1,7 @@
 from dataclasses import dataclass
-from abc import abstractclassmethod, ABC
-
-
-class Entity(ABC):
-    @abstractclassmethod
-    def to_dict(self) -> dict:
-        pass
-
-
-@dataclass
-class Chapter(Entity):
-    name: str
-    pages: list[str]
-
-    def to_dict(self) -> dict:
-        return {"name": self.name, "pages": self.pages}
-
-
-@dataclass
-class ChapterInfo(Entity):
-    id: str
-    name: str
-
-    def to_dict(self) -> dict:
-        return {"id": self.id, "name": self.name}
+from .entity import Entity
+from .chapter import Chapter
+from .chapter_info import ChapterInfo
 
 
 @dataclass
@@ -68,17 +46,3 @@ class Manga(Entity):
 
     def get_chapter_names(self) -> list[str]:
         return list(map(lambda chapter: chapter.name, self.chapters))
-
-
-@dataclass
-class WebsiteUpdate(Entity):
-    origin: str
-    populars: list[str]
-    latest_updates: list[str]
-
-    def to_string(self):
-        return {
-            "origin": self.origin,
-            "populars": self.populars,
-            "latest_updates": self.latest_updates,
-        }

@@ -2,7 +2,8 @@ from bson import ObjectId
 from pymongo import MongoClient
 from dotenv import load_dotenv
 from os import getenv
-from .entities import Manga, WebsiteUpdate
+from .website_update import WebsiteUpdate
+from entities import Manga
 
 load_dotenv()
 

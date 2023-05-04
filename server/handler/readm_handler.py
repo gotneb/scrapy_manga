@@ -6,7 +6,8 @@ from core.sites.readm import (
     get_populars,
     get_pages,
 )
-from ..database import Database, Manga
+from ..database import Database
+from entities import Manga
 from .website_handler import WebsiteHandler
 
 import traceback

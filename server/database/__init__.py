@@ -1,3 +1,3 @@
 from .manga_database import *
-from .entities import *
+from .website_update import *
 from .database import *
