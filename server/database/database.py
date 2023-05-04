@@ -13,6 +13,21 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
+    def add_all(self, mangas: list[Manga]) -> list[ObjectId]:
+        """Insert a manga list  in database and returns an list with inserted ids"""
+        pass
+
+    @abstractclassmethod
+    def remove(self, url: str) -> bool:
+        """Delete document with same url in database"""
+        pass
+
+    @abstractclassmethod
+    def remove_all(self, urls: list[str]) -> bool:
+        """Delete all documents with same urls"""
+        pass
+
+    @abstractclassmethod
     def get(self, url: str) -> dict:
         """Returns document with same url"""
         pass
@@ -23,13 +38,43 @@ class Database(ABC):
         pass
 
     @abstractclassmethod
+    def search(self, search_term: str) -> list[dict]:
+        """Return mangas with similar titles or alternative titles"""
+        pass
+
+    @abstractclassmethod
     def exists(self, url: str) -> bool:
         """Checks if manga already exists by id"""
         pass
 
     @abstractclassmethod
+    def list_genres(self, language: str) -> list[str]:
+        """Returns a list with genres (by language: english or portuguese)"""
+        pass
+
+    @abstractclassmethod
+    def get_mangas_by_genre(self, genre: str) -> list[dict]:
+        """Returns a list with mangas"""
+        pass
+
+    @abstractclassmethod
+    def get_populars(self, origin: str) -> list[dict]:
+        """Return a list od the most popular mangas"""
+        pass
+
+    @abstractclassmethod
+    def get_latest_updates(self, origin: str) -> list[dict]:
+        """Return a list of recently updated mangas"""
+        pass
+
+    @abstractclassmethod
     def add_update_info(self, update: WebsiteUpdate) -> ObjectId:
         """Add website info"""
+        pass
+
+    @abstractclassmethod
+    def remove_update_info(self, origin: str) -> bool:
+        """Remove website info"""
         pass
 
     @abstractclassmethod
