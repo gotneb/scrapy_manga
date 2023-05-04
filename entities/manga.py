@@ -54,7 +54,7 @@ class Manga(Entity):
         }
 
     def get_chapter_names(self) -> list[str]:
-        return list(map(lambda chapter: chapter.name, self.chapters))
+        return list(map(lambda info: info.name, self.chapters_info))
 
     # Useful for debug
     def show(self) -> None:
