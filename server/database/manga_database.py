@@ -2,9 +2,10 @@ from bson import ObjectId
 from pymongo import MongoClient
 from .website_update import WebsiteUpdate
 from entities import Manga
+from .database import Database
 
 
-class MangaDatabase:
+class MangaDatabase(Database):
     def __init__(self) -> None:
         self.client = None
         self.database = None
