@@ -80,32 +80,35 @@ def get_pages(manga_url) -> list[str]:
     return url_imgs
 
 
-def get_populars(on_manga_received: Callable[[Manga], None] = None) -> list[Manga]:
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `readm.org` and returns top 10 most populars mangas."""
     driver = init_driver(show_window=False)
     url = "https://readm.org/popular-manga"
     driver.get(url)
+    counter = 0
 
     # Links to mangas
     links = []
-    mangas = []
     elems = driver.find_elements(
         By.CSS_SELECTOR, "ul.filter-results li.mb-lg div.poster-with-subject a"
     )
     for e in elems:
-        anchor = e.get_attribute("href")
+        if counter == 10:
+            break
+
+        link_tag = e.get_attribute("href")
         if len(links) == 0 or (
-            (not links.__contains__(anchor)) and (not anchor.__contains__("category"))
+            (not links.__contains__(link_tag)) and (not link_tag.__contains__("category"))
         ):
-            links.append(anchor)
-            manga = manga_detail(anchor)
+            links.append(link_tag)
 
-            mangas.append(manga)
             # Callback
-            if on_manga_received != None:
-                on_manga_received(manga)
+            if on_link_received != None:
+                on_link_received(link_tag)
+            
+            counter += 1
 
-    return mangas
+    return links
 
 
 def get_all_start_with(
