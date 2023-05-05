@@ -2,6 +2,7 @@ from core.sites.manga_livre import (
     manga_detail,
     get_all_start_with,
     get_latest_updates,
+    get_populars,
     get_pages,
 )
 from ..database import Database
@@ -12,7 +13,7 @@ import traceback
 
 
 class MangaLivreHandler(WebsiteHandler):
-    """Class that updates database with readm mangas"""
+    """Class that updates database with Manga Livre mangas"""
 
     def __init__(self, database: Database):
         self.origin = "manga_livre"
@@ -43,7 +44,14 @@ class MangaLivreHandler(WebsiteHandler):
         return urls
 
     def get_popular_urls(self):
-        return []
+        urls = []
+
+        try:
+            urls = urls + get_populars()
+        except Exception:
+            print(traceback.format_exc())
+
+        return urls
 
     def get_manga(self, manga_url: str) -> Manga:
         manga = manga_detail(manga_url, False)
