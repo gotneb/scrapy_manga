@@ -321,11 +321,12 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
         By.CSS_SELECTOR, "div#series-desc span.series-desc ol.series-synom li"
     )
 
-    alt_title = ""
+    li_texts = []
     for li in elems:
-        if is_oriental(li.text):
-            alt_title = li.text
-            break
+        li_texts.append(li.text)
+    
+    alt_title = ', '.join(li_texts)
+    print(alt_title)
 
     return alt_title
 
@@ -384,7 +385,3 @@ def _get_chapter_id(a_tag: str) -> str:
     # Python indexes are weird as hell
     # Last but one
     return splitted[-2]
-
-
-def is_oriental(word: str) -> bool:
-    return not word.isascii()
