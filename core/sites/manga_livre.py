@@ -326,7 +326,6 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
         li_texts.append(li.text)
     
     alt_title = ', '.join(li_texts)
-    print(alt_title)
 
     return alt_title
 
