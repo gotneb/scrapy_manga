@@ -21,6 +21,32 @@ _origin = "manga_livre"
 _language = "portuguese"
 
 
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `mangalivre.net` and returns top 10 most populars in the day mangas."""
+    url = 'https://mangalivre.net/lista-de-mangas/ordenar-por-numero-de-leituras/todos/dia'
+    links = []
+    counter = 0
+
+    driver = init_driver(show_window=False)
+    driver.get(url)
+
+    elems = driver.find_elements(By.CSS_SELECTOR, 'div.content-wraper ul.seriesList li a[href]')
+    for tag in elems:
+        if counter == 10:
+            break
+
+        link = tag.get_attribute('href')
+        links.append(link)
+
+        # Callback
+        if on_link_received is not None:
+            on_link_received(link)
+
+        counter += 1
+    
+    return links
+
+
 def get_latest_updates(
     limit: int = 30, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
