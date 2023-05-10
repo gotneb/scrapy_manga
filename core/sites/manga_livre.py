@@ -332,10 +332,6 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
         li_texts.append(li.text)
     
     alt_title = ', '.join(li_texts)
-<<<<<<< Updated upstream
-=======
-    #print(alt_title)
->>>>>>> Stashed changes
 
     return alt_title
 
