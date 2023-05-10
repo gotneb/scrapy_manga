@@ -90,12 +90,13 @@ def get_latest_updates(
     return mangas_urls
 
 
-def get_pages(manga_url: str) -> list[str]:
+def get_pages(chapter_url: str) -> list[str]:
     """Extract all image links from a manga chapter.\n
     `manga_url:` manga chapter
     """
+    print(f'Getting page: {chapter_url}')
     driver = init_driver(show_window=False)
-    driver.get(manga_url)
+    driver.get(chapter_url)
 
     # Toggle to vertical mode
     try:
@@ -105,7 +106,8 @@ def get_pages(manga_url: str) -> list[str]:
         )
         btn.click()
     except:
-        print("ALREADY IN VERTICAL MODE!")
+        # print("[:] already in vertical mode [:]")
+        pass
 
     # For adult content, agree I'm older than 18 years
     try:
@@ -114,17 +116,21 @@ def get_pages(manga_url: str) -> list[str]:
         )
         btn.click()
     except:
-        print("NOT AN ADULT CONTENT")
+        # Debug - print("NOT AN ADULT CONTENT")
+        pass
 
-    while True:
-        elem = driver.find_element(By.CSS_SELECTOR, "div.loading")
+    try:
+        while True:
+            elem = driver.find_element(By.CSS_SELECTOR, "div.loading")
 
-        # When all pages were loaded, the 'style' is triggered
-        # Before that, it doesn't have any value
-        if len(elem.get_attribute("style")) > 1:
-            break
+            # When all pages were loaded, the 'style' is triggered
+            # Before that, it doesn't have any value
+            if len(elem.get_attribute("style")) > 1:
+                break
 
-        ActionChains(driver).scroll_by_amount(0, 200).perform()
+            ActionChains(driver).scroll_by_amount(0, 1500).perform()
+    except:
+        pass
 
     pages = []
     elems = driver.find_elements(By.CSS_SELECTOR, "div.manga-image picture img")
@@ -326,6 +332,10 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
         li_texts.append(li.text)
     
     alt_title = ', '.join(li_texts)
+<<<<<<< Updated upstream
+=======
+    #print(alt_title)
+>>>>>>> Stashed changes
 
     return alt_title
 
