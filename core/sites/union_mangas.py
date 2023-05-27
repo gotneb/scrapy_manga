@@ -1,11 +1,27 @@
+# External packages
 from bs4 import BeautifulSoup
-from requests import get
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-
+# Ours code
 from core.driver import init_driver
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
+
+
+def get_pages(chapter_url) -> list[str]:
+    """Extract all image links from a manga chapter.
+
+    `manga_url:` a chapter of a manga
+    """
+    driver = init_driver(False)
+    driver.get(chapter_url)
+    html = driver.page_source
+    soup = BeautifulSoup(html, "html.parser")
+
+    tag_pages = soup.css.select("img.img-responsive.img-manga")
+    pages = []
+    for page in tag_pages:
+        pages.append(page['src'])
+
+    return pages
 
 
 def manga_detail(manga_url, show_window=False):
