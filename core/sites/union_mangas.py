@@ -1,3 +1,5 @@
+# Python
+from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
 # Ours code
@@ -16,6 +18,8 @@ def get_pages(chapter_url) -> list[str]:
     html = driver.page_source
     soup = BeautifulSoup(html, "html.parser")
 
+    driver.quit()
+
     tag_pages = soup.css.select("img.img-responsive.img-manga")
     pages = []
     for page in tag_pages:
@@ -23,6 +27,29 @@ def get_pages(chapter_url) -> list[str]:
 
     return pages
 
+
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `unionleitor.top` and returns top 12 most populars mangas."""
+    populars_url = 'https://unionleitor.top/home' 
+    driver = init_driver(False)
+    driver.get(populars_url)
+    html = driver.page_source
+    driver.quit()
+    soup = BeautifulSoup(html, "html.parser")
+
+    elems = soup.css.select("div.row")[4]
+    links = []
+    for e in elems:
+        a_tag = e.find('a')
+        # Wtf, I really don't even know why -1 is happening...
+        if a_tag != None and a_tag != -1:
+            link = a_tag['href']
+            links.append(link)
+            # Callback
+            if on_link_received != None:
+                on_link_received(link)
+
+    return links
 
 def manga_detail(manga_url, show_window=False):
     """
