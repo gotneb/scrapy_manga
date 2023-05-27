@@ -23,8 +23,10 @@ def manga_detail(manga_url, show_window=False):
     driver = init_driver(False)
     driver.get(manga_url)
     html = driver.page_source
-    driver.quit()
     soup = BeautifulSoup(html, "html.parser")
+
+    # Clean resources
+    driver.quit()
 
     title = get_title(soup)
     alt_title = get_alt_title(soup)
@@ -61,7 +63,7 @@ def get_title(soup: BeautifulSoup) -> str:
 
 
 def get_alt_title(soup: BeautifulSoup) -> str:
-    """Returns alternative title from manga"""
+    """Returns alternative title from manga. Otherwise None."""
     try:
         title = soup.css.select("div.col-md-8.col-xs-12 h4.media-heading.manga-perfil")
         # It removes 'Titulos Altenativo(s)'
@@ -71,7 +73,7 @@ def get_alt_title(soup: BeautifulSoup) -> str:
     
 
 def get_author(soup: BeautifulSoup) -> str:
-    """Returns author from manga."""
+    """Returns author from manga. Otherwise None."""
     try:
         title = soup.css.select("div.col-md-8.col-xs-12 h4.media-heading.manga-perfil")
         # It removes 'Autor'
@@ -81,7 +83,7 @@ def get_author(soup: BeautifulSoup) -> str:
 
 
 def get_artist(soup: BeautifulSoup) -> str:
-    """Returns author from manga. If does not exist, hence it returns an empty str."""
+    """Returns author from manga. Otherwise None."""
     try:
         title = soup.css.select("div.col-md-8.col-xs-12 h4.media-heading.manga-perfil")
         # It removes 'Artista'
@@ -99,7 +101,7 @@ def get_score(soup: BeautifulSoup) -> float:
 
 
 def get_status(soup: BeautifulSoup) -> str:
-    """Returns status from manga."""
+    """Returns status from manga. Otherwise None."""
     try:
         title = soup.css.select("div.col-md-8.col-xs-12 h4.media-heading.manga-perfil")
         # It removes 'Status' word
@@ -109,7 +111,7 @@ def get_status(soup: BeautifulSoup) -> str:
     
 
 def get_genres(soup: BeautifulSoup) -> list[str]:
-    """Returns a list of genres from manga."""
+    """Returns a list of genres from manga. Otherwise None."""
     try:
         tag = soup.css.select("div.col-md-8.col-xs-12 h4.media-heading.manga-perfil")
         # It removes 'Genêro(s)' word
