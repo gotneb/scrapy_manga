@@ -1,55 +1,63 @@
 # Python
+import math
 from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
 # Ours code
 from core.driver import init_driver
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
 
-def get_pages(chapter_url) -> list[str]:
-    """Extract all image links from a manga chapter.
-
-    `manga_url:` a chapter of a manga
+def get_all_start_with(
+    letter, show_window=False, on_link_received: Callable[[str], None] = None
+) -> list[str]:
     """
+    Visits `unionleitor.top` and extract all links that starts with `letter` on its name.
+
+    Arguments:
+
+    `letter:` manga initial name.
+
+    `show_window:` show google's chrome window.
+
+    `on_link_received:` callback that's called when manga's link is received.
+    """
+    if len(letter) > 2:
+        raise Exception("letter must be an unique character.")
+
+    url = f'https://unionleitor.top/lista-mangas/a-z/1/{letter}'
     driver = init_driver(False)
-    driver.get(chapter_url)
+    driver.get(url)
     html = driver.page_source
     soup = BeautifulSoup(html, "html.parser")
 
-    driver.quit()
-
-    tag_pages = soup.css.select("img.img-responsive.img-manga")
-    pages = []
-    for page in tag_pages:
-        pages.append(page['src'])
-
-    return pages
-
-
-def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
-    """Visits the `unionleitor.top` and returns top 12 most populars mangas."""
-    populars_url = 'https://unionleitor.top/home' 
-    driver = init_driver(False)
-    driver.get(populars_url)
-    html = driver.page_source
-    driver.quit()
-    soup = BeautifulSoup(html, "html.parser")
-
-    elems = soup.css.select("div.row")[4]
+    # Get the button to skip to the last page in that section
+    last = soup.css.select("div.row div.col-md-8.tamanho-bloco-perfil div.row.text-center nav li a")[-1]
+    # Extract url and actually get the last index
+    end_index = int(last['href'].split('/')[-2])
+    
     links = []
-    for e in elems:
-        a_tag = e.find('a')
-        # Wtf, I really don't even know why -1 is happening...
-        if a_tag != None and a_tag != -1:
-            link = a_tag['href']
-            links.append(link)
-            # Callback
-            if on_link_received != None:
-                on_link_received(link)
+    for index in range(1, end_index + 1):
+        driver.get(f'https://unionleitor.top/lista-mangas/a-z/{index}/{letter}')
+        html = driver.page_source
+        soup = BeautifulSoup(html, "html.parser")
 
+        # Extract links from mangas
+        tags = soup.css.select('div.row div.col-md-8.tamanho-bloco-perfil div.row div.col-md-3.col-xs-4.text-center.lista-mangas-novos a')
+        for t in tags:
+            if t.has_attr('class'):
+                l = t['href']
+                links.append(l)
+                # Callback
+                if on_link_received != None:
+                    on_link_received(l)
+
+    driver.quit()
     return links
+
 
 def manga_detail(manga_url, show_window=False):
     """
