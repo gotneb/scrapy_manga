@@ -3,8 +3,10 @@ import math
 from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
+from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoAlertPresentException
 # Ours code
 from core.driver import init_driver
 from entities.chapter_info import ChapterInfo
@@ -58,6 +60,126 @@ def get_all_start_with(
     driver.quit()
     return links
 
+# For some shit reason, `Union Mangas` likes to
+# spawn a fucking `alert dialog`` in the screen :(
+def is_there_alert(driver: webdriver.Chrome) -> bool:
+    try:
+        driver.switch_to.alert
+        return True
+    except NoAlertPresentException:
+        return False
+
+
+# Helper function to `get_latest_updates`
+def extract_mangas(driver: webdriver.Chrome, on_link_received: Callable[[str], None] = None, limit: int = 20) -> list[str]:
+    links = []
+    total = 0
+    elems = driver.find_elements(By.CSS_SELECTOR, 'div.row div.row div.col-md-12 > a.link-titulo')
+    for e in elems:
+        if total == limit:
+            break
+
+        if len(e.text) > 0:
+            l = e.get_attribute('href')
+            links.append(l)
+            # Callback
+            if on_link_received != None:
+                on_link_received(l)
+            total += 1
+
+    return links
+
+
+def get_latest_updates(
+    limit: int = 20, on_link_received: Callable[[str], None] = None
+) -> list[str]:
+    """
+    Returns a list of all links from `unionleitor.top` that were updateds.
+
+    Arguments:
+
+    `limit:` the total quantity of manga links will be extracted.
+    """
+    if limit > 20:
+        raise Exception("It's temporarily prohibited get more than 20 links due this function still being under development!")
+    
+    latest_url = 'https://unionleitor.top/home'
+    driver = init_driver(False)
+    driver.get(latest_url)
+
+    mangas = extract_mangas(driver, on_link_received, limit)
+    print(f'Got {len(mangas)} mangas')
+    return mangas
+
+    # ==========================================================================================================
+    # I'm aware about this shit...
+    # I'll work in a way to solve it, or at least try
+    # ==========================================================================================================
+    #total_clicks = math.ceil(limit / 20)
+    #clicks = 1
+    #
+    #while clicks <= total_clicks:
+    #        if is_there_alert(driver):
+    #            driver.switch_to.alert.accept()
+    #        btn = driver.find_element(By.CSS_SELECTOR, 'div#linha-botao-mais')
+    #        display = btn.get_attribute('style')
+    #
+    #        # It means the content is fully loaded...
+    #        if len(display) <= 1:
+    #            mangas = extract_mangas(driver, on_link_received)
+    #            print(f'Got {len(mangas)} mangas | click: {clicks}')
+    #            clicks += 1
+    #            btn.click()
+    #        driver.implicitly_wait(0.5)
+    #
+    #input('Press any key to cancel...')
+    #driver.quit()
+    #return []
+    # ==========================================================================================================
+
+
+def get_pages(chapter_url) -> list[str]:
+    """Extract all image links from a manga chapter.
+
+    `manga_url:` a chapter of a manga
+    """
+    driver = init_driver(False)
+    driver.get(chapter_url)
+    html = driver.page_source
+    soup = BeautifulSoup(html, "html.parser")
+
+    driver.quit()
+
+    tag_pages = soup.css.select("img.img-responsive.img-manga")
+    pages = []
+    for page in tag_pages:
+        pages.append(page['src'])
+
+    return pages
+
+
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `unionleitor.top` and returns top 12 most populars mangas."""
+    populars_url = 'https://unionleitor.top/home' 
+    driver = init_driver(False)
+    driver.get(populars_url)
+    html = driver.page_source
+    driver.quit()
+    soup = BeautifulSoup(html, "html.parser")
+
+    elems = soup.css.select("div.row")[4]
+    links = []
+    for e in elems:
+        a_tag = e.find('a')
+        # Wtf, I really don't even know why -1 is happening...
+        if a_tag != None and a_tag != -1:
+            link = a_tag['href']
+            links.append(link)
+            # Callback
+            if on_link_received != None:
+                on_link_received(link)
+
+    return links
 
 def manga_detail(manga_url, show_window=False):
     """
