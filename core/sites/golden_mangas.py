@@ -9,6 +9,23 @@ from entities.manga import Manga
 _domain = 'https://goldenmangas.top'
 
 
+def get_pages(chapter_url) -> list[str]:
+    """Extract all image links from a manga chapter.
+
+    `chapter_url:` a chapter of a manga
+    """
+    html = get(chapter_url)
+    soup = BeautifulSoup(html.text, "html.parser")
+    url_imgs = []
+
+    tags = soup.css.select("body article div div#leitor article.container.backTop div#leitor_full.row div#capitulos_images.col-sm-12.text-center img.img-responsive.img-manga")
+    for t in tags:
+        img = f"{_domain}{t['src']}"
+        url_imgs.append(img) 
+    
+    return url_imgs
+
+
 def get_all_start_with(
     letter: str, show_window=False, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
