@@ -75,6 +75,28 @@ def get_all_start_with(
     return links
 
 
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `goldenmangas.top` and returns top 20 most populars mangas."""
+
+    html = get('https://goldenmangas.top/')    
+    soup = BeautifulSoup(html.text, "html.parser")
+    tags = soup.css.select("div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a")
+    populars = []
+    for a in tags:
+        link = f'{_domain}{a["href"]}'
+        # Remove the chapter number from link
+        split_link = link.split('/')[0:-1] 
+        # Now it's only the manga link itself
+        manga_link = "/".join(split_link)
+        populars.append(manga_link)
+        #  Callback
+        if on_link_received != None:
+            on_link_received(manga_link)
+
+    return populars
+
+
+
 def manga_detail(manga_url, show_window=False) -> Manga:
     """
     Visits the `manga_url` and extract all data on it.\n
