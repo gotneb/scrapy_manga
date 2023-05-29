@@ -1,10 +1,62 @@
+from typing import Callable
 from bs4 import BeautifulSoup
 from requests import get
 
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
+
 _domain = 'https://goldenmangas.top'
+
+
+def get_all_start_with(
+    letter: str, show_window=False, on_link_received: Callable[[str], None] = None
+) -> list[str]:
+    """
+    Visits `readm.org` and extract all links that starts with `letter` on its name.\n
+    Arguments:
+    `letter:` manga initial name.
+    `show_window:` show google's chrome window.
+    `on_link_received:` callback that's called when manga's link is received.\n
+    Return:
+    list of links.
+    """
+    if len(letter) > 2:
+        raise Exception("letter must be an unique character.")
+    letter = letter.upper()
+
+    if show_window:
+        raise Exception('"show_window" is disabled...')
+    
+    html = get(f'https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1')
+    soup = BeautifulSoup(html.text, "html.parser")
+
+    # Get last index value
+    tags = soup.css.select("div.container.text-center nav.text-center ul.pagination li a")
+    if len(tags) > 3:
+        end_index = int(tags[-2].text)
+    else:
+        end_index = 1
+    
+    # Get data on manga
+    links = []
+    for i in range(1, end_index+1):
+        # if it's the first, then it isn't needed to load the content again...
+        if i != 1:
+            html = get(f'https://goldenmangas.top/mangabr?letra={letter}&pagina={i}')
+            soup = BeautifulSoup(html.text, "html.parser")
+
+        # Get manga content
+        tags = soup.css.select("div.container section.row div.mangas.col-lg-2.col-md-2.col-xs-6 a")
+        for a in tags:
+            l = f'{_domain}{a["href"]}'
+            links.append(l)
+            # Callback
+            if on_link_received != None:
+                on_link_received(l)
+
+    return links
+
 
 def manga_detail(manga_url, show_window=False) -> Manga:
     """
