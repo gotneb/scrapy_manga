@@ -1,7 +1,10 @@
+# Python
+import math
 from typing import Callable
+# External packages
 from bs4 import BeautifulSoup
 from requests import get
-
+# Ours code
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
@@ -24,6 +27,46 @@ def get_pages(chapter_url) -> list[str]:
         url_imgs.append(img) 
     
     return url_imgs
+
+
+def get_latest_updates(
+    limit: int = 18, on_link_received: Callable[[str], None] = None
+) -> list[str]:
+    """
+    Returns a list of all links from `goldenmangas.top` that were updateds.\n
+    Arguments:
+        `limit:` the total quantity of manga links will be extracted.
+    Return:
+        A list of recent mangas updated.
+    """
+    # 540 it's equivalente to 30 page on "goldenmangas.top".
+    if limit > 540:
+        raise Exception("limit must be lower or equals than 540!")
+    
+    total_pages = math.ceil(limit / 18)
+    counter = 0
+    links = []
+
+    for i in range(1, total_pages+1):
+        if counter == limit:
+            break
+
+        html = get(f"https://goldenmangas.top/index.php?pagina={i}")
+        soup = BeautifulSoup(html.text, "html.parser")
+        tags = soup.css.select("div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao > a")
+
+        for a in tags:
+            if counter == limit:
+                break
+
+            l = f"{_domain}{a['href']}"
+            links.append(l)
+            counter += 1
+
+            if on_link_received != None:
+                on_link_received(l)
+
+    return links
 
 
 def get_all_start_with(
@@ -94,7 +137,6 @@ def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
             on_link_received(manga_link)
 
     return populars
-
 
 
 def manga_detail(manga_url, show_window=False) -> Manga:
