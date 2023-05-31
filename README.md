@@ -7,3 +7,10 @@ On terminal:
 Download chrome driver:
 
 https://chromedriver.chromium.org/downloads
+
+On .env:
+
+```
+API_BASE_URL=\<url da api>
+AUTH_TOKEN=<token de autenticação da api>
+```
