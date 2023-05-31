@@ -15,11 +15,11 @@ import traceback
 class MangaLivreHandler(WebsiteHandler):
     """Class that updates database with Manga Livre mangas"""
 
-    def __init__(self, database: Database):
+    def __init__(self):
         self.origin = "manga_livre"
         self.language = "portuguese"
 
-        super().__init__(database=database, origin=self.origin)
+        super().__init__(origin=self.origin, language=self.language)
 
     def get_all_urls(self):
         urls = []

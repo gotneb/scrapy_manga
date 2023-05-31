@@ -1,6 +1,5 @@
 from abc import ABC, abstractclassmethod
-from .website_update import WebsiteUpdate
-from entities import Manga
+from entities import Manga, WebsiteUpdate
 from bson import ObjectId
 
 

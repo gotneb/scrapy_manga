@@ -1,7 +1,7 @@
 from bson import ObjectId
 from pymongo import MongoClient
-from .website_update import WebsiteUpdate
-from entities import Manga
+from entities.manga import Manga
+from entities.website_update import WebsiteUpdate
 from .database import Database
 
 

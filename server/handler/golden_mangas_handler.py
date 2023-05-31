@@ -1,4 +1,4 @@
-from core.sites.readm import (
+from core.sites.golden_mangas import (
     manga_detail,
     get_all_start_with,
     get_latest_updates,
@@ -11,12 +11,12 @@ from .website_handler import WebsiteHandler
 import traceback
 
 
-class ReadmHandler(WebsiteHandler):
+class GoldenMangasHandler(WebsiteHandler):
     """Class that updates database with readm mangas"""
 
     def __init__(self):
-        self.origin = "readm"
-        self.language = "english"
+        self.origin = "golden_mangas"
+        self.language = "portuguese"
 
         super().__init__(origin=self.origin, language=self.language)
 
@@ -63,7 +63,7 @@ class ReadmHandler(WebsiteHandler):
         return manga
 
     def get_chapter(self, manga_url: str, info: ChapterInfo) -> Chapter:
-        cp_url = f"{manga_url}/{info.name}/all-pages"
+        cp_url = f"{manga_url}/{info.name}"
         pages = get_pages(cp_url)
 
         return Chapter(name=info.name, pages=pages)

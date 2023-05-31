@@ -1,15 +1,19 @@
 # Python
 import math
 from typing import Callable
+
 # External packages
 from bs4 import BeautifulSoup
 from requests import get
+
 # Ours code
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
 
-_domain = 'https://goldenmangas.top'
+_domain = "https://goldenmangas.top"
+_origin = "golden_mangas"
+_language = "portuguese"
 
 
 def get_pages(chapter_url) -> list[str]:
@@ -21,11 +25,13 @@ def get_pages(chapter_url) -> list[str]:
     soup = BeautifulSoup(html.text, "html.parser")
     url_imgs = []
 
-    tags = soup.css.select("body article div div#leitor article.container.backTop div#leitor_full.row div#capitulos_images.col-sm-12.text-center img.img-responsive.img-manga")
+    tags = soup.css.select(
+        "body article div div#leitor article.container.backTop div#leitor_full.row div#capitulos_images.col-sm-12.text-center img.img-responsive.img-manga"
+    )
     for t in tags:
         img = f"{_domain}{t['src']}"
-        url_imgs.append(img) 
-    
+        url_imgs.append(img)
+
     return url_imgs
 
 
@@ -42,18 +48,20 @@ def get_latest_updates(
     # 540 it's equivalente to 30 page on "goldenmangas.top".
     if limit > 540:
         raise Exception("limit must be lower or equals than 540!")
-    
+
     total_pages = math.ceil(limit / 18)
     counter = 0
     links = []
 
-    for i in range(1, total_pages+1):
+    for i in range(1, total_pages + 1):
         if counter == limit:
             break
 
         html = get(f"https://goldenmangas.top/index.php?pagina={i}")
         soup = BeautifulSoup(html.text, "html.parser")
-        tags = soup.css.select("div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao > a")
+        tags = soup.css.select(
+            "div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao > a"
+        )
 
         for a in tags:
             if counter == limit:
@@ -87,27 +95,31 @@ def get_all_start_with(
 
     if show_window:
         raise Exception('"show_window" is disabled...')
-    
-    html = get(f'https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1')
+
+    html = get(f"https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1")
     soup = BeautifulSoup(html.text, "html.parser")
 
     # Get last index value
-    tags = soup.css.select("div.container.text-center nav.text-center ul.pagination li a")
+    tags = soup.css.select(
+        "div.container.text-center nav.text-center ul.pagination li a"
+    )
     if len(tags) > 3:
         end_index = int(tags[-2].text)
     else:
         end_index = 1
-    
+
     # Get data on manga
     links = []
-    for i in range(1, end_index+1):
+    for i in range(1, end_index + 1):
         # if it's the first, then it isn't needed to load the content again...
         if i != 1:
-            html = get(f'https://goldenmangas.top/mangabr?letra={letter}&pagina={i}')
+            html = get(f"https://goldenmangas.top/mangabr?letra={letter}&pagina={i}")
             soup = BeautifulSoup(html.text, "html.parser")
 
         # Get manga content
-        tags = soup.css.select("div.container section.row div.mangas.col-lg-2.col-md-2.col-xs-6 a")
+        tags = soup.css.select(
+            "div.container section.row div.mangas.col-lg-2.col-md-2.col-xs-6 a"
+        )
         for a in tags:
             l = f'{_domain}{a["href"]}'
             links.append(l)
@@ -121,14 +133,16 @@ def get_all_start_with(
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `goldenmangas.top` and returns top 20 most populars mangas."""
 
-    html = get('https://goldenmangas.top/')    
+    html = get("https://goldenmangas.top/")
     soup = BeautifulSoup(html.text, "html.parser")
-    tags = soup.css.select("div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a")
+    tags = soup.css.select(
+        "div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a"
+    )
     populars = []
     for a in tags:
         link = f'{_domain}{a["href"]}'
         # Remove the chapter number from link
-        split_link = link.split('/')[0:-1] 
+        split_link = link.split("/")[0:-1]
         # Now it's only the manga link itself
         manga_link = "/".join(split_link)
         populars.append(manga_link)
@@ -148,7 +162,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     """
     if show_window:
         raise Exception('"show_window" is disabled...')
-    
+
     html = get(manga_url)
     soup = BeautifulSoup(html.text, "html.parser")
 
@@ -170,8 +184,8 @@ def manga_detail(manga_url, show_window=False) -> Manga:
         artist=artist,
         status=stt,
         url=manga_url,
-        origin='golden_manga',
-        language='portuguese',
+        origin=_origin,
+        language=_language,
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
@@ -209,14 +223,18 @@ def get_status(soup: BeautifulSoup) -> str:
 
 def get_thumbnail(soup: BeautifulSoup) -> str:
     """Returns thumbnail (image) from manga."""
-    tag = soup.css.select("div.container.manga div.row div.col-sm-8 div.row div.col-sm-4.text-right img.img-responsive")
-    img = tag[0]['src']
-    return f'{_domain}{img}'
+    tag = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 div.row div.col-sm-4.text-right img.img-responsive"
+    )
+    img = tag[0]["src"]
+    return f"{_domain}{img}"
 
 
 def get_genres(soup: BeautifulSoup) -> list[str]:
     """Returns a list of genres from manga."""
-    tags = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a.label.label-warning")
+    tags = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 h5.cg_color a.label.label-warning"
+    )
     genres = []
     for g in tags:
         if len(g.text) > 0:
@@ -228,7 +246,7 @@ def get_score(soup: BeautifulSoup) -> float:
     """Returns the score given by the users."""
     try:
         tag = soup.css.select("div.container.manga div.row div.col-sm-8 h2.cg_color")[1]
-        score = tag.text.split(' ')[0].replace('#', '')
+        score = tag.text.split(" ")[0].replace("#", "")
         return float(score)
     except:
         # There's no score at all
@@ -237,7 +255,9 @@ def get_score(soup: BeautifulSoup) -> float:
 
 def get_summary(soup: BeautifulSoup) -> str:
     """Returns summary from manga."""
-    tag = soup.css.select("div.container.manga div.row div.col-sm-8 div#manga_capitulo_descricao")[0]
+    tag = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 div#manga_capitulo_descricao"
+    )[0]
     return " ".join(tag.text.split())
 
 
@@ -249,8 +269,8 @@ def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
 
     chapters = []
     for a in a_tags:
-        text = a.text.strip().split(' ')
+        text = a.text.strip().split(" ")
         if "Cap" in text:
             chapters.append(ChapterInfo(text[1]))
-    
+
     return chapters

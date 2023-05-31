@@ -1,26 +1,19 @@
-from server import ReadmHandler, MangaDatabase, MangaLivreHandler
+from server.handler.readm_handler import ReadmHandler
+from server.handler.golden_mangas_handler import GoldenMangasHandler
+
 import schedule
 from time import sleep
 from random import randint
-from dotenv import load_dotenv
-from os import getenv
-
-load_dotenv()
 
 
 def update_database():
-    db = MangaDatabase()
+    readmHandler = ReadmHandler()
+    readmHandler.start()
+    readmHandler.join()
 
-    if db.connect(getenv("MONGO_URI")):
-        readmHandler = ReadmHandler(db)
-        readmHandler.start()
-        readmHandler.join()
-
-        mangaLivreHandler = MangaLivreHandler(db)
-        mangaLivreHandler.start()
-        mangaLivreHandler.join()
-
-        db.close()
+    goldenMangasHandler = GoldenMangasHandler()
+    goldenMangasHandler.start()
+    goldenMangasHandler.join()
 
 
 if __name__ == "__main__":
