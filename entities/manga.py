@@ -59,18 +59,16 @@ class Manga(Entity):
     # Useful for debug
     def show(self) -> None:
         """Prints manga atributes on standard output"""
-        print(
-            f"""Origin: {self.origin}
-                Url: {self.url}
-                Title: {self.title}
-                Alternative title: {self.alternative_title}
-                Author: {self.author}
-                Artist: {self.artist}
-                Status: {self.status}
-                Rating: {self.rating}
-                Language: {self.language}
-                Thumbnail: {self.thumbnail}
-                genres: {self.genres}
-                Summary: {self.summary}
-                Chapters: {self.get_chapter_names()}"""
-        )
+        print(f"""Origin: {self.origin}
+Url: {self.url}
+Title: {self.title}
+Alternative title: {self.alternative_title}
+Author: {self.author}
+Artist: {self.artist}
+Status: {self.status}
+Rating: {self.rating}
+Language: {self.language}
+Thumbnail: {self.thumbnail}
+genres: {self.genres}
+Summary: {self.summary}
+Chapters: {self.get_chapter_names()}""")
