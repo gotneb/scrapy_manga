@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from entities.manga import Manga
 from entities.chapter import Chapter
 from entities.website_update import WebsiteUpdate
+from errors.api_error import ApiError
 
 load_dotenv()
 
@@ -23,38 +24,50 @@ class API:
         response = self.section.get(url)
         results = response.json()
 
-        return response.status_code == 200 and results["data"] != None
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
+        return results["data"] != None
 
     def update_info(self, info: WebsiteUpdate) -> bool:
         url = self.prepare_url(f"/info/update")
         response = self.section.post(url, json=info.to_dict())
         results = response.json()
 
-        return response.status_code == 200 and results["data"]
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
+        return results["data"]
 
     def add_info(self, info: WebsiteUpdate) -> bool:
         url = self.prepare_url(f"/info/add")
         response = self.section.post(url, json=info.to_dict())
         results = response.json()
 
-        return response.status_code == 200 and results["data"] != None
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
+        return results["data"] != None
 
     def manga_exists(self, manga_url: str) -> str:
         url = self.prepare_url(f"/mangas/exists")
         response = self.section.post(url, json={"url": manga_url})
         results = response.json()
 
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
         return results["data"]
 
     def get_chapter_names(self, manga_id: str) -> list[str]:
         url = self.prepare_url(f"/chapters/names/{manga_id}")
         response = self.section.get(url)
+        results = response.json()
 
-        if response.status_code == 200:
-            results = response.json()
-            return results["data"]
+        if response.status_code != 200:
+            raise ApiError(results["error"])
 
-        return []
+        return results["data"]
 
     def add_chapters(self, manga_id: str, chapters: list[Chapter]) -> bool:
         prepared_chapters = list(map(lambda chapter: chapter.to_dict(), chapters))
@@ -67,18 +80,20 @@ class API:
 
         results = response.json()
 
-        return response.status_code == 200 and results["data"]
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
+        return results["data"]
 
     def add_manga(self, manga: Manga) -> str:
         url = self.prepare_url(f"/mangas/add")
         response = self.section.post(url, json=manga.to_dict())
         results = response.json()
 
-        if response.status_code == 200:
-            return results["data"]
-        else:
-            print(results)
-            return None
+        if response.status_code != 200:
+            raise ApiError(results["error"])
+
+        return results["data"]
 
 
 api = API(auth_token=os.getenv("AUTH_TOKEN"), base_url=os.getenv("API_BASE_URL"))
