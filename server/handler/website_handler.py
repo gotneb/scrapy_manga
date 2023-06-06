@@ -98,12 +98,17 @@ class WebsiteHandler(ABC, Thread):
 
     def save(self, manga_url: str):
         """Save a new manga in the database."""
-        manga = self.get_manga(manga_url)
+        manga = self.get_manga_with_chapter_pages(manga_url)
         api.add_manga(manga)
 
     @abstractmethod
+    def get_manga_with_chapter_pages(self, manga_url: str) -> Manga:
+        """Download a manga with chapter pages"""
+        pass
+
+    @abstractmethod
     def get_manga(self, manga_url: str) -> Manga:
-        """Get the manga entity (server.entities.Manga)."""
+        """Download a manga without chapter pages"""
         pass
 
     @abstractmethod

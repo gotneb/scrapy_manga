@@ -53,6 +53,9 @@ class ReadmHandler(WebsiteHandler):
         return urls
 
     def get_manga(self, manga_url: str) -> Manga:
+        return manga_detail(manga_url, False)
+
+    def get_manga_with_chapter_pages(self, manga_url: str) -> Manga:
         manga = manga_detail(manga_url, False)
         manga.chapters = []
 

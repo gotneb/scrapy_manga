@@ -12,8 +12,8 @@ load_dotenv()
 
 class API:
     def __init__(self, auth_token: str, base_url: str) -> None:
-        self.section = requests.Session()
-        self.section.headers = {"authorization": auth_token}
+        self.session = requests.Session()
+        self.session.headers = {"authorization": auth_token}
         self.base_url = base_url
 
     def prepare_url(self, endpoint: str) -> str:
@@ -21,7 +21,7 @@ class API:
 
     def origin_exists(self, origin: str) -> bool:
         url = self.prepare_url(f"/info/get/{origin}")
-        response = self.section.get(url)
+        response = self.session.get(url)
         results = response.json()
 
         if response.status_code != 200:
@@ -31,7 +31,7 @@ class API:
 
     def update_info(self, info: WebsiteUpdate) -> bool:
         url = self.prepare_url(f"/info/update")
-        response = self.section.post(url, json=info.to_dict())
+        response = self.session.post(url, json=info.to_dict())
         results = response.json()
 
         if response.status_code != 200:
@@ -41,7 +41,7 @@ class API:
 
     def add_info(self, info: WebsiteUpdate) -> bool:
         url = self.prepare_url(f"/info/add")
-        response = self.section.post(url, json=info.to_dict())
+        response = self.session.post(url, json=info.to_dict())
         results = response.json()
 
         if response.status_code != 200:
@@ -51,7 +51,7 @@ class API:
 
     def manga_exists(self, manga_url: str) -> str:
         url = self.prepare_url(f"/mangas/exists")
-        response = self.section.post(url, json={"url": manga_url})
+        response = self.session.post(url, json={"url": manga_url})
         results = response.json()
 
         if response.status_code != 200:
@@ -61,7 +61,7 @@ class API:
 
     def get_chapter_names(self, manga_id: str) -> list[str]:
         url = self.prepare_url(f"/chapters/names/{manga_id}")
-        response = self.section.get(url)
+        response = self.session.get(url)
         results = response.json()
 
         if response.status_code != 200:
@@ -76,7 +76,7 @@ class API:
         body = {"id": manga_id, "chapters": prepared_chapters}
 
         url = self.prepare_url(f"/chapters/add")
-        response = self.section.post(url, json=body)
+        response = self.session.post(url, json=body)
 
         results = response.json()
 
@@ -87,7 +87,7 @@ class API:
 
     def add_manga(self, manga: Manga) -> str:
         url = self.prepare_url(f"/mangas/add")
-        response = self.section.post(url, json=manga.to_dict())
+        response = self.session.post(url, json=manga.to_dict())
         results = response.json()
 
         if response.status_code != 200:
