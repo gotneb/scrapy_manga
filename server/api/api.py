@@ -24,6 +24,9 @@ class API:
         response = self.session.get(url)
         results = response.json()
 
+        if response.status_code == 404:
+            return False
+
         if response.status_code != 200:
             raise ApiError(results["error"])
 
