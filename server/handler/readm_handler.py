@@ -18,7 +18,11 @@ class ReadmHandler(WebsiteHandler):
         self.origin = "readm"
         self.language = "english"
 
-        super().__init__(origin=self.origin, language=self.language)
+        super().__init__(
+            origin=self.origin,
+            language=self.language,
+            control_file_name=f"{self.origin}_urls.txt",
+        )
 
     def get_all_urls(self):
         urls = []

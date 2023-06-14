@@ -4,15 +4,19 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, Future
 from ..api import *
 from abc import ABC, abstractmethod
+from ..file_handler.file_handler import *
+from threading import Lock
 
 
 class WebsiteHandler(ABC, Thread):
     """Base class for websites handlers."""
 
-    def __init__(self, origin: str, language: str) -> None:
+    def __init__(self, origin: str, language: str, control_file_name: str) -> None:
         Thread.__init__(self)
         self.origin = origin
         self.language = language
+        self.control_file_name = control_file_name
+        self.file_lock = Lock()
 
         self.number_of_works = 3  # Set this value according to your preference (affects the computer's performance)
 
@@ -21,27 +25,35 @@ class WebsiteHandler(ABC, Thread):
 
         print(f"Handler ({self.origin}): started.")
 
-        print(f"Handler ({self.origin}): downloading latest updated urls.")
-        latest_updated_urls = self.get_latest_updated_urls()
+        if (not file_exist(self.control_file_name)) or (
+            get_time_since_last_update(self.control_file_name) >= 24
+        ):
+            print(f"Handler ({self.origin}): downloading latest updated urls.")
+            latest_updated_urls = self.get_latest_updated_urls()
 
-        print(f"Handler ({self.origin}): downloading the most popular urls.")
-        popular_urls = self.get_popular_urls()
+            print(f"Handler ({self.origin}): downloading the most popular urls.")
+            popular_urls = self.get_popular_urls()
 
-        info = WebsiteUpdate(
-            origin=self.origin,
-            language=self.language,
-            populars=popular_urls,
-            latest_updates=latest_updated_urls,
-        )
+            info = WebsiteUpdate(
+                origin=self.origin,
+                language=self.language,
+                populars=popular_urls,
+                latest_updates=latest_updated_urls,
+            )
 
-        if origin_exists(info.origin):
-            update_info(info)
-            urls = latest_updated_urls
-        else:
-            add_info(info)
+            if origin_exists(info.origin):
+                update_info(info)
 
-            print(f"Handler ({self.origin}): downloading all urls.")
-            urls = self.get_all_urls()
+                save_operation_file(self.control_file_name, latest_updated_urls)
+            else:
+                add_info(info)
+
+                print(f"Handler ({self.origin}): downloading all urls.")
+                all_urls = self.get_all_urls()
+
+                save_operation_file(self.control_file_name, all_urls)
+
+        urls = get_urls_not_processed(self.control_file_name)
 
         with ThreadPoolExecutor(max_workers=self.number_of_works) as executor:
             futures: list[Future] = []
@@ -63,10 +75,18 @@ class WebsiteHandler(ABC, Thread):
                 self.update(manga_id, manga_url)
             else:
                 self.save(manga_url)
-        except Exception:
+
+            self.file_lock.acquire()
+            change_operation_status(self.control_file_name, True, manga_url)
+            self.file_lock.release()
+        except Exception as error:
             print(
                 f"Handler ({self.origin}) failure: {manga_url}\n      {traceback.format_exc()}"
             )
+
+            self.file_lock.acquire()
+            add_message_error(self.control_file_name, manga_url, error.args[0])
+            self.file_lock.release()
 
     def update(self, manga_id: str, manga_url):
         """Checks for missing chapters and updates them."""
