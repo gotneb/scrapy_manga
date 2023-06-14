@@ -1,10 +1,8 @@
 from entities import Manga, ChapterInfo, Chapter, WebsiteUpdate
 from threading import Thread
 import traceback
-from concurrent.futures import ThreadPoolExecutor, Future, wait
-from typing import Callable
-from ..api.api import api
-
+from concurrent.futures import ThreadPoolExecutor, Future
+from ..api import *
 from abc import ABC, abstractmethod
 
 
@@ -29,18 +27,18 @@ class WebsiteHandler(ABC, Thread):
         print(f"Handler ({self.origin}): downloading the most popular urls.")
         popular_urls = self.get_popular_urls()
 
-        update_info = WebsiteUpdate(
+        info = WebsiteUpdate(
             origin=self.origin,
             language=self.language,
             populars=popular_urls,
             latest_updates=latest_updated_urls,
         )
 
-        if api.origin_exists(update_info.origin):
-            api.update_info(update_info)
+        if origin_exists(info.origin):
+            update_info(info)
             urls = latest_updated_urls
         else:
-            api.add_info(update_info)
+            add_info(info)
 
             print(f"Handler ({self.origin}): downloading all urls.")
             urls = self.get_all_urls()
@@ -59,7 +57,7 @@ class WebsiteHandler(ABC, Thread):
         """Check if manga is in the database, saving the manga or updating chapters."""
         try:
             print(f"Handler ({self.origin}): processing {manga_url}")
-            manga_id = api.manga_exists(manga_url)
+            manga_id = manga_exists(manga_url)
 
             if manga_id:
                 self.update(manga_id, manga_url)
@@ -73,7 +71,7 @@ class WebsiteHandler(ABC, Thread):
     def update(self, manga_id: str, manga_url):
         """Checks for missing chapters and updates them."""
         manga = self.get_manga(manga_url)
-        chapter_names_registered = api.get_chapter_names(manga_id)
+        chapter_names_registered = get_chapter_names(manga_id)
 
         new_chapters: list[Chapter] = []
 
@@ -84,7 +82,7 @@ class WebsiteHandler(ABC, Thread):
             new_chapters.append(chapter)
 
         if len(new_chapters) > 0:
-            api.add_chapters(manga_id, new_chapters)
+            add_chapters(manga_id, new_chapters)
 
     def chapters_not_registered(
         self, chapters_info: list[ChapterInfo], chapter_names_registered: list[str]
@@ -99,7 +97,7 @@ class WebsiteHandler(ABC, Thread):
     def save(self, manga_url: str):
         """Save a new manga in the database."""
         manga = self.get_manga_with_chapter_pages(manga_url)
-        api.add_manga(manga)
+        add_manga(manga)
 
     @abstractmethod
     def get_manga_with_chapter_pages(self, manga_url: str) -> Manga:
