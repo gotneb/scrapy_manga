@@ -13,7 +13,7 @@ def update_database(exec_all: bool = False):
     golden_mangas_update_mangas(exec_all)
 
 
-if __name__ == "__main__":
+def define_program_args():
     # Handling program arguments
     parser = argparse.ArgumentParser(description="Arguments for website update")
 
@@ -40,7 +40,24 @@ if __name__ == "__main__":
         help="Update all mangas from the source websites.",
     )
 
-    args = parser.parse_args()
+    return parser.parse_args()
+
+
+def schedule_execution(exec_all: bool = False):
+    hour = 23
+    minutes = randint(0, 60)
+    schedule.every().day.at("{:02d}:{:02d}".format(hour, minutes)).do(
+        update_database, exec_all
+    )
+
+    while True:
+        schedule.run_pending()
+        sleep(10 * 60)  # checks every 10 minutes
+
+
+if __name__ == "__main__":
+    # Handling program arguments
+    args = define_program_args()
 
     # define number of threads
     if args.threads:
@@ -54,14 +71,5 @@ if __name__ == "__main__":
     # run now and finish
     if args.now:
         update_database(exec_all)
-    else:
-        # schedule execution
-        hour = 23
-        minutes = randint(0, 60)
-        schedule.every().day.at("{:02d}:{:02d}".format(hour, minutes)).do(
-            update_database, exec_all
-        )
-
-        while True:
-            schedule.run_pending()
-            sleep(10 * 60)  # checks every 10 minutes
+    else:  # schedule execution
+        schedule_execution(exec_all)
