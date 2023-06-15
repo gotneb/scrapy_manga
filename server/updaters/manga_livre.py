@@ -12,7 +12,7 @@ origin = "manga_livre"
 language = "portuguese"
 
 
-def update_mangas():
+def update_mangas(exec_all: bool = False):
     """Get the manga urls and update the database."""
 
     # Update site information in database
@@ -26,13 +26,20 @@ def update_mangas():
         latest_updates=latest_updated_urls,
     )
 
-    if origin_exists(info.origin):
+    site_already_registered = origin_exists(info.origin)
+
+    if site_already_registered:
         update_info(info)
-        urls_for_update = latest_updated_urls
     else:
         add_info(info)
-        urls_for_update = get_all_urls()
 
+    # define if process all urls
+    if (not site_already_registered) or exec_all:
+        urls_for_update = get_all_urls()
+    else:
+        urls_for_update = latest_updated_urls
+
+    # create threads
     create_threads_to_update_mangas(urls_for_update, feat)
 
 
