@@ -67,11 +67,11 @@ def add_message_error(file_name: str, url: str, error_message: str) -> None:
 def get_urls_not_processed(file_name: str) -> list[str]:
     urls = []
 
-    with open(file_name, "r+") as url_file:
+    with open(os.path.join(current_path, file_name), "r") as url_file:
         rows = url_file.readlines()[1:]
 
         for row in rows:
-            if row.startswith("0"):
+            if row.startswith("0 http"):
                 url = row.split(" ")[1].replace("\n", "")
                 urls.append(url)
 

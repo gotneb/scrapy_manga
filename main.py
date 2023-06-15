@@ -1,5 +1,5 @@
-from server.handler.readm_handler import ReadmHandler
-from server.handler.golden_mangas_handler import GoldenMangasHandler
+from server.updaters.readm import update_mangas as readm_update_mangas
+from server.updaters.golden_mangas import update_mangas as golden_mangas_update_mangas
 
 import schedule
 from time import sleep
@@ -7,13 +7,8 @@ from random import randint
 
 
 def update_database():
-    readmHandler = ReadmHandler()
-    readmHandler.start()
-    readmHandler.join()
-
-    goldenMangasHandler = GoldenMangasHandler()
-    goldenMangasHandler.start()
-    goldenMangasHandler.join()
+    readm_update_mangas()
+    golden_mangas_update_mangas()
 
 
 if __name__ == "__main__":
