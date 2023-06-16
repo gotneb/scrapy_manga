@@ -11,7 +11,7 @@ origin = "readm"
 language = "english"
 
 
-def update_mangas(exec_all: bool = False):
+def update_mangas(number_of_works: int, exec_all: bool = False):
     """Get the manga urls and update the database."""
 
     # Update site information in database
@@ -39,7 +39,7 @@ def update_mangas(exec_all: bool = False):
         urls_for_update = latest_updated_urls
 
     # create threads
-    create_threads_to_update_mangas(urls_for_update, feat)
+    create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
 
 
 def feat(manga_url: str):

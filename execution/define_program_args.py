@@ -1,4 +1,4 @@
-from server.updaters.create_threads_to_update_mangas import number_of_works
+from server.updaters.create_threads_to_update_mangas import default_number_of_works
 import argparse
 
 
@@ -16,10 +16,10 @@ def define_program_args():
     parser.add_argument(
         "-t",
         "--threads",
-        default=number_of_works,
+        default=default_number_of_works,
         action="store",
         type=int,
-        help=f"Set the number of threads to be executed during the website update (default: {number_of_works}).",
+        help=f"Set the number of threads to be executed during the website update (default: {default_number_of_works}).",
     )
 
     scheduled_time = 23

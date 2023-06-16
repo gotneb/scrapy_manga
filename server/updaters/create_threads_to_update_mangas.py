@@ -4,11 +4,13 @@ from core.sites.manga_livre import *
 from typing import Callable
 
 
-number_of_works = 3
+default_number_of_works = 3
 
 
 def create_threads_to_update_mangas(
-    urls: list[str], update_function: Callable[[list[str]], None]
+    urls: list[str],
+    update_function: Callable[[list[str]], None],
+    number_of_works: int = default_number_of_works,
 ):
     """Create N threads to update mangas"""
     with ThreadPoolExecutor(max_workers=number_of_works) as executor:
