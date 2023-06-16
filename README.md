@@ -4,14 +4,7 @@ On terminal:
 
 `pip install -r requirements.txt`
 
-Arguments for website update
-
-options:
--h, --help show this help message and exit
--n, --now Update websites immediately upon program invocation and then exit
--t THREADS, --threads THREADS
-Set the number of threads to be executed during the website update (default: 3)
--a, --all Update all mangas from the source websites
+Arguments for website update: run `main.py` with argument `--help` (or `-h`) for more info.
 
 Download chrome driver:
 
