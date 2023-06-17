@@ -16,3 +16,5 @@ On .env:
 API_BASE_URL=\<url da api>
 AUTH_TOKEN=<token de autenticação da api>
 ```
+
+Execution logs are stored in exec_logs.log

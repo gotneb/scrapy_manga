@@ -6,6 +6,7 @@ from core.sites.manga_livre import *
 from entities import Manga, ChapterInfo, Chapter, WebsiteUpdate
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
 from .utils import get_chapters_not_registered
+from execution.log_configs import logger
 
 
 origin = "manga_livre"
@@ -46,7 +47,7 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
 def feat(manga_url: str):
     """Check if manga is in the database, saving the manga or updating chapters."""
 
-    print(f"({origin}): processing {manga_url}")
+    logger.info(f"({origin}): processing {manga_url}")
 
     try:
         manga_id = manga_exists(manga_url)
@@ -57,7 +58,7 @@ def feat(manga_url: str):
             save(manga_url)
 
     except Exception as error:
-        print(
+        logger.error(
             f"({origin}): failure {manga_url}\n   -> error: {error.args[0]} \n\n {error.with_traceback()} \n\n"
         )
 
@@ -86,7 +87,7 @@ def save(manga_url: str):
 
 
 def get_all_urls():
-    print(f"({origin}): downloading all mangas URLs.")
+    logger.info(f"({origin}): downloading all mangas URLs.")
     urls = []
 
     for letter in [chr(i) for i in range(97, 123)]:
@@ -94,31 +95,31 @@ def get_all_urls():
             letter_urls = get_all_start_with(letter=letter)
             urls = urls + letter_urls
         except Exception:
-            print(traceback.format_exc())
+            logger.error(traceback.format_exc())
 
     return urls
 
 
 def get_latest_updated_urls():
-    print(f"({origin}): downloading updated mangas URLs.")
+    logger.info(f"({origin}): downloading updated mangas URLs.")
     urls = []
 
     try:
         urls = urls + get_latest_updates(limit=400)
     except Exception:
-        print(traceback.format_exc())
+        logger.error(traceback.format_exc())
 
     return urls
 
 
 def get_popular_urls():
-    print(f"({origin}): downloading popular mangas URLs.")
+    logger.info(f"({origin}): downloading popular mangas URLs.")
     urls = []
 
     try:
         urls = urls + get_populars()
     except Exception:
-        print(traceback.format_exc())
+        logger.error(traceback.format_exc())
 
     return urls
 
