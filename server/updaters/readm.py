@@ -127,12 +127,17 @@ def get_manga_without_chapter_pages(manga_url: str) -> Manga:
 
 
 def get_manga_with_chapter_pages(manga_url: str) -> Manga:
+    # download manga info
     manga = manga_detail(manga_url, False)
     manga.chapters = []
 
+    # dowload chapter pages
     for info in manga.chapters_info:
         chapter = get_chapter(manga_url, info)
-        manga.chapters.append(chapter)
+
+        # if chapter contains pages
+        if len(chapter.pages) > 0:
+            manga.chapters.append(chapter)
 
     return manga
 
