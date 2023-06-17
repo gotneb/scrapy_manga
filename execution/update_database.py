@@ -6,8 +6,13 @@ from execution.log_configs import logger
 def update_database(number_of_works: int, exec_all: bool = False):
     logger.info("Starting the website update process\n")
 
-    logger.info("\nUpdating readm.org\n")
-    readm_update_mangas(number_of_works, exec_all)
+    try:
+        logger.info("\nUpdating readm.org\n")
+        readm_update_mangas(number_of_works, exec_all)
 
-    logger.info("\nUpdating goldenmangas.top\n")
-    golden_mangas_update_mangas(number_of_works, exec_all)
+        logger.info("\nUpdating goldenmangas.top\n")
+        golden_mangas_update_mangas(number_of_works, exec_all)
+    except Exception as error:
+        logger.error(
+            f"update error: {error.args[0]} \n\n {error.with_traceback()} \n\n"
+        )
