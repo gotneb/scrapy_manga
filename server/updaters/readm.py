@@ -81,7 +81,10 @@ def update(manga_id: str, manga_url):
 def save(manga_url: str):
     """Save a new manga in the database."""
     manga = get_manga_with_chapter_pages(manga_url)
-    add_manga(manga)
+
+    # if manga contain chapters
+    if len(manga.chapters > 0):
+        add_manga(manga)
 
 
 def get_all_urls():
