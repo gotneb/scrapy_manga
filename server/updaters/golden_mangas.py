@@ -15,32 +15,38 @@ language = "portuguese"
 def update_mangas(number_of_works: int, exec_all: bool = False):
     """Get the manga urls and update the database."""
 
-    # Update site information in database
-    latest_updated_urls = get_latest_updated_urls()
-    popular_urls = get_popular_urls()
+    try:
+        # Update site information in database
+        latest_updated_urls = get_latest_updated_urls()
+        popular_urls = get_popular_urls()
 
-    info = WebsiteUpdate(
-        origin=origin,
-        language=language,
-        populars=popular_urls,
-        latest_updates=latest_updated_urls,
-    )
+        info = WebsiteUpdate(
+            origin=origin,
+            language=language,
+            populars=popular_urls,
+            latest_updates=latest_updated_urls,
+        )
 
-    site_already_registered = origin_exists(info.origin)
+        site_already_registered = origin_exists(info.origin)
 
-    if site_already_registered:
-        update_info(info)
-    else:
-        add_info(info)
+        if site_already_registered:
+            update_info(info)
+        else:
+            add_info(info)
 
-    # define if process all urls
-    if (not site_already_registered) or exec_all:
-        urls_for_update = get_all_urls()
-    else:
-        urls_for_update = latest_updated_urls
+        # define if process all urls
+        if (not site_already_registered) or exec_all:
+            urls_for_update = get_all_urls()
+        else:
+            urls_for_update = latest_updated_urls
 
-    # create threads
-    create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
+        # create threads
+        create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
+
+    except Exception as error:
+        logger.error(
+            f"({origin}) updater error: {error.args[0]} \n\n {error.with_traceback()} \n\n"
+        )
 
 
 def feat(manga_url: str):

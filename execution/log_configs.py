@@ -9,5 +9,5 @@ logging.basicConfig(
 
 logger = logging.getLogger()
 
-# set the threshold of logger to DEBUG
+# set the threshold of logger
 logger.setLevel(logging.INFO)
