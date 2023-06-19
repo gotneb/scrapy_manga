@@ -81,32 +81,24 @@ def get_pages(manga_url) -> list[str]:
 
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
-    """Visits the `readm.org` and returns top 10 most populars mangas."""
+    """Visits the `readm.org` and returns most populars mangas right now."""
     driver = init_driver(show_window=False)
-    url = "https://readm.org/popular-manga"
+    url = "https://readm.org"
     driver.get(url)
-    counter = 0
 
     # Links to mangas
     links = []
     elems = driver.find_elements(
-        By.CSS_SELECTOR, "ul.filter-results li.mb-lg div.poster-with-subject a"
+        By.CSS_SELECTOR, "div.owl-stage-outer div.owl-stage div.owl-item div.item a[href]"
     )
-    for e in elems:
-        if counter == 10:
-            break
+    for a in elems:
+        # Actually it returns the page... So I'm splitting to separate the page
+        link = '/'.join(a.get_attribute('href').split('/')[:-2])
+        if link not in links:
+            links.append(link)
 
-        link_tag = e.get_attribute("href")
-        if len(links) == 0 or (
-            (not links.__contains__(link_tag)) and (not link_tag.__contains__("category"))
-        ):
-            links.append(link_tag)
-
-            # Callback
             if on_link_received != None:
-                on_link_received(link_tag)
-            
-            counter += 1
+                on_link_received(link)
 
     return links
 
