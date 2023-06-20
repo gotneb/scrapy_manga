@@ -1,5 +1,7 @@
 from selenium import webdriver
 
+_profile = 'selenium_manga'
+
 def init_driver(show_window) -> webdriver.Chrome:
     """
     Creates a webdriver.\n
@@ -8,12 +10,10 @@ def init_driver(show_window) -> webdriver.Chrome:
     Returns:
         A google's webdriver.
     """
-    # TODO: Throw exception if chrome is not installed
+    options = webdriver.ChromeOptions()
+    options.add_argument(f"user-data-dir=/home/gabriel/.config/google-chrome/{_profile}")
+
     if not show_window:
-        options = webdriver.ChromeOptions()
         options.add_argument('--headless')
-        #options.add_argument('--no-sandbox')
-        #options.add_argument('--disable-dev-shm-usage')
-        return webdriver.Chrome(options=options)
-    else:
-        return webdriver.Chrome()
+
+    return webdriver.Chrome(options=options)
