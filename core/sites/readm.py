@@ -11,6 +11,7 @@ from requests import get
 
 # Core
 from core.driver import init_driver
+from core.sites.readm_helper import extract_manga_page
 from entities import ChapterInfo
 from entities import Manga
 
@@ -78,6 +79,14 @@ def get_pages(manga_url) -> list[str]:
         url_imgs.append(url)
 
     return url_imgs
+
+# Some mangas actually needs to the person be logged in 
+# the site to actually read it -.-'
+# (oh god, why does life need to be that complicated?)
+def _need_authenticate(soup: BeautifulSoup) -> bool:
+    alert = 'You need to LOG IN in order to read this manga.'
+    elem = soup.css.select("div.alert.alert-info")[0].text
+    return elem == alert
 
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
@@ -148,6 +157,9 @@ def manga_detail(manga_url, show_window=False) -> Manga:
 
     html = get(manga_url)
     soup = BeautifulSoup(html.text, "html.parser")
+
+    if _need_authenticate(soup):
+        soup = BeautifulSoup(extract_manga_page(manga_url), "html.parser")
 
     title = get_title(soup)
     alt_title = get_alt_title(soup)
