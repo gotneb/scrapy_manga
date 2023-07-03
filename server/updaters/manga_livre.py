@@ -1,4 +1,3 @@
-import traceback
 from ..api import *
 import re
 
@@ -46,7 +45,8 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
 
     except Exception as error:
         logger.error(
-            f"({origin}) updater error: {error.args[0]} \n\n {error.with_traceback()} \n\n"
+            f"({origin}) updater error: {error} \n\n",
+            exc_info=True,
         )
 
 
@@ -65,7 +65,8 @@ def feat(manga_url: str):
 
     except Exception as error:
         logger.error(
-            f"({origin}): failure {manga_url}\n   -> error: {error.args[0]} \n\n {error.with_traceback()} \n\n"
+            f"{origin}): failure in {manga_url}\n  -> error: {error} \n\n",
+            exc_info=True,
         )
 
 
@@ -91,7 +92,7 @@ def save(manga_url: str):
     manga = get_manga_with_chapter_pages(manga_url)
 
     # if manga contain chapters
-    if len(manga.chapters > 0):
+    if len(manga.chapters) > 0:
         add_manga(manga)
 
 
@@ -103,8 +104,11 @@ def get_all_urls():
         try:
             letter_urls = get_all_start_with(letter=letter)
             urls = urls + letter_urls
-        except Exception:
-            logger.error(traceback.format_exc())
+        except Exception as error:
+            logger.error(
+                f"({origin}) error getting all URLs: {error} \n\n",
+                exc_info=True,
+            )
 
     return urls
 
@@ -115,8 +119,11 @@ def get_latest_updated_urls():
 
     try:
         urls = urls + get_latest_updates(limit=400)
-    except Exception:
-        logger.error(traceback.format_exc())
+    except Exception as error:
+        logger.error(
+            f"({origin}) error getting latest updated URLs: {error} \n\n",
+            exc_info=True,
+        )
 
     return urls
 
@@ -127,8 +134,11 @@ def get_popular_urls():
 
     try:
         urls = urls + get_populars()
-    except Exception:
-        logger.error(traceback.format_exc())
+    except Exception as error:
+        logger.error(
+            f"({origin}) error getting populars URLs: {error} \n\n",
+            exc_info=True,
+        )
 
     return urls
 
