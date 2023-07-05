@@ -28,11 +28,6 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
 
         site_already_registered = origin_exists(info.origin)
 
-        if site_already_registered:
-            update_info(info)
-        else:
-            add_info(info)
-
         # define if process all urls
         if (not site_already_registered) or exec_all:
             urls_for_update = get_all_urls()
@@ -41,6 +36,9 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
 
         # create threads
         create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
+
+        # update informations about mangas in the api
+        update_info(info)
 
     except Exception as error:
         logger.error(
@@ -64,7 +62,7 @@ def feat(manga_url: str):
 
     except Exception as error:
         logger.error(
-            f"{origin}): failure in {manga_url}\n  -> error: {error} \n\n",
+            f"({origin}): failure in {manga_url}\n  -> error: {error} \n\n",
             exc_info=True,
         )
 
