@@ -3,7 +3,7 @@ from ..api import *
 from core.sites.golden_mangas import *
 from entities import Manga, ChapterInfo, Chapter, WebsiteUpdate
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
-from .utils import get_chapters_not_registered
+from .utils import get_chapters_not_registered, filter_empty_chapters
 from execution.log_configs import logger
 
 
@@ -82,6 +82,8 @@ def update(manga_id: str, manga_url):
         chapter = get_chapter(manga_url, info)
         new_chapters.append(chapter)
 
+    new_chapters = filter_empty_chapters(new_chapters)
+
     if len(new_chapters) > 0:
         add_chapters(manga_id, new_chapters)
 
@@ -89,6 +91,7 @@ def update(manga_id: str, manga_url):
 def save(manga_url: str):
     """Save a new manga in the database."""
     manga = get_manga_with_chapter_pages(manga_url)
+    manga.chapters = filter_empty_chapters(manga.chapters)
 
     # if manga contain chapters
     if len(manga.chapters) > 0:

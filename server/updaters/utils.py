@@ -1,4 +1,5 @@
 from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 
 
 def get_chapters_not_registered(
@@ -11,3 +12,13 @@ def get_chapters_not_registered(
         if not info.name in chapter_names_registered:
             informations.append(info)
     return informations
+
+
+def filter_empty_chapters(chapters: list[Chapter]) -> list[Chapter]:
+    results = filter(lambda chapter: not chapter_is_empty(chapter), chapters)
+    chapters_non_empty = list(results)
+    return chapters_non_empty
+
+
+def chapter_is_empty(chapter: Chapter) -> bool:
+    return len(chapter.pages) == 0
