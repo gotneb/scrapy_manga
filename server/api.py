@@ -20,6 +20,27 @@ def prepare_url(endpoint: str) -> str:
     return f"{base_url}{endpoint}"
 
 
+def get_origin_info(origin: str) -> WebsiteUpdate:
+    url = prepare_url(f"/info/get/{origin}")
+
+    response = requests.get(url, headers=headers)
+
+    if response.status_code == 404:
+        return None
+
+    results = response.json()
+
+    if response.status_code != 200:
+        throw_api_error(results)
+
+    return WebsiteUpdate(
+        origin=results["data"]["origin"],
+        language=results["data"]["language"],
+        populars=results["data"]["populars"],
+        latest_updates=results["data"]["latest_updates"],
+    )
+
+
 def origin_exists(origin: str) -> bool:
     url = prepare_url(f"/info/get/{origin}")
 

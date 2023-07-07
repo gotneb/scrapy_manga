@@ -18,17 +18,10 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         latest_updated_urls = get_latest_updated_urls()
         popular_urls = get_popular_urls()
 
-        info = WebsiteUpdate(
-            origin=origin,
-            language=language,
-            populars=popular_urls,
-            latest_updates=latest_updated_urls,
-        )
-
-        site_already_registered = origin_exists(info.origin)
+        registed_info = get_origin_info(origin)
 
         # define if process all urls
-        if (not site_already_registered) or exec_all:
+        if (not registed_info) or exec_all:
             urls_for_update = get_all_urls()
         else:
             urls_for_update = latest_updated_urls
@@ -37,6 +30,22 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
 
         # update informations about mangas in the api
+        info = WebsiteUpdate(
+            origin=origin,
+            language=language,
+            populars=popular_urls,
+            latest_updates=latest_updated_urls,
+        )
+
+        if registed_info:
+            # Keep info about popular mangas if new list is empty
+            if len(info.populars) == 0:
+                info.populars = registed_info.populars
+
+            # Keep info about popular mangas if new list is empty
+            if len(info.latest_updates) == 0:
+                info.latest_updates = registed_info.latest_updates
+
         update_info(info)
 
     except Exception as error:
