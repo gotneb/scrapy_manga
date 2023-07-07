@@ -51,8 +51,8 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         update_info(info)
 
     except Exception as error:
-        logger.error(
-            f"({origin}) updater error: {error} \n\n",
+        logger.critical(
+            f"({origin}) on update mangas.",
             exc_info=True,
         )
 
@@ -72,7 +72,7 @@ def feat(manga_url: str):
 
     except Exception as error:
         logger.error(
-            f"({origin}): failure in {manga_url}\n  -> error: {error} \n\n",
+            f"({origin}): error in the processing of {manga_url}",
             exc_info=True,
         )
 
@@ -115,8 +115,8 @@ def get_all_urls():
             letter_urls = get_all_start_with(letter=letter)
             urls = urls + letter_urls
         except Exception as error:
-            logger.error(
-                f"({origin}) error getting all URLs: {error} \n\n",
+            logger.critical(
+                f"({origin}) error getting all URLs.",
                 exc_info=True,
             )
 
@@ -130,8 +130,8 @@ def get_latest_updated_urls():
     try:
         urls = urls + get_latest_updates(limit=400)
     except Exception as error:
-        logger.error(
-            f"({origin}) error getting latest updated URLs: {error} \n\n",
+        logger.critical(
+            f"({origin}) error getting latest updated URLs.",
             exc_info=True,
         )
 
@@ -145,8 +145,8 @@ def get_popular_urls():
     try:
         urls = urls + get_populars()
     except Exception as error:
-        logger.error(
-            f"({origin}) error getting populars URLs: {error} \n\n",
+        logger.critical(
+            f"({origin}) error getting populars URLs.",
             exc_info=True,
         )
 
