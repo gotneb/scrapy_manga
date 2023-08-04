@@ -17,6 +17,18 @@ _origin = "golden_mangas"
 _language = "portuguese"
 
 
+def _get_html(link) -> str:
+    driver = init_driver(False)
+    driver.set_page_load_timeout(4)
+
+    try:
+        driver.get(link)
+    except:
+        driver.execute_script('window.stop();')
+
+    return driver.page_source
+
+
 def get_pages(chapter_url) -> list[str]:
     """Extract all image links from a manga chapter.
 
@@ -58,7 +70,7 @@ def get_latest_updates(
         if counter == limit:
             break
 
-        html = get(f"https://goldenmangas.top/index.php?pagina={i}")
+        html = get(f"https://goldenmanga.top/index.php?pagina={i}")
         soup = BeautifulSoup(html.text, "html.parser")
         tags = soup.css.select(
             "div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao > a"
@@ -136,14 +148,7 @@ def get_all_start_with(
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `goldenmanga.top` and returns top 20 most populars mangas."""
 
-    driver = init_driver(False)
-    driver.set_page_load_timeout(5)
-
-    try:
-        driver.get("https://goldenmanga.top")
-    except:
-        driver.execute_script('window.stop();')
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(_get_html('https://goldenmanga.top'), "html.parser")
     tags = soup.css.select(
         "div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a"
     )
