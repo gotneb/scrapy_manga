@@ -27,6 +27,10 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         else:
             urls_for_update = latest_updated_urls
 
+        # remove invalid urls
+        urls_for_update = remove_invalid_urls(urls_for_update)
+        popular_urls = remove_invalid_urls(popular_urls)
+
         # create threads
         create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
 
@@ -177,3 +181,8 @@ def get_chapter(manga_url: str, info: ChapterInfo) -> Chapter:
     pages = get_pages(cp_url)
 
     return Chapter(name=info.name, pages=pages)
+
+
+def remove_invalid_urls(urls: list[str]) -> list[str]:
+    filtered_urls = [url for url in urls if "mangabr" not in url]
+    return filtered_urls

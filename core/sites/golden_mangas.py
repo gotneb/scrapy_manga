@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from requests import get
 
 # Ours code
+from core.driver import init_driver
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
@@ -163,8 +164,16 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     if show_window:
         raise Exception('"show_window" is disabled...')
 
-    html = get(manga_url)
-    soup = BeautifulSoup(html.text, "html.parser")
+    driver = init_driver(True)
+    # Loads page even more faster
+    driver.set_page_load_timeout(10)
+
+    try:
+        driver.get(manga_url)
+    except:
+        driver.execute_script("window.stop();")
+
+    soup = BeautifulSoup(driver.page_source, "html.parser")
 
     title = get_title(soup)
     alt_title = None

@@ -84,9 +84,13 @@ def get_pages(manga_url) -> list[str]:
 # the site to actually read it -.-'
 # (oh god, why does life need to be that complicated?)
 def _need_authenticate(soup: BeautifulSoup) -> bool:
-    alert = 'You need to LOG IN in order to read this manga.'
-    elem = soup.css.select("div.alert.alert-info")[0].text
-    return elem == alert
+    try:
+        alert = 'You need to LOG IN in order to read this manga.'
+        elem = soup.css.select("div.alert.alert-info")[0].text
+        return elem == alert
+    except:
+        # There's no alert notifying to make login
+        return False
 
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
