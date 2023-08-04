@@ -134,10 +134,16 @@ def get_all_start_with(
 
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
-    """Visits the `goldenmangas.top` and returns top 20 most populars mangas."""
+    """Visits the `goldenmanga.top` and returns top 20 most populars mangas."""
 
-    html = get("https://goldenmangas.top/")
-    soup = BeautifulSoup(html.text, "html.parser")
+    driver = init_driver(False)
+    driver.set_page_load_timeout(5)
+
+    try:
+        driver.get("https://goldenmanga.top")
+    except:
+        driver.execute_script('window.stop();')
+    soup = BeautifulSoup(driver.page_source, "html.parser")
     tags = soup.css.select(
         "div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a"
     )
