@@ -97,7 +97,8 @@ def get_all_start_with(
     if show_window:
         raise Exception('"show_window" is disabled...')
 
-    html = get(f"https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1")
+    html = get(
+        f"https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1")
     soup = BeautifulSoup(html.text, "html.parser")
 
     # Get last index value
@@ -114,7 +115,8 @@ def get_all_start_with(
     for i in range(1, end_index + 1):
         # if it's the first, then it isn't needed to load the content again...
         if i != 1:
-            html = get(f"https://goldenmangas.top/mangabr?letra={letter}&pagina={i}")
+            html = get(
+                f"https://goldenmangas.top/mangabr?letra={letter}&pagina={i}")
             soup = BeautifulSoup(html.text, "html.parser")
 
         # Get manga content
@@ -164,7 +166,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     if show_window:
         raise Exception('"show_window" is disabled...')
 
-    driver = init_driver(True)
+    driver = init_driver(False)  # Don't show any window
     # Loads page even more faster
     driver.set_page_load_timeout(10)
 
@@ -205,27 +207,31 @@ def manga_detail(manga_url, show_window=False) -> Manga:
 
 def get_title(soup: BeautifulSoup) -> str:
     """Returns title from manga"""
-    h2 = soup.css.select("div.container.manga div.row div.col-sm-8 h2.cg_color")
+    h2 = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 h2.cg_color")
     return h2[0].text
 
 
 def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga."""
-    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
     author = tag[-3].text.strip()
     return author
 
 
 def get_artist(soup: BeautifulSoup) -> str:
     """Returns author from manga."""
-    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
     text = tag[-2].text.strip()
     return text
 
 
 def get_status(soup: BeautifulSoup) -> str:
     """Returns status from manga."""
-    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select(
+        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
     text = tag[-1].text.strip()
     return text
 
@@ -254,7 +260,8 @@ def get_genres(soup: BeautifulSoup) -> list[str]:
 def get_score(soup: BeautifulSoup) -> float:
     """Returns the score given by the users."""
     try:
-        tag = soup.css.select("div.container.manga div.row div.col-sm-8 h2.cg_color")[1]
+        tag = soup.css.select(
+            "div.container.manga div.row div.col-sm-8 h2.cg_color")[1]
         score = tag.text.split(" ")[0].replace("#", "")
         return float(score)
     except:
