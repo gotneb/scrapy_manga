@@ -96,7 +96,7 @@ def get_all_start_with(
     letter: str, show_window=False, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
     """
-    Visits `readm.org` and extract all links that starts with `letter` on its name.\n
+    Visits `goldenmanga.top` and extract all links that starts with `letter` on its name.\n
     Arguments:
     `letter:` manga initial name.
     `show_window:` show google's chrome window.
@@ -111,9 +111,8 @@ def get_all_start_with(
     if show_window:
         raise Exception('"show_window" is disabled...')
 
-    html = get(
-        f"https://goldenmangas.top/mangabr?letra={letter.upper()}&pagina=1")
-    soup = BeautifulSoup(html.text, "html.parser")
+    url_page = f"https://goldenmanga.top/mangabr?letra={letter.upper()}&pagina=1"
+    soup = BeautifulSoup(_get_html(url_page), "html.parser")
 
     # Get last index value
     tags = soup.css.select(
@@ -129,9 +128,8 @@ def get_all_start_with(
     for i in range(1, end_index + 1):
         # if it's the first, then it isn't needed to load the content again...
         if i != 1:
-            html = get(
-                f"https://goldenmangas.top/mangabr?letra={letter}&pagina={i}")
-            soup = BeautifulSoup(html.text, "html.parser")
+            url_page = f"https://goldenmanga.top/mangabr?letra={letter}&pagina={i}"
+            soup = BeautifulSoup(_get_html(url_page), "html.parser")
 
         # Get manga content
         tags = soup.css.select(
