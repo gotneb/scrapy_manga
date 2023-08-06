@@ -12,7 +12,7 @@ from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
 
-_domain = "https://goldenmangas.top"
+_domain = "https://goldenmanga.top"
 _origin = "golden_mangas"
 _language = "portuguese"
 
@@ -36,8 +36,7 @@ def get_pages(chapter_url) -> list[str]:
 
     `chapter_url:` a chapter of a manga
     """
-    html = get(chapter_url)
-    soup = BeautifulSoup(html.text, "html.parser")
+    soup = BeautifulSoup(_get_html(chapter_url), "html.parser")
     url_imgs = []
 
     tags = soup.css.select(
