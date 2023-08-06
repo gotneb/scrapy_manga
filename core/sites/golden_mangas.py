@@ -26,7 +26,9 @@ def _get_html(link) -> str:
     except:
         driver.execute_script('window.stop();')
 
-    return driver.page_source
+    html = driver.page_source
+    driver.close()
+    return html
 
 
 def get_pages(chapter_url) -> list[str]:
@@ -52,7 +54,7 @@ def get_latest_updates(
     limit: int = 18, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
     """
-    Returns a list of all links from `goldenmangas.top` that were updateds.\n
+    Returns a list of all links from `goldenmanga.top` that were updateds.\n
     Arguments:
         `limit:` the total quantity of manga links will be extracted.
     Return:
@@ -70,10 +72,10 @@ def get_latest_updates(
         if counter == limit:
             break
 
-        html = get(f"https://goldenmanga.top/index.php?pagina={i}")
-        soup = BeautifulSoup(html.text, "html.parser")
+        html = _get_html(f"https://goldenmanga.top/index.php?pagina={i}")
+        soup = BeautifulSoup(html, "html.parser")
         tags = soup.css.select(
-            "div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao > a"
+            "div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao div.row > a"
         )
 
         for a in tags:
@@ -147,7 +149,6 @@ def get_all_start_with(
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `goldenmanga.top` and returns top 20 most populars mangas."""
-
     soup = BeautifulSoup(_get_html('https://goldenmanga.top'), "html.parser")
     tags = soup.css.select(
         "div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a"
