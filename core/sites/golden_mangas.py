@@ -175,19 +175,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     `manga_url:` the manga content. Must have `readm.org` or `mangalivre.net` domain.
     `enable_gui:` show chrome window.
     """
-    if show_window:
-        raise Exception('"show_window" is disabled...')
-
-    driver = init_driver(False)  # Don't show any window
-    # Loads page even more faster
-    driver.set_page_load_timeout(10)
-
-    try:
-        driver.get(manga_url)
-    except:
-        driver.execute_script("window.stop();")
-
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+    soup = BeautifulSoup(_get_html(manga_url), "html.parser")
 
     title = get_title(soup)
     alt_title = None
