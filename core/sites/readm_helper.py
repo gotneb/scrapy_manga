@@ -26,8 +26,13 @@ def make_login(driver: Chrome, loginButton: WebElement):
     # Password field
     password = driver.find_element(By.CSS_SELECTOR, 'div.swal2-content input#lb-password')
     password.send_keys(os.getenv('READM_PASSWORD'))
+    # Needed 'cause chapters might not being displayed until a amount of time has elipsed
+    driver.implicitly_wait(1.0)
     # Submit button to actually login
-    driver.find_element(By.CSS_SELECTOR, 'button.swal2-confirm.swal2-styled').click()
+    driver.find_element(
+        By.CSS_SELECTOR, 'button.swal2-confirm.swal2-styled'
+    )\
+    .click()
 
 
 def extract_manga_page(manga_url) -> str:

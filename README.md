@@ -8,7 +8,7 @@ Arguments for website update: run main.py with the `--help` argument (or `-h`) f
 
 Download the chrome driver from:
 
-https://chromedriver.chromium.org/downloads
+https://github.com/mozilla/geckodriver/releases/
 
 # Enviroment variables
 
