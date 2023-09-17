@@ -12,7 +12,7 @@ from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 
 
-_domain = "https://goldenmanga.top"
+_domain = "https://www.goldenmangas.top"
 _origin = "golden_mangas"
 _language = "portuguese"
 
@@ -24,7 +24,7 @@ def _get_html(link) -> str:
     try:
         driver.get(link)
     except:
-        driver.execute_script('window.stop();')
+        driver.execute_script("window.stop();")
 
     html = driver.page_source
     driver.close()
@@ -53,7 +53,7 @@ def get_latest_updates(
     limit: int = 18, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
     """
-    Returns a list of all links from `goldenmanga.top` that were updateds.\n
+    Returns a list of all links from `goldenmangas.top` that were updateds.\n
     Arguments:
         `limit:` the total quantity of manga links will be extracted.
     Return:
@@ -71,7 +71,7 @@ def get_latest_updates(
         if counter == limit:
             break
 
-        html = _get_html(f"https://goldenmanga.top/index.php?pagina={i}")
+        html = _get_html(f"{_domain}/index.php?pagina={i}")
         soup = BeautifulSoup(html, "html.parser")
         tags = soup.css.select(
             "div.container div.row div.col-sm-8.col-xs-12 div#response.row div.col-sm-12.atualizacao div.row > a"
@@ -110,7 +110,7 @@ def get_all_start_with(
     if show_window:
         raise Exception('"show_window" is disabled...')
 
-    url_page = f"https://goldenmanga.top/mangabr?letra={letter.upper()}&pagina=1"
+    url_page = f"{_domain}/mangabr?letra={letter.upper()}&pagina=1"
     soup = BeautifulSoup(_get_html(url_page), "html.parser")
 
     # Get last index value
@@ -127,7 +127,7 @@ def get_all_start_with(
     for i in range(1, end_index + 1):
         # if it's the first, then it isn't needed to load the content again...
         if i != 1:
-            url_page = f"https://goldenmanga.top/mangabr?letra={letter}&pagina={i}"
+            url_page = f"{_domain}/mangabr?letra={letter}&pagina={i}"
             soup = BeautifulSoup(_get_html(url_page), "html.parser")
 
         # Get manga content
@@ -146,7 +146,7 @@ def get_all_start_with(
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `goldenmanga.top` and returns top 20 most populars mangas."""
-    soup = BeautifulSoup(_get_html('https://goldenmanga.top'), "html.parser")
+    soup = BeautifulSoup(_get_html(_domain), "html.parser")
     tags = soup.css.select(
         "div.container div.row div.col-sm-4.col-xs-12 section#capitulosdestaque.hidden-xs a"
     )
@@ -204,31 +204,27 @@ def manga_detail(manga_url, show_window=False) -> Manga:
 
 def get_title(soup: BeautifulSoup) -> str:
     """Returns title from manga"""
-    h2 = soup.css.select(
-        "div.container.manga div.row div.col-sm-8 h2.cg_color")
+    h2 = soup.css.select("div.container.manga div.row div.col-sm-8 h2.cg_color")
     return h2[0].text
 
 
 def get_author(soup: BeautifulSoup) -> str:
     """Returns author from manga."""
-    tag = soup.css.select(
-        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
     author = tag[-3].text.strip()
     return author
 
 
 def get_artist(soup: BeautifulSoup) -> str:
     """Returns author from manga."""
-    tag = soup.css.select(
-        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
     text = tag[-2].text.strip()
     return text
 
 
 def get_status(soup: BeautifulSoup) -> str:
     """Returns status from manga."""
-    tag = soup.css.select(
-        "div.container.manga div.row div.col-sm-8 h5.cg_color a")
+    tag = soup.css.select("div.container.manga div.row div.col-sm-8 h5.cg_color a")
     text = tag[-1].text.strip()
     return text
 
@@ -257,8 +253,7 @@ def get_genres(soup: BeautifulSoup) -> list[str]:
 def get_score(soup: BeautifulSoup) -> float:
     """Returns the score given by the users."""
     try:
-        tag = soup.css.select(
-            "div.container.manga div.row div.col-sm-8 h2.cg_color")[1]
+        tag = soup.css.select("div.container.manga div.row div.col-sm-8 h2.cg_color")[1]
         score = tag.text.split(" ")[0].replace("#", "")
         return float(score)
     except:
