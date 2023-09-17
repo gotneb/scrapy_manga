@@ -4,7 +4,7 @@ from core.sites.manga_livre import *
 from typing import Callable
 
 
-default_number_of_works = 3
+default_number_of_works = 1
 
 
 def create_threads_to_update_mangas(
