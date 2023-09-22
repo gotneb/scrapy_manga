@@ -37,7 +37,6 @@ def get_origin_info(origin: str) -> WebsiteUpdate:
         origin=results["data"]["origin"],
         language=results["data"]["language"],
         populars=results["data"]["populars"],
-        latest_updates=results["data"]["latest_updates"],
     )
 
 

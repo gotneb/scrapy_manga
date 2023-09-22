@@ -32,21 +32,12 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
 
         # update informations about mangas in the api
-        info = WebsiteUpdate(
-            origin=origin,
-            language=language,
-            populars=popular_urls,
-            latest_updates=latest_updated_urls,
-        )
+        info = WebsiteUpdate(origin=origin, language=language, populars=popular_urls)
 
         if registed_info:
             # Keep info about popular mangas if new list is empty
             if len(info.populars) == 0:
                 info.populars = registed_info.populars
-
-            # Keep info about popular mangas if new list is empty
-            if len(info.latest_updates) == 0:
-                info.latest_updates = registed_info.latest_updates
 
         update_info(info)
 
