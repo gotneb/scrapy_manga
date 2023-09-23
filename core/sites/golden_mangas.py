@@ -8,11 +8,11 @@ from requests import get
 
 # Ours code
 from core.driver import init_driver
-from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
+from entities.chapter import Chapter
 
 
-_domain = "https://www.goldenmangas.top"
+_domain = "https://www.goldenmanga.top"
 _origin = "golden_mangas"
 _language = "portuguese"
 
@@ -88,6 +88,7 @@ def get_latest_updates(
             if on_link_received != None:
                 on_link_received(l)
 
+    links.reverse()
     return links
 
 
@@ -172,7 +173,8 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     `manga_url:` the manga content. Must have `readm.org` or `mangalivre.net` domain.
     `enable_gui:` show chrome window.
     """
-    soup = BeautifulSoup(_get_html(manga_url), "html.parser")
+    html = _get_html(manga_url)
+    soup = BeautifulSoup(html, "html.parser")
 
     title = get_title(soup)
     alt_title = None
@@ -183,7 +185,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters_info = get_chapters(soup)
+    chapters = get_chapters(soup)
 
     return Manga(
         title=title,
@@ -197,7 +199,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -269,7 +271,7 @@ def get_summary(soup: BeautifulSoup) -> str:
     return " ".join(tag.text.split())
 
 
-def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def get_chapters(soup: BeautifulSoup) -> list[Chapter]:
     """Returns a list of chapters from manga."""
     a_tags = soup.css.select(
         "div.container.manga div.row div.col-sm-8 ul#capitulos.capitulos li.row a div.col-sm-5"
@@ -279,6 +281,6 @@ def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
     for a in a_tags:
         text = a.text.strip().split(" ")
         if "Cap" in text:
-            chapters.append(ChapterInfo(text[1]))
+            chapters.append(Chapter(text[1]))
 
     return chapters

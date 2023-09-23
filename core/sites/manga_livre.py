@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from core.driver import init_driver
 
 # Entities
-from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 from entities.manga import Manga
 
 _origin = "manga_livre"
@@ -23,19 +23,21 @@ _language = "portuguese"
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `mangalivre.net` and returns top 10 most populars in the day mangas."""
-    url = 'https://mangalivre.net/lista-de-mangas/ordenar-por-numero-de-leituras/todos/dia'
+    url = "https://mangalivre.net/lista-de-mangas/ordenar-por-numero-de-leituras/todos/dia"
     links = []
     counter = 0
 
     driver = init_driver(show_window=False)
     driver.get(url)
 
-    elems = driver.find_elements(By.CSS_SELECTOR, 'div.content-wraper ul.seriesList li a[href]')
+    elems = driver.find_elements(
+        By.CSS_SELECTOR, "div.content-wraper ul.seriesList li a[href]"
+    )
     for tag in elems:
         if counter == 10:
             break
 
-        link = tag.get_attribute('href')
+        link = tag.get_attribute("href")
         links.append(link)
 
         # Callback
@@ -43,7 +45,7 @@ def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
             on_link_received(link)
 
         counter += 1
-    
+
     return links
 
 
@@ -87,6 +89,7 @@ def get_latest_updates(
                 break
 
     driver.close()
+    mangas_urls.reverse()
     return mangas_urls
 
 
@@ -94,7 +97,7 @@ def get_pages(chapter_url: str) -> list[str]:
     """Extract all image links from a manga chapter.\n
     `manga_url:` manga chapter
     """
-    print(f'Getting page: {chapter_url}')
+    print(f"Getting page: {chapter_url}")
     driver = init_driver(show_window=False)
     driver.get(chapter_url)
 
@@ -164,7 +167,7 @@ def manga_detail(url: str, show_window=False):
     alt_title = get_alt_title(driver)
     summary = get_summary(driver)
     thumbnail = get_thumbnail(driver)
-    chapters_info = get_chapters_info(driver)
+    chapters = get_chapters(driver)
     genres = get_genres(driver)
 
     # Clean resources
@@ -182,7 +185,7 @@ def manga_detail(url: str, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -330,13 +333,13 @@ def get_alt_title(driver: webdriver.Chrome) -> str:
     li_texts = []
     for li in elems:
         li_texts.append(li.text)
-    
-    alt_title = ', '.join(li_texts)
+
+    alt_title = ", ".join(li_texts)
 
     return alt_title
 
 
-def get_chapters_info(driver: webdriver.Chrome) -> list[ChapterInfo]:
+def get_chapters(driver: webdriver.Chrome) -> list[Chapter]:
     # PROBLEM:
     # Chapters are loaded lazily by AJAX.
     # There isn't a specific time where I can know in advance when the page has fully loaded.
@@ -376,7 +379,7 @@ def get_chapters_info(driver: webdriver.Chrome) -> list[ChapterInfo]:
         # title's attribute returns: 'Ler Capitulo `N`', where N is a number =P
         value = a.get_attribute("title").split(" ")[2]
         id = _get_chapter_id(a.get_attribute("href"))
-        chapters.append(ChapterInfo(name=value, id=id))
+        chapters.append(Chapter(name=value, id=id))
 
     return chapters
 

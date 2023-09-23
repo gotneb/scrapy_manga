@@ -1,9 +1,7 @@
 from ..api import *
-
-from core.sites.golden_mangas import *
-from entities import Manga, ChapterInfo, Chapter, WebsiteUpdate
+from core.sites.readm import *
+from entities import Manga, Chapter, WebsiteUpdate
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
-from .utils import get_chapters_not_registered, filter_empty_chapters
 from execution.log_configs import logger
 
 
@@ -11,38 +9,38 @@ origin = "golden_mangas"
 language = "portuguese"
 
 
-def update_mangas(number_of_works: int, exec_all: bool = False):
-    """Get the manga urls and update the database."""
+def update_mangas_from_websites(number_of_works: int, exec_all: bool = False):
+    """
+    Updates manga from website.
+
+    Args:
+        number_of_works (int): Number of threads used for accessing the website.
+        exec_all (bool): If True, updates all mangas from the website.
+
+    Returns:
+        None
+    """
+
+    logger.info(f"Updating mangas from {origin}")
 
     try:
         # Update site information in database
-        latest_updated_urls = get_latest_updated_urls()
-        popular_urls = get_popular_urls()
-
+        popular_urls = get_most_popular_manga_urls()
         registed_info = get_origin_info(origin)
 
         # define if process all urls
         if (not registed_info) or exec_all:
-            urls_for_update = get_all_urls()
+            urls_for_update = get_all_urls_in_alphabetic_order()
         else:
-            urls_for_update = latest_updated_urls
-
-        # remove invalid urls
-        urls_for_update = remove_invalid_urls(urls_for_update)
-        popular_urls = remove_invalid_urls(popular_urls)
+            urls_for_update = get_latest_updated_manga_urls()
 
         # create threads
-        create_threads_to_update_mangas(urls_for_update, feat, number_of_works)
+        create_threads_to_update_mangas(urls_for_update, upsert_manga, number_of_works)
 
         # update informations about mangas in the api
-        info = WebsiteUpdate(origin=origin, language=language, populars=popular_urls)
-
-        if registed_info:
-            # Keep info about popular mangas if new list is empty
-            if len(info.populars) == 0:
-                info.populars = registed_info.populars
-
-        update_info(info)
+        if popular_urls:
+            info = WebsiteUpdate(origin, popular_urls, language)
+            update_info(info)
 
     except Exception as error:
         logger.critical(
@@ -51,18 +49,24 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
         )
 
 
-def feat(manga_url: str):
-    """Check if manga is in the database, saving the manga or updating chapters."""
+def upsert_manga(manga_url: str):
+    """
+    If the manga url is already registered, it saves the manga in the API.
+    Otherwise, it updates its chapters.
 
-    logger.info(f"({origin}): processing {manga_url}")
+    Args:
+        manga_url (str): The URL of the manga to be checked and saved or updated.
 
+    Returns:
+        None
+    """
     try:
         manga_id = manga_exists(manga_url)
 
         if manga_id:
-            update(manga_id, manga_url)
+            update_unregistered_chapters(manga_id, manga_url)
         else:
-            save(manga_url)
+            save_new_manga(manga_url)
 
     except Exception as error:
         logger.error(
@@ -71,58 +75,80 @@ def feat(manga_url: str):
         )
 
 
-def update(manga_id: str, manga_url):
-    """Checks for missing chapters and updates them."""
-    manga = get_manga_without_chapter_pages(manga_url)
-    chapter_names_registered = get_chapter_names(manga_id)
+def update_unregistered_chapters(manga_id: str, manga_url: str):
+    """
+    Updates chapters that are not yet registered for a given manga.
 
-    new_chapters: list[Chapter] = []
+    Args:
+        manga_id (str): The ID of the manga.
+        manga_url (str): The URL of the manga to be checked and updated.
 
-    for info in get_chapters_not_registered(
-        manga.chapters_info, chapter_names_registered
-    ):
-        chapter = get_chapter(manga_url, info)
-        new_chapters.append(chapter)
+    Returns:
+        None
+    """
+    logger.info(f"({origin}): updating {manga_url}.")
 
-    new_chapters = filter_empty_chapters(new_chapters)
+    new_chapters = get_unregistered_chapters(manga_id, manga_url)
 
-    if len(new_chapters) > 0:
+    if new_chapters:
         add_chapters(manga_id, new_chapters)
 
 
-def save(manga_url: str):
-    """Save a new manga in the database."""
-    manga = get_manga_with_chapter_pages(manga_url)
-    manga.chapters = filter_empty_chapters(manga.chapters)
+def save_new_manga(manga_url: str):
+    """
+    Saves a new manga to the database.
+
+    Args:
+        manga_url (str): The URL of the manga to be added to the database.
+
+    Returns:
+        None
+    """
+    logger.info(f"({origin}): saving {manga_url}")
+
+    manga = get_manga(manga_url)
 
     # if manga contain chapters
-    if len(manga.chapters) > 0:
+    if not manga.is_empty():
         add_manga(manga)
 
 
-def get_all_urls():
+def get_all_urls_in_alphabetic_order() -> list[str]:
+    """
+    Retrieves all URLs from the website and returns them in alphabetical order.
+
+    Returns:
+        list[str]: A list of URLs sorted in alphabetical order.
+    """
     logger.info(f"({origin}): downloading all mangas URLs.")
     urls = []
 
     for letter in [chr(i) for i in range(97, 123)]:
         try:
-            letter_urls = get_all_start_with(letter=letter)
-            urls = urls + letter_urls
+            urls = urls + get_all_start_with(letter=letter)
         except Exception as error:
             logger.critical(
-                f"({origin}) error getting all URLs.",
+                f"({origin}) error getting all URLs (letter={letter}).",
                 exc_info=True,
             )
+
+    urls = remove_invalid_urls(urls)
 
     return urls
 
 
-def get_latest_updated_urls():
+def get_latest_updated_manga_urls():
+    """
+    Retrieves URLs of mangas that were most recently updated on the website.
+
+    Returns:
+        list[str]: A list of URLs of the latest updated mangas.
+    """
     logger.info(f"({origin}): downloading updated mangas URLs.")
     urls = []
 
     try:
-        urls = urls + get_latest_updates(limit=400)
+        urls = get_latest_updates(limit=400)
         urls.reverse()
     except Exception as error:
         logger.critical(
@@ -130,49 +156,112 @@ def get_latest_updated_urls():
             exc_info=True,
         )
 
+    urls = remove_invalid_urls(urls)
+
     return urls
 
 
-def get_popular_urls():
+def get_most_popular_manga_urls() -> list[str]:
+    """
+    Retrieves URLs of the most popular mangas from the website.
+
+    Returns:
+        list[str]: A list of URLs of the most popular mangas.
+    """
     logger.info(f"({origin}): downloading popular mangas URLs.")
     urls = []
 
     try:
-        urls = urls + get_populars()
+        urls = get_populars()
     except Exception as error:
         logger.critical(
             f"({origin}) error getting populars URLs.",
             exc_info=True,
         )
 
+    urls = remove_invalid_urls(urls)
+
     return urls
 
 
+def get_unregistered_chapters(manga_id: str, manga_url: str) -> list[Chapter]:
+    """
+    Retrieves chapters of a manga that are not yet registered in the database.
+
+    Args:
+        manga_id (str): The ID of the manga.
+        manga_url (str): The URL of the manga.
+
+    Returns:
+        list[str]: A list of chapters that are not registered in the database.
+    """
+    new_chapters: list[Chapter] = []
+
+    manga = get_manga_without_chapter_pages(manga_url)
+    chapter_names_registered = get_chapter_names(manga_id)
+
+    for chapter in manga.chapters:
+        if chapter.name not in chapter_names_registered:
+            chapter.pages = get_chapter_pages(manga_url, chapter)
+
+            if not chapter.is_empty():
+                new_chapters.append(chapter)
+
+    return new_chapters
+
+
 def get_manga_without_chapter_pages(manga_url: str) -> Manga:
-    return manga_detail(manga_url, False)
+    """
+    Retrieves information about a manga, excluding its chapter pages.
+
+    Args:
+        manga_url (str): The URL of the manga.
+
+    Returns:
+        Manga: A manga object without chapter pages.
+    """
+    return manga_detail(manga_url)
 
 
-def get_manga_with_chapter_pages(manga_url: str) -> Manga:
+def get_manga(manga_url: str) -> Manga:
+    """
+    Retrieves information about a manga, including its chapter pages.
+
+    Args:
+        manga_url (str): The URL of the manga.
+
+    Returns:
+        Manga: A manga object with chapter pages included.
+    """
+
     # download manga info
-    manga = manga_detail(manga_url, False)
-    manga.chapters = []
+    manga = manga_detail(manga_url)
 
     # dowload chapter pages
-    for info in manga.chapters_info:
-        chapter = get_chapter(manga_url, info)
+    for chapter in manga.chapters:
+        chapter.pages = get_chapter_pages(manga_url, chapter)
 
-        # if chapter contains pages
-        if len(chapter.pages) > 0:
-            manga.chapters.append(chapter)
+    manga.filter_empty_chapters()
 
     return manga
 
 
-def get_chapter(manga_url: str, info: ChapterInfo) -> Chapter:
-    cp_url = f"{manga_url}/{info.name}"
+def get_chapter_pages(manga_url: str, chapter: Chapter) -> list[str]:
+    """
+    Retrieves URLs of the chapter pages for a specific chapter of a manga.
+
+    Args:
+        manga_url (str): The URL of the manga.
+        chapter (Chapter): The chapter info for which pages should be retrieved.
+
+    Returns:
+        list[str]: A list of URLs of the chapter pages.
+    """
+
+    cp_url = f"{manga_url}/{chapter.name}"
     pages = get_pages(cp_url)
 
-    return Chapter(name=info.name, pages=pages)
+    return pages
 
 
 def remove_invalid_urls(urls: list[str]) -> list[str]:
