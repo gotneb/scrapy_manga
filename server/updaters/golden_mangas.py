@@ -123,6 +123,7 @@ def get_latest_updated_urls():
 
     try:
         urls = urls + get_latest_updates(limit=400)
+        urls.reverse()
     except Exception as error:
         logger.critical(
             f"({origin}) error getting latest updated URLs.",
