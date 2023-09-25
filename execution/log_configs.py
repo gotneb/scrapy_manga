@@ -24,14 +24,10 @@ info_logger_handler = logging.FileHandler(filename=info_log_file_path, mode="w")
 info_logger_handler.setLevel(logging.INFO)
 info_logger_handler.setFormatter(formater)
 
-info_filter = logging.Filter()
-info_filter.filter = lambda record: record.levelno == logging.INFO
-info_logger_handler.addFilter(info_filter)
-
 # error logger configs
 error_log_file_path = os.path.join(parent_dir, "error_logs.log")
 error_logger_handler = logging.FileHandler(filename=error_log_file_path, mode="w")
-error_logger_handler.setLevel(logging.WARNING)
+error_logger_handler.setLevel(logging.ERROR)
 error_logger_handler.setFormatter(formater)
 
 # add handlers in main logger
