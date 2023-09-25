@@ -49,7 +49,7 @@ def update_mangas_from_websites(number_of_works: int, exec_all: bool = False):
         )
 
 
-def upsert_manga(manga_url: str):
+def upsert_manga(manga_url: str) -> bool:
     """
     If the manga url is already registered, it saves the manga in the API.
     Otherwise, it updates its chapters.
@@ -58,24 +58,32 @@ def upsert_manga(manga_url: str):
         manga_url (str): The URL of the manga to be checked and saved or updated.
 
     Returns:
-        None
+        boolean: Return True if operation was completed successfully.
     """
+    ok = False
+
     try:
         manga_id = manga_exists(manga_url)
 
         if manga_id:
-            update_unregistered_chapters(manga_id, manga_url)
+            ok = update_unregistered_chapters(manga_id, manga_url)
         else:
-            save_new_manga(manga_url)
+            ok = save_new_manga(manga_url) != None
 
+        if ok:
+            logger.info(f"({origin}): operation completed successfully on {manga_url}")
+        else:
+            logger.warning(f"({origin}): operation failed on {manga_url}")
     except Exception as error:
         logger.error(
             f"({origin}): error in the processing of {manga_url}",
             exc_info=True,
         )
 
+    return ok
 
-def update_unregistered_chapters(manga_id: str, manga_url: str):
+
+def update_unregistered_chapters(manga_id: str, manga_url: str) -> bool:
     """
     Updates chapters that are not yet registered for a given manga.
 
@@ -84,17 +92,20 @@ def update_unregistered_chapters(manga_id: str, manga_url: str):
         manga_url (str): The URL of the manga to be checked and updated.
 
     Returns:
-        None
+        boolean: Return True if operation was completed successfully.
     """
     logger.info(f"({origin}): updating {manga_url}")
 
+    updated = False
     new_chapters = get_unregistered_chapters(manga_id, manga_url)
 
     if new_chapters:
-        add_chapters(manga_id, new_chapters)
+        updated = add_chapters(manga_id, new_chapters)
+
+    return updated
 
 
-def save_new_manga(manga_url: str):
+def save_new_manga(manga_url: str) -> str:
     """
     Saves a new manga to the database.
 
@@ -102,15 +113,18 @@ def save_new_manga(manga_url: str):
         manga_url (str): The URL of the manga to be added to the database.
 
     Returns:
-        None
+        str: Manga ID inserted.
     """
     logger.info(f"({origin}): saving {manga_url}")
 
+    inserted_id = None
     manga = get_manga(manga_url)
 
     # if manga contain chapters
     if not manga.is_empty():
-        add_manga(manga)
+        inserted_id = add_manga(manga)
+
+    return inserted_id
 
 
 def get_all_urls_in_alphabetic_order() -> list[str]:
