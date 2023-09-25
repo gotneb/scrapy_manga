@@ -37,10 +37,10 @@ class Manga(Entity):
         self.chapters: list[Chapter] = chapters
 
     def chapters_to_dict_list(self):
-        return list(map(lambda chapter: chapter.to_dict(), self.chapters))
+        return [chapter.to_dict() for chapter in self.chapters]
 
     def get_chapter_names(self) -> list[str]:
-        return list(map(lambda info: info.name, self.chapters))
+        return [chapter.name for chapter in self.chapters]
 
     def filter_empty_chapters(self) -> None:
         results = []
