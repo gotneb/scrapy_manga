@@ -6,9 +6,8 @@ On terminal:
 
 Arguments for website update: run main.py with the `--help` argument (or `-h`) for more information.
 
-Download the chrome driver from:
-
-https://github.com/mozilla/geckodriver/releases/
+### Driver
+Firefox automatically downloads the driver for us.
 
 # Enviroment variables
 
