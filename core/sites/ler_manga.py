@@ -6,10 +6,41 @@ from requests import get
 # Ours code
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
+from execution.log_configs import logger
 
 _domain = "https://lermanga.org"
 _origin = "ler_manga"
 _language = "portuguese"
+
+def get_pages(chapter_url: str) -> list[str]:
+    """Extract all image links from a chapter.\n
+    `chapter_url:` a chapter of a manga
+    """
+    soup = BeautifulSoup(get(chapter_url).content, "html.parser")
+
+    # Remove unnecessary '/' at the end
+    if chapter_url[-1] == '/':
+        chapter_url = chapter_url[:-1]
+
+    # Returns first letter to upper case
+    capital_letter = chapter_url.split('/')[-1][0].upper()
+
+    # Get total of pages
+    tags = soup.css.select(
+        "div.nvs.slc select.select_paged option")
+    total = int(tags[-1].text.split(' ')[0])
+
+    # Get title along with the chapter number
+    splitted_url = chapter_url.split('/')[-1]
+    splitted_url = splitted_url.split('capitulo')
+    title = splitted_url[0][:-1]
+    number = splitted_url[-1][1:]
+
+    imgs = []
+    for i in range(1, total + 1):
+        imgs.append(f'https://img.lermanga.org/{capital_letter}/{title}/capitulo-{number}/{i}.jpg')
+    return imgs
+
 
 def manga_detail(manga_url, show_window=False):
     """
