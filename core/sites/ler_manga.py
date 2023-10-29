@@ -3,42 +3,59 @@ from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
 from requests import get
+from core.driver import init_driver
 # Ours code
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
-from execution.log_configs import logger
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
+
+import time
 
 _domain = "https://lermanga.org"
 _origin = "ler_manga"
 _language = "portuguese"
 
+
+def _get_html(link) -> str:
+    driver = init_driver(False)
+    driver.set_page_load_timeout(10)
+
+    driver.get(link)
+    options = driver.find_elements(By.CSS_SELECTOR, 'div.nvs.slc select#slch option')
+    options[-1].click()
+    
+    # Site might open a 2nd tab to show ads
+    if len(driver.window_handles) == 2:
+        # Close ADS tab
+        driver.close()
+        # Move to newly tab manga
+        driver.switch_to.window(driver.window_handles[0])
+
+    ARBITRARY_NUMBER_ATTEMPTS = 30
+    ARBITRARY_SCROLL_AMOUNT = 700
+    ARBITRARY_TIME = 0.05
+
+    for _ in range(0, ARBITRARY_NUMBER_ATTEMPTS):
+        ActionChains(driver)      \
+        .scroll_by_amount(0, ARBITRARY_SCROLL_AMOUNT) \
+        .perform()
+        time.sleep(ARBITRARY_TIME)
+
+    html = driver.page_source
+    driver.close()
+    return html
+
+
 def get_pages(chapter_url: str) -> list[str]:
     """Extract all image links from a chapter.\n
     `chapter_url:` a chapter of a manga
     """
-    soup = BeautifulSoup(get(chapter_url).content, "html.parser")
-
-    # Remove unnecessary '/' at the end
-    if chapter_url[-1] == '/':
-        chapter_url = chapter_url[:-1]
-
-    # Returns first letter to upper case
-    capital_letter = chapter_url.split('/')[-1][0].upper()
-
-    # Get total of pages
-    tags = soup.css.select(
-        "div.nvs.slc select.select_paged option")
-    total = int(tags[-1].text.split(' ')[0])
-
-    # Get title along with the chapter number
-    splitted_url = chapter_url.split('/')[-1]
-    splitted_url = splitted_url.split('capitulo')
-    title = splitted_url[0][:-1]
-    number = splitted_url[-1][1:]
-
+    soup = BeautifulSoup(_get_html(chapter_url), "html.parser")
+    img_tags = soup.css.select("div.reader-area img")
     imgs = []
-    for i in range(1, total + 1):
-        imgs.append(f'https://img.lermanga.org/{capital_letter}/{title}/capitulo-{number}/{i}.jpg')
+    for img in img_tags:
+        imgs.append(img.get('src'))
     return imgs
 
 
