@@ -85,7 +85,7 @@ def _get_html(link) -> str:
         # Move to newly tab manga
         driver.switch_to.window(driver.window_handles[0])
 
-    ARBITRARY_NUMBER_ATTEMPTS = 30
+    ARBITRARY_NUMBER_ATTEMPTS = 20
     ARBITRARY_SCROLL_AMOUNT = 700
     ARBITRARY_TIME = 0.05
 
