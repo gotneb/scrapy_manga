@@ -17,9 +17,26 @@ _domain = "https://lermanga.org"
 _origin = "ler_manga"
 _language = "portuguese"
 
+LINKS_PER_PAGE = 100
+
+def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
+    """Visits the `lermanga.org` and returns most populars mangas right now."""
+    URL = 'https://lermanga.org/mangas/?orderby=trending&order=desc'
+    soup = BeautifulSoup(get(URL).content, "html.parser")
+    anchor_tags = soup.css.select("div.film-detail a")
+    links = []
+    for a in anchor_tags:
+        link = a.get('href')
+        links.append(link)
+
+        if on_link_received != None:
+            on_link_received(link)
+    return links
+
+
 
 def get_latest_updates(
-    limit: int = 100, on_link_received: Callable[[str], None] = None
+    limit: int = LINKS_PER_PAGE, on_link_received: Callable[[str], None] = None
 ) -> list[str]:
     """
     Returns a list of all links from `lermmanga.org` that were updateds.\n
@@ -28,7 +45,6 @@ def get_latest_updates(
     Return:
         A list of recent mangas updated.
     """
-    LINKS_PER_PAGE = 100
     total_pages = math.ceil(limit / LINKS_PER_PAGE)
     counter = 0
     links = []
@@ -43,7 +59,7 @@ def get_latest_updates(
         for a in links_tags:
             if counter == limit:
                 break
-            
+
             link = a.get('href')
             links.append(link)
             counter += 1
