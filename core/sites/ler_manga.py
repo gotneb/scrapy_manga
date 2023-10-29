@@ -1,4 +1,5 @@
 # Python
+import math
 from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
@@ -17,6 +18,42 @@ _origin = "ler_manga"
 _language = "portuguese"
 
 
+def get_latest_updates(
+    limit: int = 100, on_link_received: Callable[[str], None] = None
+) -> list[str]:
+    """
+    Returns a list of all links from `lermmanga.org` that were updateds.\n
+    Arguments:
+        `limit:` the total quantity of manga links will be extracted.
+    Return:
+        A list of recent mangas updated.
+    """
+    LINKS_PER_PAGE = 100
+    total_pages = math.ceil(limit / LINKS_PER_PAGE)
+    counter = 0
+    links = []
+
+    for i in range(1, total_pages + 1):
+        url = f'https://lermanga.org/capitulos/page/{i}/'
+        if i == 1:
+            url = 'https://lermanga.org/capitulos/'
+        soup = BeautifulSoup(get(url).content, "html.parser")
+        links_tags = soup.css.select("a.dynamic-visited")
+        
+        for a in links_tags:
+            if counter == limit:
+                break
+            
+            link = a.get('href')
+            links.append(link)
+            counter += 1
+
+            if on_link_received != None:
+                on_link_received(link)
+    return links
+
+
+# Helper function to get function `get_pages``
 def _get_html(link) -> str:
     driver = init_driver(False)
     driver.set_page_load_timeout(10)
