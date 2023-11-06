@@ -1,6 +1,5 @@
 from concurrent.futures import ThreadPoolExecutor, Future
 from ..api import *
-from core.sites.manga_livre import *
 from typing import Callable
 
 

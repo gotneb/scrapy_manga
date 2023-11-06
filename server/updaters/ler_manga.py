@@ -1,12 +1,12 @@
 from ..api import *
-from core.sites.readm import *
+from core.sites.ler_manga import *
 from entities import Manga, Chapter, WebsiteUpdate
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
 from execution.log_configs import logger
+
 import re
 
-
-origin = "manga_livre"
+origin = "ler_manga"
 language = "portuguese"
 
 
@@ -266,11 +266,14 @@ def get_chapter_pages(manga_url: str, chapter: Chapter) -> list[str]:
     Returns:
         list[str]: A list of URLs of the chapter pages.
     """
+    pages = []
 
-    pattern = r"manga/([^/]+)"
-    slug = re.search(pattern=pattern, string=manga_url).group(1)
+    pattern = r"mangas/(.*?)/"
+    search_string_results = re.search(pattern, manga_url)
 
-    cp_url = f" https://mangalivre.net/ler/{slug}/online/{chapter.id}/{chapter.name}"
-    pages = get_pages(cp_url)
+    if search_string_results:
+        manga_slug = search_string_results.group(1)
+        cp_url = f"https://lermanga.org/capitulos/{manga_slug}-capitulo-{chapter.name}/"
+        pages = get_pages(cp_url)
 
     return pages
