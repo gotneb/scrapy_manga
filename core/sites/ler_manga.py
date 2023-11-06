@@ -2,7 +2,7 @@
 import math
 from typing import Callable
 # External packages
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from requests import get
 from core.driver import init_driver
 # Ours code
@@ -12,12 +12,75 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 import time
+import utils.debug_tools as utils
 
 _domain = "https://lermanga.org"
 _origin = "ler_manga"
 _language = "portuguese"
 
 LINKS_PER_PAGE = 100
+
+# Helper function to `get_all_start_with`
+def _link_start_with(link: str, letter: str) -> bool:
+    name = link.split('/')[-2].lower()
+    return name.startswith(letter)
+
+
+# Helper functions to `get_all_start_with`
+def _extract_link(tag: Tag) -> str:
+    tags = tag.select('div.film-detail h3.film-name a')
+    return tags[0].get('href')
+
+
+def get_all_start_with(
+    letter, show_window=False, on_link_received: Callable[[str], None] = None
+) -> list[str]:
+    """
+    Visits `lermanga.org` and extract all links that starts with `letter` on its name.\n
+    Arguments:
+    `letter:` manga initial name.
+    `show_window:` show google's chrome window.
+    `on_link_received:` callback that's called when manga's link is received.\n
+    Return:
+    list of links.
+    """
+    if len(letter) > 2:
+        raise Exception("letter must be an unique character.")
+    if show_window:
+        raise Exception("Couldn't open the window.")
+    
+    found_letter = False
+    break_sequence = False
+    index = 1
+    url = ''
+
+    links = []
+    while True:
+        if index == 1:
+            url = f'{_domain}/mangas/?orderby=title&order=asc'
+        else:
+            url = f'{_domain}/mangas/page/{index}/?orderby=title&order=asc'
+        
+        req = get(url)
+        soup = BeautifulSoup(req.content, "html.parser")
+        tags = soup.css.select("div.film_list-wrap div.flw-item")
+
+        for tag in tags:
+            link = _extract_link(tag)
+            if _link_start_with(link, letter):
+                found_letter = True
+                links.append(link)
+
+                if on_link_received != None:
+                    on_link_received(link)
+            elif found_letter:
+                break_sequence = True
+        index += 1
+        if found_letter and break_sequence:
+            break
+
+    return links
+
 
 def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     """Visits the `lermanga.org` and returns most populars mangas right now."""
@@ -32,7 +95,6 @@ def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
         if on_link_received != None:
             on_link_received(link)
     return links
-
 
 
 def get_latest_updates(
