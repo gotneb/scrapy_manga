@@ -12,7 +12,6 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 import time
-import utils.debug_tools as utils
 
 _domain = "https://lermanga.org"
 _origin = "ler_manga"
@@ -30,6 +29,38 @@ def _link_start_with(link: str, letter: str) -> bool:
 def _extract_link(tag: Tag) -> str:
     tags = tag.select('div.film-detail h3.film-name a')
     return tags[0].get('href')
+
+
+def letter_min_index(letter: str) -> int:
+    indexes = {
+        'a': 2,
+        'b': 8,
+        'c': 13,
+        'd': 17,
+        'e': 23,
+        'f': 25,
+        'g': 28,
+        'h': 31,
+        'i': 37,
+        'j': 46,
+        'k': 48,
+        'l': 56,
+        'm': 60,
+        'n': 69,
+        'o': 72,
+        'p': 76,
+        'q': 79,
+        'r': 79,
+        's': 83,
+        't': 94,
+        'u': 108,
+        'v': 110,
+        'w': 111,
+        'x': 113,
+        'y': 115,
+        'z': 118,
+    }
+    return indexes[letter]
 
 
 def get_all_start_with(
@@ -51,8 +82,10 @@ def get_all_start_with(
     
     found_letter = False
     break_sequence = False
-    index = 1
+    index = letter_min_index(letter)
     url = ''
+
+    print(f'Index: {index}')
 
     links = []
     while True:
