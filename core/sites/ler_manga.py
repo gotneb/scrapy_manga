@@ -8,7 +8,7 @@ from requests import get
 from core.driver import init_driver
 
 # Ours code
-from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 from entities.manga import Manga
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -170,7 +170,7 @@ def get_latest_updates(
 # Helper function to get function `get_pages``
 def _get_html(link) -> str:
     driver = init_driver(False)
-    driver.set_page_load_timeout(10)
+    driver.set_page_load_timeout(60)
 
     driver.get(link)
     options = driver.find_elements(By.CSS_SELECTOR, "div.nvs.slc select#slch option")
@@ -226,7 +226,7 @@ def manga_detail(manga_url, show_window=False):
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters_info = get_chapters(soup)
+    chapters = get_chapters(soup)
 
     return Manga(
         title=title,
@@ -240,7 +240,7 @@ def manga_detail(manga_url, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -287,11 +287,11 @@ def get_summary(soup: BeautifulSoup) -> str:
     return summary
 
 
-def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def get_chapters(soup: BeautifulSoup) -> list[Chapter]:
     """Returns all manga's chapters."""
     tags_chapters = soup.css.select("div.single-chapter a")
     chapters = []
     for chap in tags_chapters:
         c = chap.text.strip().split(" ")[1]
-        chapters.append(ChapterInfo(c))
+        chapters.append(Chapter(c))
     return chapters
