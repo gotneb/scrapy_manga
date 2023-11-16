@@ -8,13 +8,12 @@ from requests import get
 from core.driver import init_driver
 
 # Ours code
-from entities.chapter import Chapter
+from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
 import time
-import utils.debug_tools as utils
 
 _domain = "https://lermanga.org"
 _origin = "ler_manga"
@@ -33,6 +32,38 @@ def _link_start_with(link: str, letter: str) -> bool:
 def _extract_link(tag: Tag) -> str:
     tags = tag.select("div.film-detail h3.film-name a")
     return tags[0].get("href")
+
+
+def letter_min_index(letter: str) -> int:
+    indexes = {
+        "a": 2,
+        "b": 8,
+        "c": 13,
+        "d": 17,
+        "e": 23,
+        "f": 25,
+        "g": 28,
+        "h": 31,
+        "i": 37,
+        "j": 46,
+        "k": 48,
+        "l": 56,
+        "m": 60,
+        "n": 69,
+        "o": 72,
+        "p": 76,
+        "q": 79,
+        "r": 79,
+        "s": 83,
+        "t": 94,
+        "u": 108,
+        "v": 110,
+        "w": 111,
+        "x": 113,
+        "y": 115,
+        "z": 118,
+    }
+    return indexes[letter]
 
 
 def get_all_start_with(
@@ -54,8 +85,10 @@ def get_all_start_with(
 
     found_letter = False
     break_sequence = False
-    index = 1
+    index = letter_min_index(letter)
     url = ""
+
+    print(f"Index: {index}")
 
     links = []
     while True:
@@ -137,7 +170,7 @@ def get_latest_updates(
 # Helper function to get function `get_pages``
 def _get_html(link) -> str:
     driver = init_driver(False)
-    driver.set_page_load_timeout(60)
+    driver.set_page_load_timeout(10)
 
     driver.get(link)
     options = driver.find_elements(By.CSS_SELECTOR, "div.nvs.slc select#slch option")
@@ -193,7 +226,7 @@ def manga_detail(manga_url, show_window=False):
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters = get_chapters(soup)
+    chapters_info = get_chapters(soup)
 
     return Manga(
         title=title,
@@ -207,7 +240,7 @@ def manga_detail(manga_url, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters=chapters,
+        chapters_info=chapters_info,
         rating=score,
     )
 
@@ -254,11 +287,11 @@ def get_summary(soup: BeautifulSoup) -> str:
     return summary
 
 
-def get_chapters(soup: BeautifulSoup) -> list[Chapter]:
+def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
     """Returns all manga's chapters."""
     tags_chapters = soup.css.select("div.single-chapter a")
     chapters = []
     for chap in tags_chapters:
         c = chap.text.strip().split(" ")[1]
-        chapters.append(Chapter(c))
+        chapters.append(ChapterInfo(c))
     return chapters
