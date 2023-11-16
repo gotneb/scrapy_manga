@@ -7,15 +7,15 @@ from .update_database import update_database
 from .log_configs import logger
 
 
-def schedule_execution(hour: int, number_of_works: int, exec_all: bool = False):
+def schedule_execution(args):
     """Schedule the update for the specified time (but minutes is random)."""
 
     while True:
         # define update time
-        time = "{:02d}:{:02d}".format(hour, randint(0, 60))
+        time = "{:02d}:{:02d}".format(args["schedule"], randint(0, 60))
 
         # schedule udpate
-        schedule.every().day.at(time).do(update_database, number_of_works, exec_all)
+        schedule.every().day.at(time).do(update_database, args)
         next_task = schedule.jobs[0]
 
         logger.info(f"Scheduled update for {next_task.next_run}.")
