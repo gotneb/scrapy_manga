@@ -1,12 +1,13 @@
 from ..api import *
-from core.sites.readm import *
+from core.sites.ler_manga import *
 from entities import Manga, Chapter, WebsiteUpdate
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
 from execution.log_configs import logger
 
+import re
 
-origin = "readm"
-language = "english"
+origin = "ler_manga"
+language = "portuguese"
 
 
 def update_mangas_from_websites(number_of_works: int, exec_all: bool = False):
@@ -149,7 +150,7 @@ def get_all_urls_in_alphabetic_order() -> list[str]:
     return urls
 
 
-def get_latest_updated_manga_urls():
+def get_latest_updated_manga_urls() -> list[dict]:
     """
     Retrieves URLs of mangas that were most recently updated on the website.
 
@@ -157,18 +158,40 @@ def get_latest_updated_manga_urls():
         list[str]: A list of URLs of the latest updated mangas.
     """
     logger.info(f"({origin}): downloading updated mangas URLs.")
-    urls = []
+    manga_urls = []
 
     try:
-        urls = get_latest_updates(limit=400)
-        urls.reverse()
+        # get manga urls from chapters updates
+        chapters_urls = get_latest_updates(limit=400)
+        urls = [extract_manga_url(cp_url) for cp_url in chapters_urls]
+
+        # remove repeated URLs
+        for url in urls:
+            if url not in manga_urls:
+                manga_urls.append(url)
+
+        manga_urls.reverse()
     except Exception as error:
         logger.critical(
             f"({origin}) error getting latest updated URLs.",
             exc_info=True,
         )
 
-    return urls
+    return manga_urls
+
+
+def extract_manga_url(chapter_url: str) -> str:
+    slug_pattern = r"capitulos/(.*?)-capitulo-"
+
+    search_manga_slug = re.search(slug_pattern, chapter_url)
+
+    if search_manga_slug:
+        manga_slug = search_manga_slug.group(1)
+        manga_url = f"https://lermanga.org/mangas/{manga_slug}/"
+
+        return manga_url
+
+    return None
 
 
 def get_most_popular_manga_urls() -> list[str]:
@@ -265,8 +288,14 @@ def get_chapter_pages(manga_url: str, chapter: Chapter) -> list[str]:
     Returns:
         list[str]: A list of URLs of the chapter pages.
     """
+    pages = []
 
-    cp_url = f"{manga_url}/{chapter.name}/all-pages"
-    pages = get_pages(cp_url)
+    pattern = r"mangas/(.*?)/"
+    search_string_results = re.search(pattern, manga_url)
+
+    if search_string_results:
+        manga_slug = search_string_results.group(1)
+        cp_url = f"https://lermanga.org/capitulos/{manga_slug}-capitulo-{chapter.name}/"
+        pages = get_pages(cp_url)
 
     return pages

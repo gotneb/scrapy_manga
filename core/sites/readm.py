@@ -12,7 +12,7 @@ from requests import get
 # Core
 from core.driver import init_driver
 from core.sites.readm_helper import extract_manga_page
-from entities import ChapterInfo
+from entities import Chapter
 from entities import Manga
 
 _origin = "readm"
@@ -57,6 +57,8 @@ def get_latest_updates(
             if pages_counter == limit:
                 break
 
+    links.reverse()
+
     return links
 
 
@@ -80,12 +82,13 @@ def get_pages(manga_url) -> list[str]:
 
     return url_imgs
 
-# Some mangas actually needs to the person be logged in 
+
+# Some mangas actually needs to the person be logged in
 # the site to actually read it -.-'
 # (oh god, why does life need to be that complicated?)
 def _need_authenticate(soup: BeautifulSoup) -> bool:
     try:
-        alert = 'You need to LOG IN in order to read this manga.'
+        alert = "You need to LOG IN in order to read this manga."
         elem = soup.css.select("div.alert.alert-info")[0].text
         return elem == alert
     except:
@@ -102,11 +105,12 @@ def get_populars(on_link_received: Callable[[str], None] = None) -> list[str]:
     # Links to mangas
     links = []
     elems = driver.find_elements(
-        By.CSS_SELECTOR, "div.owl-stage-outer div.owl-stage div.owl-item div.item a[href]"
+        By.CSS_SELECTOR,
+        "div.owl-stage-outer div.owl-stage div.owl-item div.item a[href]",
     )
     for a in elems:
         # Actually it returns the page... So I'm splitting to separate the page
-        link = '/'.join(a.get_attribute('href').split('/')[:-2])
+        link = "/".join(a.get_attribute("href").split("/")[:-2])
         if link not in links:
             links.append(link)
 
@@ -174,7 +178,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
     thumbnail = get_thumbnail(soup)
     genres = get_genres(soup)
     summary = get_summary(soup)
-    chapters_info = get_chapters(soup)
+    chapters = get_chapters(soup)
 
     return Manga(
         title=title,
@@ -188,7 +192,7 @@ def manga_detail(manga_url, show_window=False) -> Manga:
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -275,7 +279,7 @@ def get_summary(soup: BeautifulSoup) -> str:
     return summary
 
 
-def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def get_chapters(soup: BeautifulSoup) -> list[Chapter]:
     """Returns a list of chapters from manga."""
     a_tags = soup.css.select(
         "section.episodes-box div.ui.tab div.ui.list div.item.season_start h6.truncate a"
@@ -287,6 +291,6 @@ def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
         # This a bug from the site itself
         if len(a.text.split()) == 2:
             c = a.text.split()[1]
-            chapters.append(ChapterInfo(name=c))
+            chapters.append(Chapter(name=c))
 
     return chapters
