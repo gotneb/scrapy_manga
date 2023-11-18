@@ -85,8 +85,6 @@ def get_all_start_with(
     index = letter_min_index(letter)
     url = ''
 
-    print(f'Index: {index}')
-
     links = []
     while True:
         if index == 1:
@@ -166,8 +164,7 @@ def get_latest_updates(
 
 # Helper function to get function `get_pages``
 def _get_html(link) -> str:
-    driver = init_driver(False)
-    driver.set_page_load_timeout(10)
+    driver = init_driver(True, timeout=10)
 
     driver.get(link)
     options = driver.find_elements(By.CSS_SELECTOR, 'div.nvs.slc select#slch option')
@@ -182,7 +179,7 @@ def _get_html(link) -> str:
 
     ARBITRARY_NUMBER_ATTEMPTS = 20
     ARBITRARY_SCROLL_AMOUNT = 700
-    ARBITRARY_TIME = 0.05
+    ARBITRARY_TIME = 0.05 # 50 ms
 
     for _ in range(0, ARBITRARY_NUMBER_ATTEMPTS):
         ActionChains(driver)      \
