@@ -15,6 +15,7 @@ def manga_detail(manga_url, show_window=False):
     `manga_url:` the manga content.
     `enable_gui:` show chrome window.
     """
+    manga_url = _sanitize_url(manga_url)
     soup = BeautifulSoup(get(manga_url).content, "html.parser")
 
     title = _get_title(soup)
@@ -43,6 +44,13 @@ def manga_detail(manga_url, show_window=False):
         chapters_info=chapters_info,
         rating=score,
     )
+
+
+# Needed to loads chapters names
+def _sanitize_url(url: str) -> str:
+    if 'waring' not in url:
+        url = f'{url}?waring=1'
+    return url
 
 
 def _get_title(soup: BeautifulSoup) -> str:
@@ -148,14 +156,14 @@ def _get_chapter_id(tag: Tag) -> str:
 
 
 # Helper function to '_get_chapters'
-def _has_numbers(value: str) -> bool:
-    return any(char.isdigit() for char in value)
-
-
-# Helper function to '_get_chapters'
 def _find_number(value: str) -> str | None:
     values = value.split(' ')
     for text in values:
         if _has_numbers(text):
             return text
     return None
+
+
+# Helper function to '_get_chapters'
+def _has_numbers(value: str) -> bool:
+    return any(char.isdigit() for char in value)
