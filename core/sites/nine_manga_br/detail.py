@@ -16,6 +16,7 @@ def manga_detail(manga_url, show_window=False):
     `enable_gui:` show chrome window.
     """
     manga_url = _sanitize_url(manga_url)
+    print(f'URL: {manga_url}')
     soup = BeautifulSoup(get(manga_url).content, "html.parser")
 
     title = _get_title(soup)
@@ -113,10 +114,13 @@ def _extract_genres(tag: Tag) -> list[str]:
 
 def _get_summary(soup: BeautifulSoup) -> str:
     """Returns manga's summary."""
-    tags = soup.css.select("div.manga div.bookintro p")
-    text = tags[0].text
-    text = text.replace('Sinopse:', '').strip()
-    return text
+    try:
+        tags = soup.css.select("div.manga div.bookintro p")
+        text = tags[0].text
+        text = text.replace('Sinopse:', '').strip()
+        return text
+    except:
+        return None
 
 
 def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
