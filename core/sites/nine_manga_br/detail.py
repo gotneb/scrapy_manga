@@ -16,7 +16,6 @@ def manga_detail(manga_url, show_window=False):
     `enable_gui:` show chrome window.
     """
     manga_url = _sanitize_url(manga_url)
-    print(f'URL: {manga_url}')
     soup = BeautifulSoup(get(manga_url).content, "html.parser")
 
     title = _get_title(soup)
