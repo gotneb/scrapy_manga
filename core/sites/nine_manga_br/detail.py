@@ -6,7 +6,6 @@ from entities.manga import Manga
 from requests import get
 
 from .constants import *
-import utils.debug_tools as debug
 
 
 def manga_detail(manga_url, show_window=False):
@@ -118,17 +117,34 @@ def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
     chapters = []
 
     for a in tags:
+        id = _get_chapter_id(a)
         text = a.text.strip()
         text = text.split(' ')[-1].strip()
+        text = _sanitize(text)
+
         if _has_numbers(text):
-            chapters.append(ChapterInfo(text))
+            chapters.append(ChapterInfo(text, id))
         else:
             # Sometimes this site has a weird pattern on chapters names -.-'
             text = _find_number(a.text.strip())
             if text != None:
-                chapters.append(ChapterInfo(text))
+                chapters.append(ChapterInfo(text, id))
 
     return chapters
+
+
+def _sanitize(value: str) -> str:
+    if value.isdigit():
+        return value.lstrip('0')
+    return value
+
+
+# Helper function to '_get_chapters'
+def _get_chapter_id(tag: Tag) -> str:
+    id = tag.get('href')
+    id = id.split('/')[-1]
+    id = id.split('.')[0]
+    return id
 
 
 # Helper function to '_get_chapters'
