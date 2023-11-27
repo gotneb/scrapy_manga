@@ -1,23 +1,12 @@
-# Python
-import math
-from typing import Callable
 # External packages
 from bs4 import BeautifulSoup
-from requests import get
-from core.driver import init_driver
+from core.driver import get_driver_html, init_driver
 # Ours code
 from entities.chapter_info import ChapterInfo
 from entities.manga import Manga
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
 
-import utils.debug_tools as utils
-
-_domain = "https://mangaschan.net"
-_origin = "mangas_chan"
-_language = "portuguese"
-
-_default_thumbnail_not_found = 'https://img.freepik.com/vetores-gratis/erro-404-com-ilustracao-do-conceito-de-paisagem_114360-7898.jpg?size=626&ext=jpg&ga=GA1.1.1413502914.1696809600&semt=ais'
+from .constants import origin
+from .constants import language
 
 
 def manga_detail(manga_url, show_window=False):
@@ -27,17 +16,19 @@ def manga_detail(manga_url, show_window=False):
     `manga_url:` the manga content.
     `enable_gui:` show chrome window.
     """
-    soup = BeautifulSoup(get(manga_url).content, "html.parser")
-    #soup = BeautifulSoup(utils.read_file('mangas_chan_berserk.txt'), "html.parser")
+    driver = init_driver(True)
+    soup = BeautifulSoup(get_driver_html(driver, manga_url), "html.parser")
 
-    title = get_title(soup)
-    alt_title = get_alt_title(soup)
-    status, author, artist = get_status_author_artist(soup)
-    score = get_score(soup)
-    thumbnail = get_thumbnail(soup)
-    genres = get_genres(soup)
-    summary = get_summary(soup)
-    chapters_info = get_chapters(soup)
+    title = _get_title(soup)
+    alt_title = _get_alt_title(soup)
+    status, author, artist = _get_status_author_artist(soup)
+    score = _get_score(soup)
+    thumbnail = _get_thumbnail(soup)
+    genres = _get_genres(soup)
+    summary = _get_summary(soup)
+    chapters_info = _get_chapters(soup)
+
+    driver.quit()
 
     return Manga(
         title=title,
@@ -46,8 +37,8 @@ def manga_detail(manga_url, show_window=False):
         artist=artist,
         status=status,
         url=manga_url,
-        origin=_origin,
-        language=_language,
+        origin=origin,
+        language=language,
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
@@ -56,7 +47,7 @@ def manga_detail(manga_url, show_window=False):
     )
 
 
-def get_title(soup: BeautifulSoup) -> str:
+def _get_title(soup: BeautifulSoup) -> str:
     """Returns manga's title."""
     tags = soup.css.select("div#titlemove h1.entry-title")
     title = tags[0].text
@@ -64,7 +55,7 @@ def get_title(soup: BeautifulSoup) -> str:
     return title
 
 
-def get_alt_title(soup: BeautifulSoup) -> str:
+def _get_alt_title(soup: BeautifulSoup) -> str:
     """Returns manga's alternative title."""
     try:
         tags = soup.css.select("div#titlemove span.alternative")
@@ -75,7 +66,7 @@ def get_alt_title(soup: BeautifulSoup) -> str:
         return ""
 
 
-def get_status_author_artist(soup: BeautifulSoup) -> (str, str, str):
+def _get_status_author_artist(soup: BeautifulSoup) -> (str, str, str):
     """Returns manga's status, author and artist. In that order."""
     status, author, artist = "", "", ""
     try:
@@ -92,7 +83,7 @@ def get_status_author_artist(soup: BeautifulSoup) -> (str, str, str):
         return status, author, artist
 
 
-def get_score(soup: BeautifulSoup) -> float:
+def _get_score(soup: BeautifulSoup) -> float:
     """Returns manga's score."""
     try:
         tags = soup.css.select("div.rating-prc div.num")
@@ -102,7 +93,7 @@ def get_score(soup: BeautifulSoup) -> float:
         return 0
 
 
-def get_thumbnail(soup: BeautifulSoup) -> str:
+def _get_thumbnail(soup: BeautifulSoup) -> str:
     """Returns manga's thumbnail."""
     try:
         tags = soup.css.select('img.attachment-.size-.wp-post-image')
@@ -112,7 +103,7 @@ def get_thumbnail(soup: BeautifulSoup) -> str:
         return ""
 
 
-def get_genres(soup: BeautifulSoup) -> str:
+def _get_genres(soup: BeautifulSoup) -> str:
     """Returns manga's genres."""
     tags = soup.css.select("div.wd-full span.mgen a")
     genres = []
@@ -121,14 +112,14 @@ def get_genres(soup: BeautifulSoup) -> str:
     return genres
 
 
-def get_summary(soup: BeautifulSoup) -> str:
+def _get_summary(soup: BeautifulSoup) -> str:
     """Returns manga's summary."""
     tags = soup.css.select("div.info-desc.bixbox div.wd-full div.entry-content.entry-content-single")
     summary = tags[0].text.strip()
     return summary
 
 
-def get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
     """Returns manga's chapters."""
     tags = soup.css.select("ul.clstyle li")
     chapters = []
