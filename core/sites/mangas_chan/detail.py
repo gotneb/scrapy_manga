@@ -1,8 +1,9 @@
 # External packages
 from bs4 import BeautifulSoup
 from core.driver import get_driver_html, init_driver
+
 # Ours code
-from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 from entities.manga import Manga
 
 from .constants import origin
@@ -26,7 +27,7 @@ def manga_detail(manga_url, show_window=False):
     thumbnail = _get_thumbnail(soup)
     genres = _get_genres(soup)
     summary = _get_summary(soup)
-    chapters_info = _get_chapters(soup)
+    chapters = _get_chapters(soup)
 
     driver.quit()
 
@@ -42,7 +43,7 @@ def manga_detail(manga_url, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -73,11 +74,11 @@ def _get_status_author_artist(soup: BeautifulSoup) -> (str, str, str):
         tags = soup.css.select("div.tsinfo.bixbox div.imptdt")
         for tag in tags:
             if "Status" in tag.text:
-                status = tag.css.select('i')[0].text
+                status = tag.css.select("i")[0].text
             elif "Autor" in tag.text:
-                author = tag.css.select('i')[0].text
+                author = tag.css.select("i")[0].text
             elif "Artista" in tag.text:
-                artist = tag.css.select('i')[0].text
+                artist = tag.css.select("i")[0].text
         return status, author, artist
     except:
         return status, author, artist
@@ -96,8 +97,8 @@ def _get_score(soup: BeautifulSoup) -> float:
 def _get_thumbnail(soup: BeautifulSoup) -> str:
     """Returns manga's thumbnail."""
     try:
-        tags = soup.css.select('img.attachment-.size-.wp-post-image')
-        thumbnail = tags[0].get('src')
+        tags = soup.css.select("img.attachment-.size-.wp-post-image")
+        thumbnail = tags[0].get("src")
         return thumbnail
     except:
         return ""
@@ -114,16 +115,18 @@ def _get_genres(soup: BeautifulSoup) -> str:
 
 def _get_summary(soup: BeautifulSoup) -> str:
     """Returns manga's summary."""
-    tags = soup.css.select("div.info-desc.bixbox div.wd-full div.entry-content.entry-content-single")
+    tags = soup.css.select(
+        "div.info-desc.bixbox div.wd-full div.entry-content.entry-content-single"
+    )
     summary = tags[0].text.strip()
     return summary
 
 
-def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def _get_chapters(soup: BeautifulSoup) -> list[Chapter]:
     """Returns manga's chapters."""
     tags = soup.css.select("ul.clstyle li")
     chapters = []
     for li in tags:
-        number = li.get('data-num')
-        chapters.append(ChapterInfo(number))
+        number = li.get("data-num")
+        chapters.append(Chapter(number))
     return chapters

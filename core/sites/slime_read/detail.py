@@ -1,13 +1,15 @@
 # External packages
 from core.driver import init_driver
+
 # Ours code
-from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 from entities.manga import Manga
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 
 from .constants import origin
 from .constants import language
+
 
 def manga_detail(manga_url, show_window=False):
     """
@@ -27,7 +29,7 @@ def manga_detail(manga_url, show_window=False):
     thumbnail = _get_thumbnail(driver)
     genres = _get_genres(driver)
     summary = _get_summary(driver)
-    chapters_info = _get_chapters(driver)
+    chapters = _get_chapters(driver)
 
     driver.quit()
 
@@ -43,30 +45,30 @@ def manga_detail(manga_url, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
 
 def _get_title(driver: Firefox) -> str:
     """Returns manga's title."""
-    elem = driver.find_element(By.CSS_SELECTOR, 'div.mt-4 p')
+    elem = driver.find_element(By.CSS_SELECTOR, "div.mt-4 p")
     title = elem.text
     return title
 
 
 def _get_status(driver: Firefox) -> str:
     """Returns manga's status."""
-    elems = driver.find_elements(By.CSS_SELECTOR, 'div.mt-4 p')
+    elems = driver.find_elements(By.CSS_SELECTOR, "div.mt-4 p")
     status = elems[-1].text
-    status = status.split(':')[-1].strip()
+    status = status.split(":")[-1].strip()
     return status
 
 
 def _get_thumbnail(driver: Firefox) -> str:
     """Returns manga's thumbnail."""
-    elem = driver.find_element(By.CSS_SELECTOR, 'img.flex.rounded')
-    thumb = elem.get_attribute('src')
+    elem = driver.find_element(By.CSS_SELECTOR, "img.flex.rounded")
+    thumb = elem.get_attribute("src")
     return thumb
 
 
@@ -80,7 +82,7 @@ def _get_summary(driver: Firefox) -> str:
 def _get_genres(driver: Firefox) -> list[str]:
     """Returns manga's genres."""
     genres = []
-    elems = driver.find_elements(By.CSS_SELECTOR, 'div.mt-2.undefined a p')
+    elems = driver.find_elements(By.CSS_SELECTOR, "div.mt-2.undefined a p")
 
     for tag in elems:
         genre = tag.text.strip()
@@ -89,14 +91,14 @@ def _get_genres(driver: Firefox) -> list[str]:
     return genres
 
 
-def _get_chapters(driver: Firefox) -> list[ChapterInfo]:
+def _get_chapters(driver: Firefox) -> list[Chapter]:
     """Returns manga's chapters."""
     chapters = []
-    elems = driver.find_elements(By.CSS_SELECTOR, 'section.mt-2 div.mt-2 a p')
+    elems = driver.find_elements(By.CSS_SELECTOR, "section.mt-2 div.mt-2 a p")
     for tag in elems:
         text = tag.text.strip().lower()
-        if 'cap' in text:
-            chapter = text.split(' ')[1]
+        if "cap" in text:
+            chapter = text.split(" ")[1]
             chapters.append(chapter)
 
     print(chapters)

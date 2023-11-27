@@ -1,8 +1,9 @@
 # External packages
 from bs4 import BeautifulSoup
 from core.driver import get_driver_html, init_driver
+
 # Ours code
-from entities.chapter_info import ChapterInfo
+from entities.chapter import Chapter
 from entities.manga import Manga
 from requests import get
 
@@ -28,7 +29,7 @@ def manga_detail(manga_url, show_window=False):
     thumbnail = _get_thumbnail(soup)
     genres = _get_genres(soup)
     summary = _get_summary(soup)
-    chapters_info = _get_chapters(soup)
+    chapters = _get_chapters(soup)
 
     return Manga(
         title=title,
@@ -42,7 +43,7 @@ def manga_detail(manga_url, show_window=False):
         thumbnail=thumbnail,
         genres=genres,
         summary=summary,
-        chapters_info=chapters_info,
+        chapters=chapters,
         rating=score,
     )
 
@@ -54,10 +55,11 @@ def _get_title(soup: BeautifulSoup) -> str:
     title = title.strip()
     return title
 
+
 def _get_status(soup: BeautifulSoup) -> str:
     """Returns manga's status."""
     tags = soup.css.select("div.post-status div.post-content_item")
-    div = tags[1].css.select('div.summary-content')[0]
+    div = tags[1].css.select("div.summary-content")[0]
     status = div.text.strip()
     return status
 
@@ -89,7 +91,7 @@ def _get_score(soup: BeautifulSoup) -> float:
 def _get_thumbnail(soup: BeautifulSoup) -> str:
     """Returns manga's thumbnail."""
     tags = soup.css.select("div.summary_image img.img-responsive")
-    img = tags[0].get('src')
+    img = tags[0].get("src")
     img = img.strip()
     return img
 
@@ -103,6 +105,7 @@ def _get_genres(soup: BeautifulSoup) -> list[str]:
         genres.append(a.text)
     return genres
 
+
 def _get_summary(soup: BeautifulSoup) -> str:
     """Returns manga's summary."""
     tags = soup.css.select("div.description-summary p")
@@ -110,7 +113,7 @@ def _get_summary(soup: BeautifulSoup) -> str:
     return summary
 
 
-def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
+def _get_chapters(soup: BeautifulSoup) -> list[Chapter]:
     """Returns manga's chapters."""
     tags = soup.css.select("div.page-content-listing.single-page li a")
     chapters = []
@@ -119,6 +122,6 @@ def _get_chapters(soup: BeautifulSoup) -> list[ChapterInfo]:
         text = li.text.strip()
         if len(text) == 0:
             continue
-        number = text.split(' ')[1] 
-        chapters.append(ChapterInfo(number))
+        number = text.split(" ")[1]
+        chapters.append(Chapter(number))
     return chapters
