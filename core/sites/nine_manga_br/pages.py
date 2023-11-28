@@ -2,7 +2,6 @@
 from bs4 import BeautifulSoup
 # Ours code
 from requests import get
-
 from .constants import *
 
 UNDEFINED = 50
