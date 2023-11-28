@@ -1,4 +1,6 @@
-from ..api import *
+from ..api.info.origin_info import get_origin_info, update_info
+from ..api.manga.manga_info import manga_exists, add_manga
+from ..api.chapters.chapter_info import add_chapters, get_chapter_names
 
 from core.sites.nine_manga_br.detail import manga_detail
 from core.sites.nine_manga_br.latest import get_latest_updates
@@ -7,6 +9,7 @@ from core.sites.nine_manga_br.pages import get_pages
 from core.sites.nine_manga_br.all_by_index import get_all_by_index, MAX_INDEX
 
 from entities import Manga, Chapter, WebsiteUpdate
+
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
 from execution.log_configs import logger
 

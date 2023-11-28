@@ -1,6 +1,11 @@
-from ..api import *
+from ..api.info.origin_info import get_origin_info, update_info
+from ..api.manga.manga_info import manga_exists, add_manga
+from ..api.chapters.chapter_info import add_chapters, get_chapter_names
+
 from core.sites.ler_manga import *
+
 from entities import Manga, Chapter, WebsiteUpdate
+
 from .create_threads_to_update_mangas import create_threads_to_update_mangas
 from execution.log_configs import logger
 
