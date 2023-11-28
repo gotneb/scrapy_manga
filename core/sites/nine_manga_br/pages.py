@@ -2,6 +2,8 @@
 from bs4 import BeautifulSoup
 # Ours code
 from requests import get
+
+from core.driver import *
 from .constants import *
 
 UNDEFINED = 50
@@ -14,12 +16,13 @@ def get_pages(manga_url) -> list[str]:
     if domain not in manga_url:
         raise Exception("get pages fucntion doesn't support this site!")
 
+    driver = init_driver(False)
     pages = []
     total = -1
 
     for index in range(1, UNDEFINED):
         url = _to_index(manga_url, index)
-        soup = BeautifulSoup(get(url).content, "html.parser")
+        soup = BeautifulSoup(get_driver_html(driver, url), "html.parser")
         _extract_individual_page(soup, pages)
 
         if index == 1:
@@ -27,6 +30,7 @@ def get_pages(manga_url) -> list[str]:
         if index >= total:
             break
 
+    driver.close()
     return pages
 
 
