@@ -2,7 +2,7 @@ import requests
 
 from entities.manga import Manga
 from ..configs import base_url, headers
-from ..throw_api_error import _throw_api_error
+from ..throw_api_error import throw_api_error
 
 
 def manga_exists(manga_url: str) -> str:
@@ -12,7 +12,7 @@ def manga_exists(manga_url: str) -> str:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"]
 
@@ -24,6 +24,6 @@ def add_manga(manga: Manga) -> str:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"]

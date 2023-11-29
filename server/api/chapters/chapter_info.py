@@ -2,7 +2,7 @@ import requests
 
 from entities.manga import Chapter
 from ..configs import base_url, headers
-from ..throw_api_error import _throw_api_error
+from ..throw_api_error import throw_api_error
 
 
 def get_chapter_names(manga_id: str) -> list[str]:
@@ -12,7 +12,7 @@ def get_chapter_names(manga_id: str) -> list[str]:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"]
 
@@ -28,6 +28,6 @@ def add_chapters(manga_id: str, chapters: list[Chapter]) -> bool:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"]

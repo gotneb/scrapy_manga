@@ -2,7 +2,7 @@ import requests
 
 from entities.website_update import WebsiteUpdate
 from ..configs import base_url, headers
-from ..throw_api_error import _throw_api_error
+from ..throw_api_error import throw_api_error
 
 
 def get_origin_info(origin: str) -> WebsiteUpdate:
@@ -16,7 +16,7 @@ def get_origin_info(origin: str) -> WebsiteUpdate:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return WebsiteUpdate(
         origin=results["data"]["origin"],
@@ -35,7 +35,7 @@ def origin_exists(origin: str) -> bool:
         return False
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"] != None
 
@@ -47,7 +47,7 @@ def update_info(info: WebsiteUpdate) -> bool:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"]
 
@@ -59,6 +59,6 @@ def add_info(info: WebsiteUpdate) -> bool:
     results = response.json()
 
     if response.status_code != 200:
-        _throw_api_error(results)
+        throw_api_error(results)
 
     return results["data"] != None
