@@ -1,7 +1,7 @@
 from ...api.manga.manga_info import manga_exists, add_manga
 from ...api.chapters.chapter_info import add_chapters
 
-from .constants import origin
+from core.sites.nine_manga_br.constants import origin
 from execution.log_configs import logger
 
 from .manga_info import get_manga, get_unregistered_chapters

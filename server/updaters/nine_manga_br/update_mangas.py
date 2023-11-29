@@ -4,7 +4,7 @@ from entities import WebsiteUpdate
 
 from ..create_threads_to_update_mangas import create_threads_to_update_mangas
 from execution.log_configs import logger
-from .constants import origin, language
+from core.sites.nine_manga_br.constants import origin, language
 from .upsert import upsert_manga
 from .website_info import (
     get_all_urls,

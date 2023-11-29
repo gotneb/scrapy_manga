@@ -2,7 +2,7 @@ from core.sites.nine_manga_br.latest import get_latest_updates
 from core.sites.nine_manga_br.populars import get_populars
 from core.sites.nine_manga_br.all_by_index import get_all_by_index, MAX_INDEX
 
-from .constants import origin
+from core.sites.nine_manga_br.constants import origin
 from execution.log_configs import logger
 
 
