@@ -11,10 +11,6 @@ def get_chapter(manga: Manga, value: str) -> list[str]:
     `manga`: well... the manga. (badum tss!)
     `value`: the chapter's value.
     '''
-    if type(value) is not str:
-        err = f'The value `{value}` {type(value)} is not the type of str!'
-        raise Exception(err)
-    
     base_url = f'https://br.ninemanga.com/chapter/{manga.title}'
     id = None
     for info in manga.chapters_info:
@@ -26,4 +22,5 @@ def get_chapter(manga: Manga, value: str) -> list[str]:
         raise Exception(err)
 
     url = f'{base_url}/{id}.html'
+    print(f'Requesting to: {url}')
     return get_pages(url)
