@@ -30,10 +30,9 @@ def update_mangas(number_of_works: int, exec_all: bool = False):
     try:
         # Update site information in database
         popular_urls = get_most_popular_manga_urls()
-        registed_info = get_origin_info(origin)
 
         # define if process all urls
-        if (not registed_info) or exec_all:
+        if exec_all:
             urls_for_update = get_all_urls()
         else:
             urls_for_update = get_latest_updated_manga_urls() + popular_urls
