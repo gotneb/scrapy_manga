@@ -4,6 +4,8 @@ from entities.manga import Manga
 from ..configs import base_url, headers
 from ..throw_api_error import throw_api_error
 
+from execution.log_configs import logger
+
 
 def manga_exists(manga_url: str) -> str:
     url = f"{base_url}/mangas/exists"

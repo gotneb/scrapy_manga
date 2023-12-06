@@ -1,4 +1,4 @@
-from ...api.info.origin_info import get_origin_info, update_info
+from ...api.info.origin_info import update_info
 
 from entities import WebsiteUpdate
 

@@ -1,10 +1,12 @@
-from ...api.manga.manga_info import manga_exists, add_manga
-from ...api.chapters.chapter_info import add_chapters
+from ...api.manga.manga_info import manga_exists
+from .chapters import update_unregistered_chapters
+from ..save_manga import save_new_manga
 
 from core.sites.nine_manga_br.constants import origin
-from execution.log_configs import logger
+from core.sites.nine_manga_br.detail import manga_detail
+from core.sites.nine_manga_br.chapter import get_all_chapters
 
-from .manga_info import get_manga, get_unregistered_chapters
+from execution.log_configs import logger
 
 
 def upsert_manga(manga_url: str) -> bool:
@@ -18,68 +20,44 @@ def upsert_manga(manga_url: str) -> bool:
     Returns:
         boolean: Return True if operation was completed successfully.
     """
-    ok = False
+    results = False
 
     try:
-        manga_id = manga_exists(manga_url)
+        manga = manga_detail(manga_url)
+        manga_id = manga_exists(manga.url)
 
         if manga_id:
-            ok = _update_unregistered_chapters(manga_id, manga_url)
-        else:
-            ok = _save_new_manga(manga_url) != None
+            manga.id = manga_id
+            results = update_unregistered_chapters(manga)
 
-        if ok:
-            logger.info(f"({origin}): operation completed successfully on {manga_url}")
+            if results:
+                logger.info(
+                    f"({manga.origin}): manga updated successfully (id: {manga.id}, url: {manga.url})"
+                )
+            else:
+                logger.warning(
+                    f"({manga.origin}): manga update falided (id: {manga.id}, url: {manga.url})"
+                )
+
         else:
-            logger.warning(f"({origin}): operation failed on {manga_url}")
+            manga.chapters = get_all_chapters(manga)
+            insertd_id = save_new_manga(manga) != None
+
+            if insertd_id:
+                results = True
+                manga.id = insertd_id
+                logger.info(
+                    f"({manga.origin}): manga inserted successfully (id: {manga.id}, url: {manga.url})"
+                )
+            else:
+                logger.warning(
+                    f"({manga.origin}): manga not inserted (url: {manga.url})"
+                )
+
     except Exception as error:
         logger.error(
             f"({origin}): error in the processing of {manga_url}",
             exc_info=True,
         )
 
-    return ok
-
-
-def _update_unregistered_chapters(manga_id: str, manga_url: str) -> bool:
-    """
-    Updates chapters that are not yet registered for a given manga.
-
-    Args:
-        manga_id (str): The ID of the manga.
-        manga_url (str): The URL of the manga to be checked and updated.
-
-    Returns:
-        boolean: Return True if operation was completed successfully.
-    """
-    logger.info(f"({origin}): updating {manga_url}")
-
-    updated = False
-    new_chapters = get_unregistered_chapters(manga_id, manga_url)
-
-    if new_chapters:
-        updated = add_chapters(manga_id, new_chapters)
-
-    return updated
-
-
-def _save_new_manga(manga_url: str) -> str:
-    """
-    Saves a new manga to the database.
-
-    Args:
-        manga_url (str): The URL of the manga to be added to the database.
-
-    Returns:
-        str: Manga ID inserted.
-    """
-    logger.info(f"({origin}): saving {manga_url}")
-
-    inserted_id = None
-    manga = get_manga(manga_url)
-
-    # if manga contain chapters
-    if not manga.is_empty():
-        inserted_id = add_manga(manga)
-
-    return inserted_id
+    return results

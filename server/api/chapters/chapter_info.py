@@ -1,8 +1,12 @@
 import requests
 
-from entities.manga import Chapter
+from entities.chapter import Chapter
+from entities.manga import Manga
+
 from ..configs import base_url, headers
 from ..throw_api_error import throw_api_error
+
+from execution.log_configs import logger
 
 
 def get_chapter_names(manga_id: str) -> list[str]:
