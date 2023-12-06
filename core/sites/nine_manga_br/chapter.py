@@ -1,9 +1,9 @@
 from .constants import *
-from entities import Manga
+from entities import Manga, Chapter
 from .pages import get_pages
 
 
-def get_chapter(manga: Manga, value: str) -> list[str]:
+def get_chapter(manga: Manga, value: str) -> Chapter:
     """
     Returns all pages in chapter `value`.
 
@@ -22,5 +22,19 @@ def get_chapter(manga: Manga, value: str) -> list[str]:
         raise Exception(err)
 
     url = f"{base_url}/{id}.html"
-    print(f"Requesting to: {url}")
-    return get_pages(url)
+
+    chapter = Chapter(name=value, pages=get_pages(url), id=id)
+
+    return chapter
+
+
+def get_all_chapters(manga: Manga) -> list[Chapter]:
+    chapters = []
+
+    for chapter in manga.chapters:
+        new_chapter = get_chapter(manga, chapter.name)
+
+        if not new_chapter.is_empty():
+            chapters.append(new_chapter)
+
+    return chapters
