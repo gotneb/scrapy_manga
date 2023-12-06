@@ -21,6 +21,7 @@ class Manga(Entity):
         genres: list[str],
         summary: str,
         chapters: list[Chapter] = [],
+        id: str = None,
     ) -> None:
         self.title: str = title
         self.alternative_title: str = alternative_title
@@ -35,6 +36,7 @@ class Manga(Entity):
         self.genres: list[str] = genres
         self.summary: str = summary
         self.chapters: list[Chapter] = chapters
+        self.id = id
 
     def chapters_to_dict_list(self):
         return [chapter.to_dict() for chapter in self.chapters]
