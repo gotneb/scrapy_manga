@@ -294,3 +294,28 @@ def get_chapters(soup: BeautifulSoup) -> list[Chapter]:
             chapters.append(Chapter(name=c))
 
     return chapters
+
+
+def get_chapter(manga: Manga, value: str) -> Chapter:
+    """
+    Returns chapter with pages.
+
+    Arguments:
+    `manga`: well... the manga. (badum tss!)
+    `value`: the chapter's value.
+    """
+    cp_url = f"{manga.url}/{value}/all-pages"
+
+    return Chapter(name=value, pages=get_pages(cp_url))
+
+
+def get_all_chapters(manga: Manga) -> list[Chapter]:
+    chapters = []
+
+    for chapter in manga.chapters:
+        new_chapter = get_chapter(manga, chapter.name)
+
+        if not new_chapter.is_empty():
+            chapters.append(new_chapter)
+
+    return chapters

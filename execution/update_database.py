@@ -1,5 +1,5 @@
-from server.updaters.readm import (
-    update_mangas_from_websites as update_mangas_from_readm,
+from server.updaters.readm.update_mangas import (
+    update_mangas as update_mangas_from_readm,
 )
 from server.updaters.nine_manga_br.update_mangas import (
     update_mangas as update_mangas_nine,
