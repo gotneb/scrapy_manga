@@ -4,6 +4,8 @@ from bs4 import BeautifulSoup, Tag
 # Ours code
 from requests import get
 
+from core.sites.nine_manga_br.utils import sanitize_link
+
 from .constants import *
 
 # I'm not sure if I should have added a callback on this function o_o'
@@ -21,7 +23,7 @@ def get_latest_updates(
     soup = BeautifulSoup(get(url).content, "html.parser")
     tags = soup.css.select("div.leftbox ul.homeupdate li a.show_book_desc")
     for a in tags:
-        link = a.get('href')
+        link = sanitize_link(a.get('href'))
         links.append(link)
 
         if on_link_received != None:
