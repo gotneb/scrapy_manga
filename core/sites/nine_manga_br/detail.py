@@ -161,7 +161,7 @@ def _get_chapter_id(tag: Tag) -> str:
 
 # Helper function to '_get_chapters'
 def _find_number(value: str) -> str | None:
-    values = value.split(" ")
+    values = value.replace('#', '').split(" ")
     for text in values:
         if _has_numbers(text):
             return text
