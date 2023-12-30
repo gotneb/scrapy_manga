@@ -13,8 +13,6 @@ def get_chapter(manga: Manga, value: str) -> Chapter:
     """
     title = sanitize_title(manga.title)
     url = f'https://lermanga.org/capitulos/{title}-capitulo-{value}/'
-
-    print(url)
     
     if not check_chapter_exists(manga, value):
         msg = f"The value {value} doesn't exist in the manga: {manga.title}."
