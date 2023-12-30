@@ -19,7 +19,7 @@ def get_pages(chapter_url: str) -> list[str]:
 
 # Helper function to get function `get_pages``
 def _get_html(link) -> str:
-    driver = init_driver(True, timeout=10)
+    driver = init_driver(False, timeout=10)
 
     driver.get(link)
     options = driver.find_elements(By.CSS_SELECTOR, "div.nvs.slc select#slch option")
