@@ -124,15 +124,16 @@ def get_chapters(manga_id: str):
         for value in json['data']:
             c = json2chapter(value)
             chapters.append(c)
-    
+
     # From the api pagination, the chapters come randomly...
     chapters.sort(key=lambda c: float(c.name))
-    
+
     return chapters
 
 
 def json2chapter(json) -> Chapter:
     return Chapter(
+        id=json['id'],
         name=json["attributes"]['chapter'],
         title=json["attributes"]['title'],
         pages=[0]
