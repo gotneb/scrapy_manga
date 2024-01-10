@@ -16,18 +16,18 @@ def get_manga(manga_id: str):
     #print(json['data']['attributes']['description']['en'])
 
     # Should I use the raw or the mangadex url?
-    url = json['data']['attributes']['links']['raw']
+    url = build_url(json)
     # I think it could be better using a list
     alt_title = get_alt_titles(json)
 
-    title = json['data']['attributes']['title']['en']
+    title = get_title(json)
     author = get_author(json)
     status = json['data']['attributes']['status']
     artist = None
     score = get_score(manga_id)
     thumbnail = get_thumbnail(manga_id, json)
     genres = get_genres(json)
-    summary = json['data']['attributes']['description']['en']
+    summary = get_summary(json)
     chapters = get_chapters(manga_id)
 
     return Manga(
@@ -54,6 +54,35 @@ def get_author(json) -> str:
     r = get(f'{base_url}/author/{author_id}')
     return r.json()['data']['attributes']['name']
 
+def get_summary(json) -> str:
+    summary = json['data']['attributes']['description']
+    try:
+        return summary['pt-br']
+    except:
+        return summary['en']
+
+def get_title(json) -> str:
+    return json['data']['attributes']['title']['en']
+
+
+def sanitize_string(input_string) -> str:
+    result = ''
+    for char in input_string:
+        if char.isalpha() or char == "'":
+            result += char
+        elif char.isspace():
+            result += '-'
+        else:
+            result += ' '
+    return result
+
+
+def build_url(json) -> str:
+    id = json['data']['id']
+    title = get_title(json)
+    title = sanitize_string(title)
+    return f'https://mangadex.org/title/{id}/{title}'
+
 
 def get_artist(json) -> str:
     json['data']['relationships'][3]['id']
@@ -66,7 +95,10 @@ def get_artist(json) -> str:
 
 
 def get_thumbnail(manga_id: str, json):
-    cover_id = json['data']['relationships'][4]['id']
+    for relation in json['data']['relationships']:
+        if relation['type'] == 'cover_art':
+            cover_id = relation['id']
+
     r = get(f'{base_url}/cover/{cover_id}')
 
     cover_filename = r.json()['data']['attributes']['fileName']
