@@ -135,24 +135,26 @@ def get_chapters(manga_id: str):
         params={
             'limit': 100,
             'offset': 0,
-            'translatedLanguage[]': ['pt-br'],
+            'translatedLanguage[]': ['en'],
         }
     )
 
+    print(f"URL: {r.url}")
+
     json = r.json()
     total = math.ceil(int(json['total']) / 100)
-
     for i in range(0, total):
         r = get(
             f"{base_url}/manga/{manga_id}/feed",
             params={
                 'limit': 100,
                 'offset': i * 100,
-                'translatedLanguage[]': ['pt-br'],
+                'translatedLanguage[]': ['en'],
             }
         )
-    
+
         json = r.json()
+        print(r.content.decode())
         for value in json['data']:
             c = json2chapter(value)
             chapters.append(c)
